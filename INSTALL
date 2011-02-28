@@ -1,0 +1,10 @@
+
+Must be installed beside libmaple:
+./libmaple
+./preen
+
+It will pick in "libmaple" the includes, the lib and the arm compiler.
+For the moment, You'll also have to edit the makefile to make it point your directories.
+
+Xavier
+
