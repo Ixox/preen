@@ -1,0 +1,71 @@
+               
+ _______  _______  _______  _______  _       
+(  ____ )(  ____ )(  ____ \(  ____ \( (    /|
+| (    )|| (    )|| (    \/| (    \/|  \  ( |
+| (____)|| (____)|| (__    | (__    |   \ | |
+|  _____)|     __)|  __)   |  __)   | (\ \) |
+| (      | (\ (   | (      | (      | | \   |
+| )      | ) \ \__| (____/\| (____/\| )  \  |
+|/       |/   \__/(_______/(_______/|/    )_)
+                                            
+V0.0 pre alpha
+By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
+28 February 2011
+
+-----------------------------------------
+Frequency modulation synth for the Maple :
+http://leaflabs.com/
+
+Distributed under the terms of the GNU General Public License 
+as published by the Free Software Foundation version 3.
+
+-----------------------------------------
+
+Preen Current Features
+. 5 FM voices
+. Each voice 3 FM operators (sin only for the moment) 
+. Each operator has a ADSR envelope
+. 4 LFO (saw, square, ramp)
+. 6 rows modulation matrix
+. 3 FM algo available... to be explained
+
+Sampling rate : 32768 Hz (makes division faster ;-) for audio
+                1024 Hz for LFO and Matrix
+
+--------------------------------------------
+
+To do before v0.1 (in no order) :
+. Dump preset on serialUSB when a button is pressed (to collect them)
+. More Algos (4 operators)
+. (More) Presets in FLASH
+. EEPROM 24LC256 <- save / load user patch
+. Use a 4*20 LCD instead of current 2*20... Cheap and usefull.
+. Documentation
+. Full midi implementation
+	. Take care of midi channel
+	. Implement all midi events
+	. Read CC to change parameters
+	. send CC when user move encoders
+. Clean hardware design
+
+Later V1.0 : 
+. a nice PCB and a Box
+
+Later V2.0 : 
+. A version 2 with 2 maples (or more) in a chain to take care of more voices.
+
+
+--------------------------------------------
+Hardware (to be detailed)
+. LCD LiquidCrystal compatible
+. 2 74HC165 to plug buttons and rotary encoder
+  (I used the DIN schema from midibox.org).
+. 1 condensator and 1 resistor to make the 1st order Low pass filter.
+. Midi plugs
+.... Full schema soon... 
+
+---------------------------------------------
+
+Xavier
+
+
