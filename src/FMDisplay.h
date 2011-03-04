@@ -27,9 +27,16 @@ public:
 	virtual ~FMDisplay();
 	void init(Encoders* encoders, LiquidCrystal* lcd);
 	void update();
+	void drawMenu();
 	inline void updateEncoderValue(int row, int encoder);
 	inline void updateEncoderName(int row, int encoder);
-
+	int getLength(const char *str) {
+		int length = 0;
+		for (const char *c = str; *c != '\0'; c++) {
+			length++;
+		}
+		return length;
+	}
 	boolean needRefresh() { return refreshStatus != 0; }
 	void refreshAllScreenByStep();
 

@@ -31,33 +31,29 @@ MidiDecoder        midiDecoder;
 Encoders		   encoders;
 RingBuffer<uint16, 64> rb;
 FMDisplay          fmDisplay;
-LiquidCrystal      lcd(12, 11, 5, 4, 3, 2);
+LiquidCrystal      lcd(23,24, 25,26,27,28,29,30,31,32);
 
-volatile int audioGlitches = 0;
-int          ag            = 0;
-bool         finish        = false;
-bool         finishedShown = false;
 
 
 void IRQSendSample() {
-	if (rb.getCount()==0) {
-		pwmWrite(AUDIO_PIN , rb.remove());
-	} else {
-		audioGlitches++;
-		synth.nextSample();
-		pwmWrite(AUDIO_PIN , (uint16)(synth.getSample()>>5)+1024);
-	}
+	synth.nextSample();
+	pwmWrite(AUDIO_PIN , (uint16)(synth.getSample()>>5)+1024);
 }
 
+
+unsigned int time = 0;
+unsigned int previousTime = 0;
+unsigned int fullDelay;
 
 void setup() 
 {
 	timer_disable_all();
 
-	lcd.begin(20, 2);
+	lcd.begin(20, 4);
     lcd.print("IxOx FM Synth V0.1");
 
- 	encoders.setSynth(&synth);
+
+	encoders.setSynth(&synth);
 	midiDecoder.setSynth(&synth);
 	int cpt= 0;
 	while (cpt<20) {
@@ -66,7 +62,7 @@ void setup()
 		cpt++;
 	}
 
-	Serial3.begin(31250);
+	Serial2.begin(31250);
 
 	Timer1.setOverflow(2197);
 	Timer1.setPrescaleFactor(1);
@@ -77,10 +73,14 @@ void setup()
 	Timer1.setChannel2Mode(TIMER_PWM);
 	pinMode(AUDIO_PIN, PWM);
 
-	audioGlitches = 0;
 	Timer1.resume();
+
 	delay(1000);
 
+
+	lcd.clear();
+	lcd.setCursor(7 , 0);
+	lcd.print(currentSynthState->presetName);
 	fmDisplay.init(&encoders, &lcd);
 }
 
@@ -88,15 +88,10 @@ int lcdMod = 0;
 
 void loop() {
 	int samples = 0;
-	while (!rb.isFull() && (samples++<50)) {
-		synth.nextSample();
-		rb.insert((uint16)(synth.getSample()>>5)+1024);
-	}
 
-
-	unsigned int numberOfEvents = Serial3.available();
+	unsigned int numberOfEvents = Serial2.available();
 	while (numberOfEvents>0) {
-		midiDecoder.newByte(Serial3.read());
+		midiDecoder.newByte(Serial2.read());
 		numberOfEvents--;
 	}
 
@@ -104,20 +99,14 @@ void loop() {
 
 	lcdMod++;
 	if (fmDisplay.needRefresh() && ((lcdMod & 0xf) == 0)) {
-		while (!rb.isFull()) {
-			synth.nextSample();
-			rb.insert((uint16)(synth.getSample()>>5)+1024);
-		}
 		fmDisplay.refreshAllScreenByStep();
 	}
 
-	if ((encoders.rowChanged() || encoders.valueHasChanged()>=0) &&((lcdMod & 0x7f) == 0)) {
-		while (!rb.isFull()) {
-			synth.nextSample();
-			rb.insert((uint16)(synth.getSample()>>5)+1024);
-		}
+	if ((encoders.valueHasChanged()>=0 || encoders.rowChanged() || encoders.menuModeChanged()) &&((lcdMod & 0x7f) == 0)) {
 		fmDisplay.update();
 	}
+
+	delayMicroseconds(300);
 }
 
 // Force init to be called *first*, i.e. before static object allocation.

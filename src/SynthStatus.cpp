@@ -17,8 +17,103 @@
 
 #include "SynthStatus.h"
 
-//unsigned char rawSynthState[] = {
-struct SynthState currentSynthState =  {
+
+
+
+// DISPLAY structures
+const char* nullNames [] = {};
+const char* algoNames [] = { "alg1", "alg2", "alg3" };
+struct ParameterRow engineParameterRow= {
+		"Engine" ,
+		{ "Algo", "IM1 ", "IM2 ", "IM3 " },
+		{
+					{ALGO1, ALGO_END-1, algoNames},
+					{0, 255, nullNames },
+					{0, 255, nullNames },
+					{0, 255, nullNames }
+		}
+};
+
+const char* oscShapeNames []  {"sin ", "off " } ;
+const char* oscTypeNames [] = { "keyb", "fixe"};
+struct ParameterRow oscParameterRow= {
+		"Oscillator",
+		{ "Shap", "FTyp", "Freq", "FTun" },
+		{
+					{ OSC_SHAPE_SIN, OSC_SHAPE_OFF, oscShapeNames },
+					{ OSC_FT_KEYBOARD, OSC_FT_FIXE, oscTypeNames },
+					{ 0, 127, nullNames },
+					{ (char)-127, 127, nullNames }
+		}
+};
+
+struct ParameterRow envParameterRow = {
+		"Enveloppe",
+		{ "Attk", "Rele", "Sust", "Deca" },
+		{
+					{ 0, 255, nullNames },
+					{ 0, 255, nullNames },
+					{ 0, 255, nullNames },
+					{ 0, 255, nullNames }
+		}
+};
+
+
+const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW"} ;
+const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "o1Am", "o2Am", "o3Am", "o4Am", "IM1 ", "IM2 ", "IM3 "} ;
+struct ParameterRow matrixParameterRow = {
+		"Matrix",
+		{ "Srce", "Mult", "Dest", "    " },
+		{
+					{ SOURCE_NONE, SOURCE_MAX-1, matrixSourceNames},
+					{ (char)-127, 127, nullNames },
+					{ DESTINATION_NONE, DESTINATION_MAX-1, matrixDestNames},
+					{ 0, 0, nullNames }
+		}
+};
+
+
+const char* lfoShapeNames [] =  { "Saw ", "Ramp", "Squa"} ;
+struct ParameterRow lfoParameterRow = {
+		"LFO",
+		{ "Shap", "Freq", "    ", "    " },
+		{
+					{ LFO_SAW, LFO_TYPE_MAX-1, lfoShapeNames},
+					{ 0, 255, nullNames },
+					{ 0, 0, nullNames },
+					{ 0, 0, nullNames }
+		}
+};
+
+
+struct AllParameterRows allParameterRows = {
+		{&engineParameterRow,
+		&oscParameterRow,
+		&oscParameterRow,
+		&oscParameterRow,
+		&oscParameterRow,
+		&envParameterRow,
+		&envParameterRow,
+		&envParameterRow,
+		&envParameterRow,
+		&matrixParameterRow,
+		&matrixParameterRow,
+		&matrixParameterRow,
+		&matrixParameterRow,
+		&matrixParameterRow,
+		&matrixParameterRow,
+		&lfoParameterRow,
+		&lfoParameterRow,
+		&lfoParameterRow,
+		&lfoParameterRow}
+};
+
+
+
+
+/******************** PRESET **********************/
+
+struct SynthState presets[] =  {{
 	// Engine
 	{ ALGO1, 16, 21, 6},
 
@@ -45,92 +140,57 @@ struct SynthState currentSynthState =  {
 
 	// LFOS
 	{ LFO_SAW, 36, 0, 0}, {LFO_SAW, 20, 0, 0 },
-	{ LFO_SAW, 3, 0, 0}, { LFO_SAW, 4, 0, 0 }
-};
+	{ LFO_SAW, 3, 0, 0}, { LFO_SAW, 4, 0, 0 },
+	"Preen"
+} ,
+{
+		{ 1, 3, 28, 7} ,
+		{ 0, 0, 16, 0} ,
+		{ 0, 0, 8, 0} ,
+		{ 0, 0, 32, 0} ,
+		{ 1, 0, 3, 0} ,
+		{ 72, 150, 160, 60} ,
+		{ 81, 66, 196, 77} ,
+		{ 50, 100, 255, 100} ,
+		{ 3, 100, 100, 100} ,
+		{ 7, 16, 9, 0} ,
+		{ 5, 64, 1, 0} ,
+		{ 1, 0, 1, 0} ,
+		{ 0, 0, 0, 0} ,
+		{ 0, 0, 0, 0} ,
+		{ 0, 0, 0, 0} ,
+		{ 0, 36, 0, 0} ,
+		{ 0, 20, 0, 0} ,
+		{ 0, 3, 0, 0} ,
+		{ 0, 4, 0, 0} ,
+		"Organ"
+},
+{
+		{ 1, 3, 28, 7} ,
+		{ 0, 0, 16, 0} ,
+		{ 0, 0, 8, 0} ,
+		{ 0, 0, 32, 0} ,
+		{ 1, 0, 3, 0} ,
+		{ 72, 150, 160, 60} ,
+		{ 81, 66, 196, 77} ,
+		{ 50, 100, 255, 100} ,
+		{ 3, 100, 100, 100} ,
+		{ 7, 16, 9, 0} ,
+		{ 5, 64, 1, 0} ,
+		{ 1, 0, 1, 0} ,
+		{ 0, 0, 0, 0} ,
+		{ 0, 0, 0, 0} ,
+		{ 0, 0, 0, 0} ,
+		{ 0, 36, 0, 0} ,
+		{ 0, 20, 0, 0} ,
+		{ 0, 3, 0, 0} ,
+		{ 0, 4, 0, 0} ,
+		"*"
+}
 
-
-// DISPLAY structures
-const char* nullNames [] = {};
-const char* algoNames [] = { "alg1", "alg2", "alg3" };
-struct ParameterRow engineParameterRow= {
-		{ "Algo", "IM1 ", "IM2 ", "IM3 " },
-		{
-					{ALGO1, ALGO_END-1, algoNames},
-					{0, 255, nullNames },
-					{0, 255, nullNames },
-					{0, 255, nullNames }
-		}
-};
-
-const char* oscShapeNames []  {"sin ", "off " } ;
-const char* oscTypeNames [] = { "keyb", "fixe"};
-struct ParameterRow oscParameterRow= {
-		{ "Shap", "FTyp", "Freq", "FTun" },
-		{
-					{ OSC_SHAPE_SIN, OSC_SHAPE_OFF, oscShapeNames },
-					{ OSC_FT_KEYBOARD, OSC_FT_FIXE, oscTypeNames },
-					{ 0, 127, nullNames },
-					{ (char)-127, 127, nullNames }
-		}
-};
-
-struct ParameterRow envParameterRow = {
-		{ "Attk", "Rele", "Sust", "Deca" },
-		{
-					{ 0, 255, nullNames },
-					{ 0, 255, nullNames },
-					{ 0, 255, nullNames },
-					{ 0, 255, nullNames }
-		}
-};
-
-
-const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW"} ;
-const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "o1Am", "o2Am", "o3Am", "o4Am", "IM1 ", "IM2 ", "IM3 "} ;
-struct ParameterRow matrixParameterRow = {
-		{ "Srce", "Mult", "Dest", "    " },
-		{
-					{ SOURCE_NONE, SOURCE_MAX-1, matrixSourceNames},
-					{ (char)-127, 127, nullNames },
-					{ DESTINATION_NONE, DESTINATION_MAX-1, matrixDestNames},
-					{ 0, 0, nullNames }
-		}
-};
-
-
-const char* lfoShapeNames [] =  { "Saw ", "Ramp", "Squa"} ;
-struct ParameterRow lfoParameterRow = {
-		{ "Shap", "Freq", "    ", "    " },
-		{
-					{ LFO_SAW, LFO_TYPE_MAX-1, lfoShapeNames},
-					{ 0, 255, nullNames },
-					{ 0, 0, nullNames },
-					{ 0, 0, nullNames }
-		}
-};
-
-struct AllParameterRows allParameterRows = {
-		{&engineParameterRow,
-		&oscParameterRow,
-		&oscParameterRow,
-		&oscParameterRow,
-		&oscParameterRow,
-		&envParameterRow,
-		&envParameterRow,
-		&envParameterRow,
-		&envParameterRow,
-		&matrixParameterRow,
-		&matrixParameterRow,
-		&matrixParameterRow,
-		&matrixParameterRow,
-		&matrixParameterRow,
-		&matrixParameterRow,
-		&lfoParameterRow,
-		&lfoParameterRow,
-		&lfoParameterRow,
-		&lfoParameterRow}
 };
 
 
 
+struct SynthState *currentSynthState =  &presets[1];
 

@@ -28,7 +28,7 @@ void Lfo::init(int number, Matrix *matrix, SourceEnum source) {
 	this->matrix = matrix;
 	this->source = source;
 	this->number = number;
-	LfoState* lfoTmp = (LfoState *)&currentSynthState.lfo1;
+	LfoState* lfoTmp = (LfoState *)&(currentSynthState->lfo1);
 	lfo = &lfoTmp[number];
 	index = 0;
 }

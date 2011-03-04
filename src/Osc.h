@@ -90,7 +90,7 @@ Osc<number>::Osc()
 		this->destAmp = OSC4_AMP;
 		break;
 	}
-	Oscillator * o = (Oscillator *)(&(currentSynthState.osc1));
+	Oscillator * o = (Oscillator *)(&(currentSynthState->osc1));
 	oscillator = &o[number-1];
 }
 

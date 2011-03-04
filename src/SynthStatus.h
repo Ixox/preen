@@ -141,6 +141,7 @@ struct SynthState {
 	struct LfoState lfo2;
 	struct LfoState lfo3;
 	struct LfoState lfo4;
+	const char presetName[13];
 };
 
 
@@ -154,13 +155,14 @@ struct Parameter {
 };
 
 struct ParameterRow {
+	const char* rowName;
 	const char* paramName[4];
 	struct Parameter params[4];
 };
 
 
 struct AllParameterRows {
-	struct ParameterRow *row[NUMBER_OF_ROWS];
+	struct ParameterRow* row[NUMBER_OF_ROWS];
 };
 
 
@@ -168,7 +170,8 @@ struct AllParameterRows {
 
 
 extern struct AllParameterRows allParameterRows;
-extern struct SynthState currentSynthState;
+extern struct SynthState* currentSynthState;
+extern struct SynthState presets[];
 
 #ifndef linux
 extern LiquidCrystal      lcd;

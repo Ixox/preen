@@ -34,19 +34,28 @@ Preen Current Features:
   32768 Hz (makes division faster ;-) for audio
   1024 Hz for LFO and Matrix
 
-. The full synth state (19 * 4 parameters) can be editable with the 4 Encoders throw the 19 rows.
+. The full synth state (19 * 4 parameters) can be edited with the 4 Encoders throw the 19 rows.
 . The 5 buttons allow easy navigation into the 19 rows (1 engine, 4 osc, 4 env, 6 matrix rows, 4 lfos)
 . LCD is updated in realtime showing the parameter you modify.
 
 --------------------------------------------
+Update March 5th 2011
 
-To do before v0.1 (in no order) :
+Done :
 . Dump preset on serialUSB when a button is pressed (to collect them)
-. More Algos (4 operators)
+. Get rid of the audio ring buffer, i was surprised to note a big improvement in the signal/noise ratio.
+. Encoder improvement by calling them more regularly
+. Make menu remember the row when go to an other part (E.G from osc to matrix) then back to the first one.
+
+In progress: 
+. Use a 4*20 LCD instead of current 2*20... Cheap and usefull.
 . (More) Presets in FLASH
 . Write a synth menu (patch name... midi channel...)
+
+To do before v0.1 (in no order) :
+. Number of voices depenndent of the algo
+. More Algos (4 operators)
 . EEPROM 24LC256 <- save / load user patch
-. Use a 4*20 LCD instead of current 2*20... Cheap and usefull.
 . Documentation
 . Full midi implementation
 	. Take care of midi channel
@@ -54,6 +63,8 @@ To do before v0.1 (in no order) :
 	. Read CC to change parameters
 	. send CC when user move encoders
 . Clean hardware design
+. Remove click when all the voices are buisy and a 6th note arrive...(Remove click when a same note is hit quickly several time)
+. Hide parameters not used by the current ALGO.
 
 Later V1.0 : 
 . a nice PCB and a Box
@@ -64,7 +75,7 @@ Later V2.0 :
 
 --------------------------------------------
 Hardware (to be detailed)
-. LCD LiquidCrystal compatible
+. LCD LiquidCrystal compatible 4x20
 . 2 74HC165 to plug buttons and rotary encoder
   (I used the DIN schema from midibox.org).
 . 1 condensator and 1 resistor to make the 1st order Low pass filter.
