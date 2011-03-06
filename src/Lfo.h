@@ -20,7 +20,6 @@
 
 #include "SynthStatus.h"
 #include "Matrix.h"
-#include "Osc.h"
 
 // LFo sample rate is 32 times slower than the rest
 // SAMPLE_RATE_x_8 / 32 =
@@ -29,7 +28,7 @@
 class Lfo {
 public:
 	Lfo();
-	virtual ~Lfo();
+	~Lfo();
 	void init(int number, Matrix* matrix, SourceEnum source);
 
 

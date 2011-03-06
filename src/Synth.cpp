@@ -91,6 +91,7 @@ bool Synth::isPlaying() {
 	return false;
 }
 
+
 int Synth::getSample() {
 	int sample = 0;
 	for (int k=0; k<NUMBER_OF_VOICES; k++) {
@@ -100,9 +101,6 @@ int Synth::getSample() {
 }
 
 void Synth::nextSample() {
-	if (cpt>1023) {
-		cpt = cpt;
-	}
 
 	// step 32 : update lfo1 , step 33 update lfo2 etc....
 	if ((cpt & 0x1c) == 0) {

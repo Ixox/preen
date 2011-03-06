@@ -15,26 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MIDIDECODER_H_
-#define MIDIDECODER_H_
 
-#include "Synth.h"
+#ifndef ENCODERSLISTENER_H_
+#define ENCODERSLISTENER_H_
 
-class MidiDecoder {
+class EncodersListener {
 public:
-	MidiDecoder();
-	~MidiDecoder();
-	void newByte(unsigned char byte);
-	void sendMidiEvent();
-	void setSynth(Synth* synth);
+	EncodersListener();
+	~EncodersListener();
 
-private:
-	unsigned char currentEvent[3];
-	bool newEvent;
-	short index;
-	short numberOfBytes;
-	Synth* synth;
-	Matrix* matrix;
+	virtual void incParameter(int num) = 0;
+	virtual void decParameter(int num) = 0;
+	virtual void buttonPressed(int number) = 0;
+	EncodersListener* nextListener;
+
 };
 
-#endif /* MIDIDECODER_H_ */
+#endif /* ENCODERSLISTENER_H_ */

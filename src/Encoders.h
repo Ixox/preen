@@ -23,37 +23,13 @@
 #include "Synth.h"
 #include "RingBuffer.h"
 #include "SynthStatus.h"
+#include "EncodersListener.h"
 
 #define HC165_DATA   12
 #define HC165_CLOCK  11
 #define HC165_LOAD   10
 
 
-#define NUMBER_OF_ENCODERS 4
-#define NUMBER_OF_BUTTONS 6
-
-#define BUTTON_SYNTH  0
-#define BUTTON_OSC    1
-#define BUTTON_ENV    2
-#define BUTTON_MATRIX 3
-#define BUTTON_LFO    4
-
-#define BUTTON_MENU   5
-
-#define BUTTON_SELECT 4
-#define BUTTON_BACK   3
-#define BUTTON_DUMP   0
-
-
-
-enum MenuState {
-	MENU_NONE = 0,
-	MENU_LOAD,
-	MENU_SAVE,
-	MENU_LOAD_INTERNAL_BANK,
-	MENU_LOAD_USER_BANK,
-	MENU_SAVE_PRESET
-};
 
 
 
@@ -65,82 +41,37 @@ struct EncoderStatus {
 class Encoders {
 public:
 	Encoders();
-	virtual ~Encoders();
+	~Encoders();
 	void checkStatus();
-	void setSynth(Synth* synth) {
-		this->synth = synth;
+
+
+
+	void insertListener(EncodersListener *listener) {
+		if (firstListener!=0) {
+			listener->nextListener = firstListener;
+		}
+		firstListener = listener;
 	}
 
-	int getCurrentRow() {
-		return currentRow;
-	}
-
-	bool isEditingEnvelope() {
-		return currentRow>=5 && currentRow<=8;
-	}
-
-	bool isEditingMatrix() {
-		return currentRow>=9 && currentRow<=14;
-	}
-
-	int valueHasChanged() {
-		return changedValue;
-	}
-
-	bool rowChanged() {
-		return newRow;
-	}
-
-	bool menuModeChanged() {
-		return changedMenuMode;
-	}
-
-	void resetChanged() {
-		changedValue = -1;
-		newRow = false;
-		changedMenuMode = false;
-	}
-
-	int getRowNumberRelative() {
-		if (currentRow<5) {
-			return currentRow;
-		} else if (currentRow<9) {
-			return currentRow - 4;
-		} else if (currentRow<15) {
-			return currentRow- 8;
-		} else {
-			return currentRow - 14;
+	void incEncoder(int num) {
+		for (EncodersListener* listener = firstListener; listener !=0; listener = listener->nextListener) {
+			listener->incParameter(num);
 		}
 	}
 
-	void dumpLine(int a, int b, int c, int d) {
-		SerialUSB.print("{ ");
-		SerialUSB.print(a);
-		SerialUSB.print(", ");
-		SerialUSB.print(b);
-		SerialUSB.print(", ");
-		SerialUSB.print(c);
-		SerialUSB.print(", ");
-		SerialUSB.print(d);
-		SerialUSB.print("} ");
-		SerialUSB.println(", ");
+	void decEncoder(int num) {
+		for (EncodersListener* listener = firstListener; listener !=0; listener = listener->nextListener) {
+			listener->decParameter(num);
+		}
 	}
 
-	MenuState getMenuState() {
-		return currentMenuState;
-	}
-
-	int getMenuSelect() {
-		return menuSelect;
-	}
-
-	bool isMenuMode() {
-		return menuMode;
+	void buttonPressed(int num) {
+		for (EncodersListener* listener = firstListener; listener !=0; listener = listener->nextListener) {
+			listener->buttonPressed(num);
+		}
 	}
 
 private:
-	Synth* synth;
-
 	bool encoderOldBit1[NUMBER_OF_ENCODERS];
 	int encoderBit1[NUMBER_OF_ENCODERS];
 	int encoderBit2[NUMBER_OF_ENCODERS];
@@ -148,17 +79,7 @@ private:
 	int buttonBit[NUMBER_OF_BUTTONS];
 	bool buttonOldState[NUMBER_OF_BUTTONS];
 
-	int currentRow;
-	int changedValue;
-	bool newRow;
-	bool changedMenuMode;
-
-	int oscRow, envRow, matrixRow, lfoRow;
-
-	MenuState currentMenuState;
-	bool menuMode;
-	int menuSelect;
-
+	EncodersListener* firstListener;
 };
 
 #endif /* ENCODERS_H_ */

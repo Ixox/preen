@@ -29,7 +29,7 @@
 class Matrix {
 public:
 	Matrix();
-	virtual ~Matrix();
+	~Matrix();
 	void reinitUsage();
 	void reinitUsage(int k, int oldValue, int value);
 

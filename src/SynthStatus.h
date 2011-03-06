@@ -18,14 +18,37 @@
 #ifndef SYNTHSTATUS_H_
 #define SYNTHSTATUS_H_
 
-#ifndef linux
 #include "libmaple_types.h"
 #include "wirish.h"
 #include "LiquidCrystal.h"
-#else
-typedef short int16;
-#endif
+#include "EncodersListener.h"
 
+
+
+#define BUTTON_SYNTH  0
+#define BUTTON_OSC    1
+#define BUTTON_ENV    2
+#define BUTTON_MATRIX 3
+#define BUTTON_LFO    4
+
+#define BUTTON_MENU   5
+
+#define BUTTON_SELECT 4
+#define BUTTON_BACK   3
+#define BUTTON_DUMP   0
+
+enum MenuState {
+	MENU_NONE = 0,
+	MENU_LOAD,
+	MENU_SAVE,
+	MENU_LOAD_INTERNAL_BANK,
+	MENU_LOAD_USER_BANK,
+	MENU_SAVE_PRESET
+};
+
+
+#define NUMBER_OF_ENCODERS 4
+#define NUMBER_OF_BUTTONS 6
 
 typedef unsigned char uchar;
 
@@ -33,6 +56,7 @@ enum Algorithm {
 	ALGO1 = 0,
 	ALGO2,
 	ALGO3,
+	ALGO4,
 	ALGO_END
 };
 
@@ -169,13 +193,81 @@ struct AllParameterRows {
 // Class define to allow initalization
 
 
-extern struct AllParameterRows allParameterRows;
-extern struct SynthState* currentSynthState;
-extern struct SynthState presets[];
 
-#ifndef linux
-extern LiquidCrystal      lcd;
-#endif
+enum PresetBank {
+	BANK_INTERNAL = 0,
+	BANK_USER
+};
+
+enum EditMode {
+	MODE_EDIT,
+	MODE_MENU
+};
+
+class SynthStatus : public EncodersListener {
+public:
+	SynthStatus();
+	void incParameter(int num);
+	void decParameter(int num);
+	bool isEnvelopeRow(int row) {
+		return row >=5 && row<=8;
+	}
+	bool isMatrixRow(int row) {
+		return row>=9 && row<=14;
+	}
+	void buttonPressed(int number);
+
+	int getCurrentRow() {
+		return currentRow;
+	}
+	EditMode getEditMode() {
+		return editMode;
+	}
+
+	void setBank(PresetBank bank) {
+		this->bank = bank;
+	}
+
+	void dumpLine(int a, int b, int c, int d) {
+		SerialUSB.print("{ ");
+		SerialUSB.print(a);
+		SerialUSB.print(", ");
+		SerialUSB.print(b);
+		SerialUSB.print(", ");
+		SerialUSB.print(c);
+		SerialUSB.print(", ");
+		SerialUSB.print(d);
+		SerialUSB.print("} ");
+		SerialUSB.println(", ");
+	}
+
+	MenuState getMenuState() {
+		return currentMenuState;
+	}
+
+	int getMenuSelect() {
+		return menuSelect;
+	}
+
+	struct SynthState *state;
+
+private:
+	PresetBank bank;
+	int preset;
+
+	int oscRow, envRow, matrixRow, lfoRow;
+	int currentRow;
+
+	EditMode editMode;
+
+	MenuState currentMenuState;
+	int menuSelect;
+
+};
+
+// Global structure used all over the code
+extern struct AllParameterRows allParameterRows;
+extern SynthStatus	synthStatus;
 
 
 

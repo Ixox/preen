@@ -19,7 +19,7 @@
 
 
 Matrix::Matrix() {
-	rows = &(currentSynthState->matrixRowState1);
+	rows = &(synthStatus.state->matrixRowState1);
 	reinitUsage();
 }
 

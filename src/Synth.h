@@ -21,6 +21,7 @@
 #include "Voice.h"
 #include "Matrix.h"
 #include "Lfo.h"
+#include "Env.h"
 
 #ifndef linux
 #include "wirish.h"

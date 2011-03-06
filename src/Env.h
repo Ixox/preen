@@ -41,7 +41,7 @@ public:
 	}
 
 	void loadADSR() {
-		Envelope * e = (Envelope *)(&(currentSynthState->env1));
+		Envelope * e = (Envelope *)&(synthStatus.state->env1);
 		Envelope* envState = &e[number-1];
 
 		attack = envState->attack * envState->attack;

@@ -26,14 +26,13 @@
 
 #define AUDIO_PIN    7
 
+SynthStatus		   synthStatus;
 Synth              synth;
 MidiDecoder        midiDecoder;
 Encoders		   encoders;
 RingBuffer<uint16, 64> rb;
 FMDisplay          fmDisplay;
 LiquidCrystal      lcd(23,24, 25,26,27,28,29,30,31,32);
-
-
 
 void IRQSendSample() {
 	synth.nextSample();
@@ -53,7 +52,11 @@ void setup()
     lcd.print("IxOx FM Synth V0.1");
 
 
-	encoders.setSynth(&synth);
+    encoders.insertListener(&fmDisplay);
+	// synthStatus must be called before display so we add it after
+    encoders.insertListener(&synthStatus);
+
+
 	midiDecoder.setSynth(&synth);
 	int cpt= 0;
 	while (cpt<20) {
@@ -61,6 +64,7 @@ void setup()
 		rb.insert((uint16)(synth.getSample()>>5)+1024);
 		cpt++;
 	}
+
 
 	Serial2.begin(31250);
 
@@ -76,18 +80,14 @@ void setup()
 	Timer1.resume();
 
 	delay(1000);
+    fmDisplay.init(&lcd);
 
 
-	lcd.clear();
-	lcd.setCursor(7 , 0);
-	lcd.print(currentSynthState->presetName);
-	fmDisplay.init(&encoders, &lcd);
 }
 
 int lcdMod = 0;
 
 void loop() {
-	int samples = 0;
 
 	unsigned int numberOfEvents = Serial2.available();
 	while (numberOfEvents>0) {
@@ -100,10 +100,6 @@ void loop() {
 	lcdMod++;
 	if (fmDisplay.needRefresh() && ((lcdMod & 0xf) == 0)) {
 		fmDisplay.refreshAllScreenByStep();
-	}
-
-	if ((encoders.valueHasChanged()>=0 || encoders.rowChanged() || encoders.menuModeChanged()) &&((lcdMod & 0x7f) == 0)) {
-		fmDisplay.update();
 	}
 
 	delayMicroseconds(300);

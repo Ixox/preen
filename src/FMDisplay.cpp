@@ -16,43 +16,21 @@
  */
 
 #include "FMDisplay.h"
-#include "SynthStatus.h"
 
 
 FMDisplay::FMDisplay() {
-	refreshStatus = 8;
+	refreshStatus = 10;
 }
 
 FMDisplay::~FMDisplay() {
 }
 
-void FMDisplay::init(Encoders* encoders, LiquidCrystal* lcd) {
-	this->encoders = encoders;
+void FMDisplay::init(LiquidCrystal* lcd) {
 	this->lcd = lcd;
+	lcd->clear();
+	displayPreset();
 }
 
-void FMDisplay::update() {
-	if (encoders->isMenuMode()) {
-		drawMenu();
-	} else {
-		if (encoders->menuModeChanged()) {
-			int length = getLength(currentSynthState->presetName);
-			lcd->setCursor(0,0);
-			lcd->print("                    ");
-			lcd->setCursor(19-length,0);
-			lcd->print(currentSynthState->presetName);
-			refreshStatus = 10;
-		}
-		if (encoders->rowChanged()) {
-			refreshStatus = 10;
-		} else if (this->encoders->valueHasChanged()>=0) {
-			int row = this->encoders->valueHasChanged() / NUMBER_OF_ENCODERS;
-			int encoder =  this->encoders->valueHasChanged() % NUMBER_OF_ENCODERS;
-			updateEncoderValue(row, encoder);
-		}
-	}
-	encoders->resetChanged();
-}
 
 void FMDisplay::updateEncoderValue(int row, int encoder) {
 	struct Parameter param = allParameterRows.row[row]->params[encoder];
@@ -60,9 +38,9 @@ void FMDisplay::updateEncoderValue(int row, int encoder) {
 	if (param.valueName[0] == 0) {
 		short value;
 		if (param.minValue<0) {
-			value = ((char*)(currentSynthState))[row*NUMBER_OF_ENCODERS+encoder];
+			value = ((char*)synthStatus.state)[row*NUMBER_OF_ENCODERS+encoder];
 		} else {
-			value = ((unsigned char*)currentSynthState)[row*NUMBER_OF_ENCODERS+encoder];
+			value = ((unsigned char*)synthStatus.state)[row*NUMBER_OF_ENCODERS+encoder];
 		}
 		lcd->print(value);
 
@@ -78,7 +56,7 @@ void FMDisplay::updateEncoderValue(int row, int encoder) {
 			lcd->print(" ");
 		}
 	} else {
-		lcd->print(param.valueName[(((unsigned char*)currentSynthState)[row*NUMBER_OF_ENCODERS+encoder])]);
+		lcd->print(param.valueName[(((unsigned char*)synthStatus.state)[row*NUMBER_OF_ENCODERS+encoder])]);
 	}
 }
 
@@ -93,28 +71,28 @@ void FMDisplay::refreshAllScreenByStep() {
 		lcd->setCursor(3,1);
 		lcd->print("               ");
 	} else if (refreshStatus==9 ) {
-		int row = encoders->getCurrentRow();
+		int row = synthStatus.getCurrentRow();
 		lcd->setCursor(0,1);
 		lcd->print(allParameterRows.row[row]->rowName);
 		if (row>0) {
 			lcd->print(" ");
-			lcd->print(encoders->getRowNumberRelative());
+			lcd->print(getRowNumberRelative(row));
 		}
 	} else if (refreshStatus>4) {
-		updateEncoderName(encoders->getCurrentRow(), refreshStatus -5);
+		updateEncoderName(synthStatus.getCurrentRow(), refreshStatus -5);
 	} else {
-		updateEncoderValue(encoders->getCurrentRow(), refreshStatus -1);
+		updateEncoderValue(synthStatus.getCurrentRow(), refreshStatus -1);
 	}
 	refreshStatus --;
 }
 
 void FMDisplay::drawMenu() {
-	switch(encoders->getMenuState()) {
+	switch(synthStatus.getMenuState()) {
 	case MENU_NONE:
 		lcd->clear();
 		lcd->setCursor(0,0);
 		lcd->print(" LOAD  SAVE ");
-		lcd->setCursor(encoders->getMenuSelect()*6+2, 1);
+		lcd->setCursor(synthStatus.getMenuSelect()*6+2, 1);
 		lcd->print("^^");
 		break;
 	case MENU_SAVE:
@@ -123,7 +101,7 @@ void FMDisplay::drawMenu() {
 		lcd->print(" LOAD >SAVE<");
 		lcd->setCursor(0, 3);
 		lcd->print(" User Preset ");
-		lcd->print(encoders->getMenuSelect());
+		lcd->print(synthStatus.getMenuSelect());
 		break;
 	case MENU_LOAD:
 		lcd->clear();
@@ -131,7 +109,7 @@ void FMDisplay::drawMenu() {
 		lcd->print(">LOAD< SAVE ");
 		lcd->setCursor(0, 1);
 		lcd->print(" Internal  User");
-		lcd->setCursor(encoders->getMenuSelect()*8+4, 2);
+		lcd->setCursor(synthStatus.getMenuSelect()*8+4, 2);
 		lcd->print("^^");
 		break;
 	case MENU_LOAD_INTERNAL_BANK:
@@ -142,7 +120,7 @@ void FMDisplay::drawMenu() {
 		lcd->print(">Internal< User");
 		lcd->setCursor(0, 3);
 		lcd->print(" Preset ");
-		lcd->print(encoders->getMenuSelect());
+		lcd->print(synthStatus.getMenuSelect());
 		break;
 	case MENU_LOAD_USER_BANK:
 		lcd->clear();
@@ -152,11 +130,46 @@ void FMDisplay::drawMenu() {
 		lcd->print(" Internal >User<");
 		lcd->setCursor(0, 3);
 		lcd->print(" Preset ");
-		lcd->print(encoders->getMenuSelect());
+		lcd->print(synthStatus.getMenuSelect());
 		break;
 	default:
 		break;
+	}
+}
 
+
+void FMDisplay::incParameter(int encoder) {
+	if (synthStatus.getEditMode() == MODE_EDIT) {
+		updateEncoderValue(synthStatus.getCurrentRow(), encoder);
+	} else {
+		drawMenu();
+	}
+}
+void FMDisplay::decParameter(int encoder) {
+	if (synthStatus.getEditMode() == MODE_EDIT) {
+		updateEncoderValue(synthStatus.getCurrentRow(), encoder);
+	} else {
+		drawMenu();
+	}
+}
+void FMDisplay::displayPreset() {
+	int length = getLength(synthStatus.state->presetName);
+	lcd->setCursor(0,0);
+	lcd->print("                    ");
+	lcd->setCursor(19-length,0);
+	lcd->print(synthStatus.state->presetName);
+}
+
+void FMDisplay::buttonPressed(int button) {
+
+	if (synthStatus.getEditMode() == MODE_EDIT) {
+		if (button == BUTTON_MENU) {
+			// Just push the button menu
+			displayPreset();
+		}
+		refreshStatus = 10;
+	} else {
+		drawMenu();
 	}
 
 }

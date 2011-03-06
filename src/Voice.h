@@ -23,6 +23,8 @@
 #include "Env.h"
 
 
+extern LiquidCrystal lcd;
+extern int vvcpt;
 
 class Voice
 {
@@ -39,7 +41,7 @@ public:
 
 	void nextSample() {
 		if (playing) {
-			switch (currentSynthState->engine.algo) {
+			switch (synthStatus.state->engine.algo) {
 			case ALGO1:
 				{
 				osc2->nextSample(oscState2);
@@ -63,6 +65,8 @@ public:
 				currentSample  >>= 15;
 				currentSample *= velocity;
 				currentSample >>=7;
+
+
 				if (env1->isDead(envState1)) {
 					playing = false;
 				}
@@ -129,19 +133,25 @@ public:
 					playing = false;
 				}
 				break;
+			case ALGO4:
+				{
+				oscState1.frequency =  oscState1.mainFrequency;
+				osc1->nextSample(oscState1);
+				currentSample = osc1->getSample(oscState1);
+				}
 			}
 		}
 	}
 
 
 	void updateModulationIndex1() {
-		IM1 = currentSynthState->engine.modulationIndex1 + (matrix->getDestination(INDEX_MODULATION1)>>4);
+		IM1 = synthStatus.state->engine.modulationIndex1 + (matrix->getDestination(INDEX_MODULATION1)>>4);
 	}
 	void updateModulationIndex2() {
-		IM2 = currentSynthState->engine.modulationIndex2 + (matrix->getDestination(INDEX_MODULATION2)>>4);
+		IM2 = synthStatus.state->engine.modulationIndex2 + (matrix->getDestination(INDEX_MODULATION2)>>4);
 	}
 	void updateModulationIndex3() {
-		IM3 = currentSynthState->engine.modulationIndex3 + (matrix->getDestination(INDEX_MODULATION3)>>4);
+		IM3 = synthStatus.state->engine.modulationIndex3 + (matrix->getDestination(INDEX_MODULATION3)>>4);
 	}
 
 

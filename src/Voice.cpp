@@ -19,6 +19,8 @@
 
 int Voice::IM1, Voice::IM2, Voice::IM3;
 
+int vvcpt=0;
+
 Voice::Voice(void)
 {
 }

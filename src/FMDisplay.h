@@ -19,14 +19,15 @@
 #define FMDISPLAY_H_
 
 
-#include "Encoders.h"
+#include "SynthStatus.h"
 
-class FMDisplay {
+
+class FMDisplay : public EncodersListener {
 public:
 	FMDisplay();
-	virtual ~FMDisplay();
-	void init(Encoders* encoders, LiquidCrystal* lcd);
-	void update();
+	~FMDisplay();
+	void init(LiquidCrystal* lcd);
+
 	void drawMenu();
 	inline void updateEncoderValue(int row, int encoder);
 	inline void updateEncoderName(int row, int encoder);
@@ -37,11 +38,28 @@ public:
 		}
 		return length;
 	}
+	int getRowNumberRelative(int row) {
+		if (row<5) {
+			return row;
+		} else if (row<9) {
+			return row - 4;
+		} else if (row<15) {
+			return row- 8;
+		} else {
+			return row - 14;
+		}
+	}
+
 	boolean needRefresh() { return refreshStatus != 0; }
 	void refreshAllScreenByStep();
+	void displayPreset();
+
+	void incParameter(int encoder);
+	void decParameter(int encoder);
+	void buttonPressed(int button);
+
 
 private:
-	Encoders* encoders;
 	LiquidCrystal* lcd;
 	int refreshStatus;
 };
