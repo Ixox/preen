@@ -39,18 +39,26 @@ Preen Current Features:
 . LCD is updated in realtime showing the parameter you modify.
 
 --------------------------------------------
-Update March 5th 2011
+DONE
 
-Done :
+Update March 6th 2011
+. Refactoring :
+  Add "EncoderListener" and "separation of concern" between Encoders, FMDisplay, and SynthStatus. 
+  Will make Menu maintenance much easier.
+
+Update March 5th 2011
 . Dump preset on serialUSB when a button is pressed (to collect them)
 . Get rid of the audio ring buffer, i was surprised to note a big improvement in the signal/noise ratio.
 . Encoder improvement by calling them more regularly
 . Make menu remember the row when go to an other part (E.G from osc to matrix) then back to the first one.
 
+--------------------------------------------
+
 In progress: 
 . Use a 4*20 LCD instead of current 2*20... Cheap and usefull.
 . (More) Presets in FLASH
 . Write a synth menu (patch name... midi channel...)
+
 
 To do before v0.1 (in no order) :
 . Number of voices depenndent of the algo
