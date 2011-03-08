@@ -18,7 +18,7 @@
 #ifndef LFO_H_
 #define LFO_H_
 
-#include "SynthStatus.h"
+#include "SynthState.h"
 #include "Matrix.h"
 
 // LFo sample rate is 32 times slower than the rest
@@ -34,9 +34,6 @@ public:
 
 	void nextValue() {
 
-		if (!matrix->isSourceUsed(source)) {
-			return;
-		}
 		// then new value
 		//	index = (index +  ((lfo[number].freq << 16) / LFO_SAMPLE_RATE_x_8 ))  & 0xffff;
 		//		int jmp = lfo[number].freq << 3 ; // << 16 >> 13
@@ -72,7 +69,7 @@ private:
 	SourceEnum source;
 	unsigned int index;
 	LfoType type;
-	LfoState* lfo ;
+	LfoParams* lfo ;
 	int frequency;
 	int jump;
 };

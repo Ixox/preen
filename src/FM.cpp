@@ -26,17 +26,20 @@
 
 #define AUDIO_PIN    7
 
-SynthStatus		   synthStatus;
+SynthState		   synthState;
 Synth              synth;
 MidiDecoder        midiDecoder;
 Encoders		   encoders;
-RingBuffer<uint16, 64> rb;
+// RingBuffer<uint16, 64> rb;
 FMDisplay          fmDisplay;
 LiquidCrystal      lcd(23,24, 25,26,27,28,29,30,31,32);
 
+uint16 currentSample = 1024;
+
 void IRQSendSample() {
+	pwmWrite(AUDIO_PIN , currentSample);
 	synth.nextSample();
-	pwmWrite(AUDIO_PIN , (uint16)(synth.getSample()>>5)+1024);
+	currentSample = (uint16)(synth.getSample()>>5) + 1024;
 }
 
 
@@ -54,17 +57,21 @@ void setup()
 
     encoders.insertListener(&fmDisplay);
 	// synthStatus must be called before display so we add it after
-    encoders.insertListener(&synthStatus);
+    encoders.insertListener(&synthState);
+
+    // Synth must reassigned
+    synthState.insertListener(&synth);
 
 
 	midiDecoder.setSynth(&synth);
+/*
 	int cpt= 0;
 	while (cpt<20) {
 		synth.nextSample();
 		rb.insert((uint16)(synth.getSample()>>5)+1024);
 		cpt++;
 	}
-
+*/
 
 	Serial2.begin(31250);
 

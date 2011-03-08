@@ -21,9 +21,9 @@
 #include "libmaple_types.h"
 #include "wirish.h"
 #include "LiquidCrystal.h"
+#include "Wire.h"
 #include "EncodersListener.h"
-
-
+#include "SynthParamListener.h"
 
 #define BUTTON_SYNTH  0
 #define BUTTON_OSC    1
@@ -107,35 +107,35 @@ enum OscFrequencyType {
 };
 
 
-struct Oscillator {
+struct OscillatorParams {
 	uchar shape; // OSC_SHAPE_*
 	uchar frequencyType; // OSC_FT_*
 	uchar frequencyMul;
 	char  detune;
 };
 
-struct Envelope {
+struct EnvelopeParams {
 	uchar attack;
 	uchar decay;
 	uchar sustain;
 	uchar release;
 };
 
-struct LfoState {
+struct LfoParams {
 	uchar shape; // LFO_SHAPE_*
 	uchar freq;  // lfoFreq[]*
 	char notused1;
 	char notused2;
 };
 
-struct MatrixRowState {
+struct MatrixRowParams {
 	uchar source;
 	char mul;
 	uchar destination;
 	char not_used;
 };
 
-struct EngineState {
+struct EngineParams {
 	uchar algo;
 	uchar modulationIndex1;
 	uchar modulationIndex2;
@@ -145,26 +145,26 @@ struct EngineState {
 #define NUMBER_OF_ROWS 19
 
 
-struct SynthState {
-	struct EngineState engine;
-	struct Oscillator osc1;
-	struct Oscillator osc2;
-	struct Oscillator osc3;
-	struct Oscillator osc4;
-	struct Envelope env1;
-	struct Envelope env2;
-	struct Envelope env3;
-	struct Envelope env4;
-	struct MatrixRowState matrixRowState1;
-	struct MatrixRowState matrixRowState2;
-	struct MatrixRowState matrixRowState3;
-	struct MatrixRowState matrixRowState4;
-	struct MatrixRowState matrixRowState5;
-	struct MatrixRowState matrixRowState6;
-	struct LfoState lfo1;
-	struct LfoState lfo2;
-	struct LfoState lfo3;
-	struct LfoState lfo4;
+struct AllSynthParams {
+	struct EngineParams engine;
+	struct OscillatorParams osc1;
+	struct OscillatorParams osc2;
+	struct OscillatorParams osc3;
+	struct OscillatorParams osc4;
+	struct EnvelopeParams env1;
+	struct EnvelopeParams env2;
+	struct EnvelopeParams env3;
+	struct EnvelopeParams env4;
+	struct MatrixRowParams matrixRowState1;
+	struct MatrixRowParams matrixRowState2;
+	struct MatrixRowParams matrixRowState3;
+	struct MatrixRowParams matrixRowState4;
+	struct MatrixRowParams matrixRowState5;
+	struct MatrixRowParams matrixRowState6;
+	struct LfoParams lfo1;
+	struct LfoParams lfo2;
+	struct LfoParams lfo3;
+	struct LfoParams lfo4;
 	const char presetName[13];
 };
 
@@ -172,21 +172,21 @@ struct SynthState {
 
 // Display information
 
-struct Parameter {
+struct ParameterDisplay {
 	char minValue;
 	unsigned char maxValue;
 	const char** valueName;
 };
 
-struct ParameterRow {
+struct ParameterRowDisplay {
 	const char* rowName;
 	const char* paramName[4];
-	struct Parameter params[4];
+	struct ParameterDisplay params[4];
 };
 
 
-struct AllParameterRows {
-	struct ParameterRow* row[NUMBER_OF_ROWS];
+struct AllParameterRowsDisplay {
+	struct ParameterRowDisplay* row[NUMBER_OF_ROWS];
 };
 
 
@@ -204,17 +204,28 @@ enum EditMode {
 	MODE_MENU
 };
 
-class SynthStatus : public EncodersListener {
+
+class SynthState : public EncodersListener {
 public:
-	SynthStatus();
+	SynthState();
 	void incParameter(int num);
 	void decParameter(int num);
-	bool isEnvelopeRow(int row) {
-		return row >=5 && row<=8;
+
+	SynthParamListenerType getListenerType(int row) {
+		if (row == 0) {
+			return SYNTH_PARAM_ENGINE_LISTENER;
+		} else if (row>=1 && row<=4) {
+			return SYNTH_PARAM_OSCILLATOR_LISTENER;
+		} else if (row>=5 && row<=8) {
+			return SYNTH_PARAM_ENVELOPE_LISTENER;
+		} else if (row>=9 && row<=14) {
+			return SYNTH_PARAM_MATRIX_LISTENER;
+		} else if (row>=15 && row<=18) {
+			return SYNTH_PARAM_LFO_LISTENER;
+		}
+		return SYNTH_PARAM_INVALID_LISTENER;
 	}
-	bool isMatrixRow(int row) {
-		return row>=9 && row<=14;
-	}
+
 	void buttonPressed(int number);
 
 	int getCurrentRow() {
@@ -227,6 +238,8 @@ public:
 	void setBank(PresetBank bank) {
 		this->bank = bank;
 	}
+	void pruneToEEPROM(int preset);
+	void readFromEEPROM(int preset);
 
 	void dumpLine(int a, int b, int c, int d) {
 		SerialUSB.print("{ ");
@@ -249,7 +262,15 @@ public:
 		return menuSelect;
 	}
 
-	struct SynthState *state;
+	void insertListener(SynthParamListener *listener) {
+		if (firstListener!=0) {
+			listener->nextListener = firstListener;
+		}
+		firstListener = listener;
+	}
+
+
+	struct AllSynthParams params;
 
 private:
 	PresetBank bank;
@@ -263,11 +284,12 @@ private:
 	MenuState currentMenuState;
 	int menuSelect;
 
+	SynthParamListener* firstListener;
 };
 
 // Global structure used all over the code
-extern struct AllParameterRows allParameterRows;
-extern SynthStatus	synthStatus;
+extern struct AllParameterRowsDisplay allParameterRows;
+extern SynthState	synthState;
 
 
 

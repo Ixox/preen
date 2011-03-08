@@ -22,7 +22,7 @@
 #include "libmaple.h"
 #include "Synth.h"
 #include "RingBuffer.h"
-#include "SynthStatus.h"
+#include "SynthState.h"
 #include "EncodersListener.h"
 
 #define HC165_DATA   12

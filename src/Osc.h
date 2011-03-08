@@ -64,7 +64,7 @@ private:
 	DestinationEnum destFreq;
 	DestinationEnum destAmp;
 	Matrix* matrix;
-	Oscillator* oscillator;
+	OscillatorParams* oscillator;
 };
 
 
@@ -90,7 +90,7 @@ Osc<number>::Osc()
 		this->destAmp = OSC4_AMP;
 		break;
 	}
-	Oscillator * o = (Oscillator *)(&(synthStatus.state->osc1));
+	OscillatorParams * o = (OscillatorParams *)(&(synthState.params.osc1));
 	oscillator = &o[number-1];
 }
 

@@ -19,24 +19,25 @@
 
 
 Matrix::Matrix() {
-	rows = &(synthStatus.state->matrixRowState1);
+	rows = &synthState.params.matrixRowState1;
 	reinitUsage();
 }
 
 Matrix::~Matrix() {
 }
 
-void Matrix::reinitUsage(int k, int oldValue, int value) {
+void Matrix::reinitUsage(int param, int oldValue, int newValue) {
+	int k = param % NUMBER_OF_ENCODERS;
 	// Source
 	if (k==0) {
 		this->sourceUsed[oldValue] = false;
-		this->sourceUsed[value] = true;
+		this->sourceUsed[newValue] = true;
 		this->sources[oldValue] = 0;
 	}
 	// Destination
 	if (k==2) {
 		this->destinationUsed[oldValue] = false;
-		this->destinationUsed[value] = true;
+		this->destinationUsed[newValue] = true;
 		this->destinations[oldValue] = 0;
 	}
 }
@@ -76,4 +77,5 @@ void Matrix::setRowDestination(int index, DestinationEnum destination) {
 	// Assign new one
 	this->destinationUsed[destination] = true;
 }
+
 

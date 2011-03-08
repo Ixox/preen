@@ -22,11 +22,9 @@
 #include "Matrix.h"
 #include "Lfo.h"
 #include "Env.h"
-
-#ifndef linux
+#include "SynthParamListener.h"
 #include "wirish.h"
 #include "LiquidCrystal.h"
-#endif
 
 #define NUMBER_OF_VOICES 5
 #define NUMBER_OF_LFOS 4
@@ -34,7 +32,7 @@
 
 #define UINT_MAX  4294967295
 
-class Synth
+class Synth : public SynthParamListener
 {
 public:
 	Synth(void);
@@ -47,11 +45,15 @@ public:
 	int getSample();
 	void nextSample();
 
-	void reloadADSR() {
-		env1.loadADSR();
-		env2.loadADSR();
-		env3.loadADSR();
-		env4.loadADSR();
+	void newParamValue(SynthParamListenerType type, int param, int oldValue, int newValue) {
+		if (type == SYNTH_PARAM_ENVELOPE_LISTENER) {
+			env1.loadADSR();
+			env2.loadADSR();
+			env3.loadADSR();
+			env4.loadADSR();
+		} else if (type == SYNTH_PARAM_MATRIX_LISTENER) {
+			matrix.reinitUsage(param, oldValue, newValue);
+		}
 	}
 
 private:

@@ -15,20 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Lfo.h"
 
-Lfo::Lfo() {
-	type = LFO_RAMP;
+#include "SynthParamListener.h"
+
+SynthParamListener::SynthParamListener() {
 }
 
-Lfo::~Lfo() {
+SynthParamListener::~SynthParamListener() {
 }
 
-void Lfo::init(int number, Matrix *matrix, SourceEnum source) {
-	this->matrix = matrix;
-	this->source = source;
-	this->number = number;
-	LfoParams* lfoTmp = (LfoParams *)&synthState.params.lfo1;
-	lfo = &lfoTmp[number];
-	index = 0;
-}
+

@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "SynthStatus.h"
+#include "SynthState.h"
 
 struct EnvState {
 	// life cycle of the env
@@ -41,8 +41,8 @@ public:
 	}
 
 	void loadADSR() {
-		Envelope * e = (Envelope *)&(synthStatus.state->env1);
-		Envelope* envState = &e[number-1];
+		EnvelopeParams * e = (EnvelopeParams *)&(synthState.params.env1);
+		EnvelopeParams* envState = &e[number-1];
 
 		attack = envState->attack * envState->attack;
 		decay = envState->decay * envState->decay;

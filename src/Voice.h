@@ -41,7 +41,7 @@ public:
 
 	void nextSample() {
 		if (playing) {
-			switch (synthStatus.state->engine.algo) {
+			switch (synthState.params.engine.algo) {
 			case ALGO1:
 				{
 				osc2->nextSample(oscState2);
@@ -145,13 +145,13 @@ public:
 
 
 	void updateModulationIndex1() {
-		IM1 = synthStatus.state->engine.modulationIndex1 + (matrix->getDestination(INDEX_MODULATION1)>>4);
+		IM1 = synthState.params.engine.modulationIndex1 + (matrix->getDestination(INDEX_MODULATION1)>>4);
 	}
 	void updateModulationIndex2() {
-		IM2 = synthStatus.state->engine.modulationIndex2 + (matrix->getDestination(INDEX_MODULATION2)>>4);
+		IM2 = synthState.params.engine.modulationIndex2 + (matrix->getDestination(INDEX_MODULATION2)>>4);
 	}
 	void updateModulationIndex3() {
-		IM3 = synthStatus.state->engine.modulationIndex3 + (matrix->getDestination(INDEX_MODULATION3)>>4);
+		IM3 = synthState.params.engine.modulationIndex3 + (matrix->getDestination(INDEX_MODULATION3)>>4);
 	}
 
 

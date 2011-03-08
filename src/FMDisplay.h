@@ -19,7 +19,7 @@
 #define FMDISPLAY_H_
 
 
-#include "SynthStatus.h"
+#include "SynthState.h"
 
 
 class FMDisplay : public EncodersListener {

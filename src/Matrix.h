@@ -21,12 +21,13 @@
 
 #define MATRIX_SIZE 6
 
-#include "SynthStatus.h"
+#include "SynthState.h"
+#include "SynthParamListener.h"
 
 
 
 
-class Matrix {
+class Matrix  {
 public:
 	Matrix();
 	~Matrix();
@@ -67,12 +68,16 @@ public:
 	int getSource(SourceEnum source) {
 		return this->sources[source];
 	}
+
+    void newParamValue(int param, int oldValue, int newValue);;
+
+
 private:
 	bool sourceUsed[SOURCE_MAX];
 	bool destinationUsed[DESTINATION_MAX];
 	int sources[SOURCE_MAX];
 	int destinations[DESTINATION_MAX];
-	MatrixRowState* rows;
+	MatrixRowParams* rows;
 };
 
 #endif /* MATRIX_H_ */

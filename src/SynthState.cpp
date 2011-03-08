@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SynthStatus.h"
+#include "SynthState.h"
 
 
 
@@ -24,7 +24,7 @@
 // DISPLAY structures
 const char* nullNames []= {};
 const char* algoNames []= { "alg1", "alg2", "alg3", "alg4" };
-struct ParameterRow engineParameterRow= {
+struct ParameterRowDisplay engineParameterRow= {
 		"Engine" ,
 		{ "Algo", "IM1 ", "IM2 ", "IM3 " },
 		{
@@ -37,7 +37,7 @@ struct ParameterRow engineParameterRow= {
 
 const char* oscShapeNames []=  {"sin ", "off " } ;
 const char* oscTypeNames [] = { "keyb", "fixe"};
-struct ParameterRow oscParameterRow = {
+struct ParameterRowDisplay oscParameterRow = {
 		"Oscillator",
 		{ "Shap", "FTyp", "Freq", "FTun" },
 		{
@@ -48,7 +48,7 @@ struct ParameterRow oscParameterRow = {
 		}
 };
 
-struct ParameterRow envParameterRow = {
+struct ParameterRowDisplay envParameterRow = {
 		"Enveloppe",
 		{ "Attk", "Rele", "Sust", "Deca" },
 		{
@@ -62,7 +62,7 @@ struct ParameterRow envParameterRow = {
 
 const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW"} ;
 const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "o1Am", "o2Am", "o3Am", "o4Am", "IM1 ", "IM2 ", "IM3 "} ;
-struct ParameterRow matrixParameterRow = {
+struct ParameterRowDisplay matrixParameterRow = {
 		"Matrix",
 		{ "Srce", "Mult", "Dest", "    " },
 		{
@@ -75,7 +75,7 @@ struct ParameterRow matrixParameterRow = {
 
 
 const char* lfoShapeNames [] =  { "Saw ", "Ramp", "Squa"} ;
-struct ParameterRow lfoParameterRow = {
+struct ParameterRowDisplay lfoParameterRow = {
 		"LFO",
 		{ "Shap", "Freq", "    ", "    " },
 		{
@@ -87,7 +87,7 @@ struct ParameterRow lfoParameterRow = {
 };
 
 
-struct AllParameterRows allParameterRows = {
+struct AllParameterRowsDisplay allParameterRows = {
 		{&engineParameterRow,
 		&oscParameterRow,
 		&oscParameterRow,
@@ -114,7 +114,7 @@ struct AllParameterRows allParameterRows = {
 
 /******************** PRESET **********************/
 
-struct SynthState presets[]  =  {{
+struct AllSynthParams presets[]  =  {{
 	// Engine
 	{ ALGO1, 16, 21, 6},
 
@@ -193,7 +193,7 @@ struct SynthState presets[]  =  {{
 
 };
 */
-SynthStatus::SynthStatus() {
+SynthState::SynthState() {
 	preset = 0;
 	bank = BANK_INTERNAL;
 	oscRow = 1;
@@ -201,38 +201,43 @@ SynthStatus::SynthStatus() {
 	matrixRow = 9;
 	lfoRow = 15;
 	// First default preset
-	state =  &presets[0];
 	editMode = MODE_EDIT;
 	currentRow = 0;
+	// enable the i2c bus
+	for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
+		((char*)&params)[k] = ((char*)presets)[k];
+	}
+	Wire.begin(2, 3);
 }
 
-void SynthStatus::incParameter(int encoder) {
+void SynthState::incParameter(int encoder) {
 	if (editMode == MODE_EDIT) {
 		int num = currentRow * NUMBER_OF_ENCODERS + encoder;
-		struct Parameter* param = &(allParameterRows.row[currentRow]->params[encoder]);
+		struct ParameterDisplay* param = &(allParameterRows.row[currentRow]->params[encoder]);
 		int newValue;
 		int oldValue;
 		if (param->minValue<0) {
-			char &value = ((char*)state)[num];
+			char &value = ((char*)&params)[num];
 			oldValue = value;
 			if (value<param->maxValue) {
 				value++;
 			}
 			newValue = value;
 		} else {
-			unsigned char &value = ((unsigned char*)synthStatus.state)[num];
+			unsigned char &value = ((unsigned char*)&params)[num];
 			oldValue = value;
 			if (value<param->maxValue) {
 				value++;
 			}
 			newValue = value;
 		}
+
 		if (newValue != oldValue) {
-			if (isMatrixRow(currentRow)) {
-				// synth->getMatrix()->reinitUsage(k, oldValue, newValue);
-			}
-			if (isEnvelopeRow(currentRow)) {
-				// synth->reloadADSR();
+			for (SynthParamListener* listener = firstListener; listener !=0; listener = listener->nextListener) {
+				SynthParamListenerType listenerType = getListenerType(currentRow);
+				if (listener->getListenerType() == listenerType) {
+					listener->newParamValue(getListenerType(currentRow), encoder, oldValue, newValue);
+				}
 			}
 		}
 	} else {
@@ -249,21 +254,21 @@ void SynthStatus::incParameter(int encoder) {
 
 }
 
-void SynthStatus::decParameter(int encoder) {
+void SynthState::decParameter(int encoder) {
 	if (editMode == MODE_EDIT) {
 		int num = currentRow * NUMBER_OF_ENCODERS + encoder;
-		struct Parameter* param = &(allParameterRows.row[currentRow]->params[encoder]);
+		struct ParameterDisplay* param = &(allParameterRows.row[currentRow]->params[encoder]);
 		int newValue;
 		int oldValue;
 		if (param->minValue<0) {
-			char &value = ((char*)state)[num];
+			char &value = ((char*)&params)[num];
 			oldValue = value;
 			if (value>param->minValue) {
 				value--;
 			}
 			newValue = value;
 		} else {
-			unsigned char &value = ((unsigned char*)synthStatus.state)[num];
+			unsigned char &value = ((unsigned char*)&params)[num];
 			oldValue = value;
 			if (value>param->minValue) {
 				value--;
@@ -271,13 +276,11 @@ void SynthStatus::decParameter(int encoder) {
 			newValue = value;
 		}
 		if (newValue != oldValue) {
-			if (isMatrixRow(currentRow)) {
-				// TO REAAD !!!!!!!!!!!!!!!!!!
-	//			synth->getMatrix()->reinitUsage(encoder, oldValue, newValue);
-			}
-			if (isEnvelopeRow(currentRow)) {
-				// TO REAAD !!!!!!!!!!!!!!!!!!
-	//			synth->reloadADSR();
+			for (SynthParamListener* listener = firstListener; listener !=0; listener = listener->nextListener) {
+				SynthParamListenerType listenerType = getListenerType(currentRow);
+				if (listener->getListenerType() == listenerType) {
+					listener->newParamValue(getListenerType(currentRow), encoder, oldValue, newValue);
+				}
 			}
 		}
 	} else {
@@ -294,7 +297,7 @@ void SynthStatus::decParameter(int encoder) {
 }
 
 
-void SynthStatus::buttonPressed(int button) {
+void SynthState::buttonPressed(int button) {
 	if (editMode == MODE_EDIT)  {
 		switch (button) {
 		case BUTTON_SYNTH:
@@ -359,6 +362,7 @@ void SynthStatus::buttonPressed(int button) {
 					} else {
 						currentMenuState = MENU_SAVE;
 					}
+					menuSelect = 0;
 					break;
 				case MENU_LOAD:
 					if (menuSelect == 0) {
@@ -366,20 +370,20 @@ void SynthStatus::buttonPressed(int button) {
 					} else {
 						currentMenuState = MENU_LOAD_USER_BANK;
 					}
+					menuSelect = 0;
 					break;
 				case MENU_SAVE:
-					// save menuSelect bank
+					pruneToEEPROM(menuSelect);
 					break;
 				case MENU_LOAD_INTERNAL_BANK:
 					// load internal bank
 					break;
 				case MENU_LOAD_USER_BANK:
-					// load internal bank
+					readFromEEPROM(menuSelect);
 					break;
 				default:
 					break;
 			}
-			menuSelect = 0;
 			break;
 		case BUTTON_BACK:
 			switch (currentMenuState) {
@@ -403,20 +407,20 @@ void SynthStatus::buttonPressed(int button) {
 		case BUTTON_DUMP:
 		{
 			SerialUSB.println("New Sound....");
-			dumpLine(synthStatus.state->engine.algo, synthStatus.state->engine.modulationIndex1, synthStatus.state->engine.modulationIndex2, synthStatus.state->engine.modulationIndex3 );
-			Oscillator * o = (Oscillator *)(&(synthStatus.state->osc1));
+			dumpLine(params.engine.algo, params.engine.modulationIndex1, params.engine.modulationIndex2, params.engine.modulationIndex3 );
+			OscillatorParams * o = (OscillatorParams *)(&(params.osc1));
 			for (int k=0; k<4; k++) {
 				dumpLine(o[k].shape, o[k].frequencyType, o[k].frequencyMul, o[k].detune);
 			}
-			Envelope * e = (Envelope*)(&(synthStatus.state->env1));
+			EnvelopeParams * e = (EnvelopeParams*)(&(params.env1));
 			for (int k=0; k<4; k++) {
 				dumpLine(e[k].attack, e[k].decay, e[k].sustain, e[k].release);
 			}
-			MatrixRowState* m = (MatrixRowState*)(&(synthStatus.state->matrixRowState1));
+			MatrixRowParams* m = (MatrixRowParams*)(&(params.matrixRowState1));
 			for (int k=0; k<6; k++) {
 				dumpLine(m[k].source, m[k].mul, m[k].destination, 0);
 			}
-			LfoState* l = (LfoState*)(&(synthStatus.state->lfo1));
+			LfoParams* l = (LfoParams*)(&(params.lfo1));
 			for (int k=0; k<4; k++) {
 				dumpLine(l[k].shape, l[k].freq, 0, 0);
 			}
@@ -432,210 +436,45 @@ void SynthStatus::buttonPressed(int button) {
 	}
 }
 
-/*
- * 	if (!menuMode) {
-		// Edit MODE
-		bool b1, b2;
-		int index = currentRow* NUMBER_OF_ENCODERS ;
-		for (int k=0; k<NUMBER_OF_ENCODERS; k++) {
-			b1 = ((registerBits & encoderBit1[k]) == 0);
-			int newValue;
-			int oldValue;
-			if (!encoderOldBit1[k] && b1) {
-				b2 = ((registerBits & encoderBit2[k]) == 0);
-				struct Parameter param = allParameterRows.row[currentRow]->params[k];
-				if (b2) {
-					decParameter(index+k);
-				} else {
-					incParameter(index+k);
-				}
+
+extern LiquidCrystal lcd;
+void SynthState::pruneToEEPROM(int preset) {
+	int deviceaddress = 0x50;
+	unsigned int eeaddress = preset * 128;
+	eeaddress = 0;
+
+//or (unsigned int k=0; k<sizeof(struct SynthState); k++) {
+	    Wire.beginTransmission(deviceaddress);
+	    Wire.send((int)(eeaddress >> 8)); // MSB
+	    Wire.send((int)(eeaddress & 0xFF)); // LSB
+	    Wire.send(((uint8*)&params), 32);
+	    Wire.endTransmission();
+	    delay(10);
+	    eeaddress++;
+//	}
+}
+
+
+void SynthState::readFromEEPROM(int preset) {
+	int deviceaddress = 0x50;
+	int eeaddress = preset * 128;
+	eeaddress = 0;
+
+//	for (unsigned int k=0; k<sizeof(struct SynthState); k++) {
+		Wire.beginTransmission(deviceaddress);
+		Wire.send((int)(eeaddress >> 8)); // MSB
+		Wire.send((int)(eeaddress & 0xFF)); // LSB
+		Wire.endTransmission();
+		Wire.requestFrom(eeaddress,32);
+		delay(10);
+		for (int k=0; k<32; k++) {
+			if (Wire.available()) {
+				((char*)&params)[k]= Wire.receive();
 			}
-			encoderOldBit1[k] = b1;
 		}
+		delay(10);
+		eeaddress++;
+//
 
 
-		for (int k=0; k<NUMBER_OF_BUTTONS; k++) {
-			b1 = ((registerBits & buttonBit[k]) == 0);
-
-			if (!buttonOldState[k] && b1) {
-				switch (k) {
-				case BUTTON_SYNTH:
-					currentRow = 0;
-					break;
-				case BUTTON_OSC:
-					if (currentRow<1 || currentRow>4) {
-						currentRow = oscRow;
-					} else {
-						currentRow ++;
-						if (currentRow<1 || currentRow>4) {
-							currentRow = 1;
-						}
-					}
-					oscRow = currentRow;
-					break;
-				case BUTTON_ENV:
-					if (currentRow<5 || currentRow>8) {
-						currentRow = envRow;
-					} else {
-						currentRow ++;
-						if (currentRow<5 || currentRow>8) {
-							currentRow = 5;
-						}
-					}
-					envRow = currentRow;
-					break;
-				case BUTTON_MATRIX:
-					if (currentRow<9 || currentRow>14) {
-						currentRow = matrixRow;
-					} else {
-						currentRow ++;
-						if (currentRow<9 || currentRow>14) {
-							currentRow = 9;
-						}
-					}
-					matrixRow = currentRow;
-					break;
-				case BUTTON_LFO:
-					if (currentRow<15 || currentRow>18) {
-						currentRow = lfoRow;
-					} else {
-						currentRow ++;
-						if (currentRow<15 || currentRow>18) {
-							currentRow = 15;
-						}
-					}
-					break;
-				case BUTTON_MENU:
-					menuMode = !menuMode;
-					currentMenuState = MENU_NONE;
-					menuSelect = 0;
-					changedMenuMode = true;
-					break;
-				}
-				newRow = true;
-			}
-			buttonOldState[k] = b1;
-		}
-	} else {
-		// Only one encoder in menu mode
-		bool b1, b2;
-		b1 = ((registerBits & encoderBit1[0]) == 0);
-		if (!encoderOldBit1[0] && b1) {
-			b2 = ((registerBits & encoderBit2[0]) == 0);
-
-			if (currentMenuState == MENU_NONE || currentMenuState == MENU_LOAD) {
-				if (!b2) {
-					if (menuSelect<1) {
-						menuSelect = menuSelect + 1;
-					}
-				} else {
-					if (menuSelect>0) {
-						menuSelect = menuSelect - 1;
-					}
-				}
-			} else {
-				if (!b2) {
-					if (menuSelect<255) {
-						menuSelect = menuSelect + 1;
-					}
-				} else {
-					if (menuSelect>0) {
-						menuSelect = menuSelect - 1;
-					}
-				}
-			}
-			newRow = true;
-		}
-		encoderOldBit1[0] = b1;
-
-		for (int k=0; k<NUMBER_OF_BUTTONS; k++) {
-			b1 = ((registerBits & buttonBit[k]) == 0);
-
-			if (!buttonOldState[k] && b1) {
-				switch (k) {
-				case BUTTON_SELECT:
-					switch (currentMenuState) {
-						case MENU_NONE:
-							if (menuSelect == 0) {
-								currentMenuState = MENU_LOAD;
-							} else {
-								currentMenuState = MENU_SAVE;
-							}
-							break;
-						case MENU_LOAD:
-							if (menuSelect == 0) {
-								currentMenuState = MENU_LOAD_INTERNAL_BANK;
-							} else {
-								currentMenuState = MENU_LOAD_USER_BANK;
-							}
-							break;
-						case MENU_SAVE:
-							// save menuSelect bank
-							break;
-						case MENU_LOAD_INTERNAL_BANK:
-							// load internal bank
-							break;
-						case MENU_LOAD_USER_BANK:
-							// load internal bank
-							break;
-						default:
-							break;
-					}
-					menuSelect = 0;
-					break;
-				case BUTTON_BACK:
-					switch (currentMenuState) {
-						case MENU_SAVE:
-							menuSelect = 1;
-							currentMenuState = MENU_NONE;
-							break;
-						case MENU_LOAD:
-							menuSelect = 0;
-							currentMenuState = MENU_NONE;
-							break;
-						case MENU_LOAD_INTERNAL_BANK:
-						case MENU_LOAD_USER_BANK:
-							menuSelect = 0;
-							currentMenuState = MENU_LOAD;
-							break;
-						default:
-							break;
-					}
-					break;
-				case BUTTON_DUMP:
-				{
-					SerialUSB.println("New Sound....");
-					dumpLine(synthStatus.state->engine.algo, synthStatus.state->engine.modulationIndex1, synthStatus.state->engine.modulationIndex2, synthStatus.state->engine.modulationIndex3 );
-					Oscillator * o = (Oscillator *)(&(synthStatus.state->osc1));
-					for (int k=0; k<4; k++) {
-						dumpLine(o[k].shape, o[k].frequencyType, o[k].frequencyMul, o[k].detune);
-					}
-					Envelope * e = (Envelope*)(&(synthStatus.state->env1));
-					for (int k=0; k<4; k++) {
-						dumpLine(e[k].attack, e[k].decay, e[k].sustain, e[k].release);
-					}
-					MatrixRowState* m = (MatrixRowState*)(&(synthStatus.state->matrixRowState1));
-					for (int k=0; k<6; k++) {
-						dumpLine(m[k].source, m[k].mul, m[k].destination, 0);
-					}
-					LfoState* l = (LfoState*)(&(synthStatus.state->lfo1));
-					for (int k=0; k<4; k++) {
-						dumpLine(l[k].shape, l[k].freq, 0, 0);
-					}
-					SerialUSB.println("\"SoundName\"");
-					break;
-				}
-				case BUTTON_MENU:
-					menuMode = !menuMode;
-					changedMenuMode = true;
-					break;
-				}
-				newRow = true;
-			}
-			buttonOldState[k] = b1;
-		}
-
-	}
-
- */
-
+}
