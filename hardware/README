@@ -1,0 +1,21 @@
+I invented really nothing in the hardware area.
+So thanks to mibox.org (ucapps.de) and sparkfun for providing all the hardware information i use.
+
+. The LCD wiring is a classic HD44780 one :
+http://www.ucapps.de/mbhp_lcd.html
+
+. Same thing for the EEPROM :
+http://www.ucapps.de/mbhp_bankstick.html
+
+. And also for the Encoder and buttons :
+http://www.ucapps.de/mbhp_din.html
+
+. The midi comes from sparkfun, schematic here :
+http://www.sparkfun.com/products/9595
+
+. And the filter is a 1st order regular RC filter.
+http://en.wikipedia.org/wiki/Low-pass_filter
+
+Xavier
+
+
