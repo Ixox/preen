@@ -41,11 +41,26 @@ void Voice::init(Matrix* matrix, Env<1>*env1, Env<2>*env2, Env<3>*env3, Env<4>*e
 	this->osc4 = osc4;
 	this->matrix = matrix;
 	this->playing = false;
+
+	this->newNotePending = false;
 }
 
 
-void Voice::noteOn(short note, char velocity, unsigned int index) {
+void Voice::noteOnWithoutPop(short note, char velocity, unsigned int index) {
+		this->nextNote = note;
+		this->nextVelocity = velocity;
+		// Update index : so that few change to be choosen again during the quick dying
+		this->index = index;
 
+		this->newNotePending = true;
+
+		env1->noteOffQuick(envState1);
+		env2->noteOffQuick(envState2);
+		env3->noteOffQuick(envState3);
+		env4->noteOffQuick(envState4);
+}
+
+void Voice::noteOn(short note, char velocity, unsigned int index) {
 	osc1->newNote(oscState1, note);
 	osc2->newNote(oscState2, note);
 	osc3->newNote(oscState3, note);
@@ -60,7 +75,6 @@ void Voice::noteOn(short note, char velocity, unsigned int index) {
 	this->note = note;
 	this->index = index;
 	this->velocity = velocity;
-
 }
 
 void Voice::noteOff() {

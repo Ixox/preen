@@ -48,15 +48,16 @@ Synth::~Synth(void)
 void Synth::noteOn(char note, char velocity) {
 	int freeNote = -1;
 	for (int k=0; k<NUMBER_OF_VOICES && freeNote==-1; k++) {
-		if (!voices[k].isPlaying() || voices[k].getNote()==note) {
+		if (!voices[k].isPlaying()) {
 			freeNote = k;
 		}
 	}
-	// If no free note, take the older one
-	if (freeNote==-1) {
+	if (freeNote >= 0) {
+		voices[freeNote].noteOn(note, velocity, voiceIndex++);
+	} else {
 		unsigned int indexMin =  4294967295;
 		for (int k=0; k<NUMBER_OF_VOICES; k++) {
-			if (voices[k].isReleased()) {
+			if (voices[k].getNote()==note || voices[k].isReleased()) {
 				indexMin = 0;
 				freeNote = k;
 			}
@@ -65,8 +66,8 @@ void Synth::noteOn(char note, char velocity) {
 				freeNote = k;
 			}
 		}
+		voices[freeNote].noteOnWithoutPop(note, velocity, voiceIndex++);
 	}
-	voices[freeNote].noteOn(note, velocity, voiceIndex++);
 }
 
 void Synth::noteOff(char note) {

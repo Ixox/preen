@@ -119,8 +119,9 @@ void FMDisplay::drawMenu() {
 		lcd->setCursor(0, 1);
 		lcd->print(">Internal< User");
 		lcd->setCursor(0, 3);
-		lcd->print(" Preset ");
 		lcd->print(synthState.getMenuSelect());
+		lcd->print(" - ");
+		lcd->print(presets[synthState.getMenuSelect()].presetName);
 		break;
 	case MENU_LOAD_USER_BANK:
 		lcd->clear();

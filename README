@@ -10,7 +10,7 @@
                                             
 V0.0 pre alpha
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-28 February 2011
+March 8th 2011
 
 -----------------------------------------
 Frequency modulation synth for the Maple :
@@ -40,6 +40,9 @@ Preen Current Features:
 
 --------------------------------------------
 DONE
+Update March 8th 2011
+. Removed click when all the voices are buisy and a 6th note arrive...
+. Remove click when a same note is hit quickly several time.
 
 Update March 6th 2011
 . Refactoring :
@@ -71,7 +74,6 @@ To do before v0.1 (in no order) :
 	. Read CC to change parameters
 	. send CC when user move encoders
 . Clean hardware design
-. Remove click when all the voices are buisy and a 6th note arrive...(Remove click when a same note is hit quickly several time)
 . Hide parameters not used by the current ALGO.
 
 Later V1.0 : 

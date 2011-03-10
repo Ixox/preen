@@ -39,6 +39,7 @@ public:
 		return currentSample;
 	}
 
+
 	void nextSample() {
 		if (playing) {
 			switch (synthState.params.engine.algo) {
@@ -68,7 +69,7 @@ public:
 
 
 				if (env1->isDead(envState1)) {
-					playing = false;
+					endNoteOfBeginNextOne();
 				}
 				break;
 				}
@@ -100,7 +101,7 @@ public:
 				currentSample *= velocity;
 				currentSample >>=8; // >>7 >> 1(we added 2 samples)
 				if (env1->isDead(envState1) && env2->isDead(envState2)) {
-					playing = false;
+					endNoteOfBeginNextOne();
 				}
 				}
 				break;
@@ -130,7 +131,7 @@ public:
 				currentSample >>=7;
 				}
 				if (env1->isDead(envState1)) {
-					playing = false;
+					endNoteOfBeginNextOne();
 				}
 				break;
 			case ALGO4:
@@ -154,8 +155,16 @@ public:
 		IM3 = synthState.params.engine.modulationIndex3 + (matrix->getDestination(INDEX_MODULATION3)>>4);
 	}
 
+	void endNoteOfBeginNextOne() {
+		if (newNotePending) {
+			noteOn(nextNote, nextVelocity, index);
+			this->newNotePending = false;
+		} else {
+			playing = false;
+		}
+	}
 
-
+	void noteOnWithoutPop(short note, char velocity, unsigned int index);
 	void noteOn(short note, char velocity, unsigned int index);
 	void noteOff();
 
@@ -169,6 +178,7 @@ private:
 	int frequency;
 	bool released;
 	bool playing;
+
 	unsigned int index;
 	char note;
 	char velocity;
@@ -178,10 +188,10 @@ private:
 	// optimization
 	static int IM1, IM2, IM3;
 
-	EnvState envState1;
-	EnvState envState2;
-	EnvState envState3;
-	EnvState envState4;
+	EnvData envState1;
+	EnvData envState2;
+	EnvData envState3;
+	EnvData envState4;
 
 	OscState oscState1;
 	OscState oscState2;
@@ -196,6 +206,13 @@ private:
 	Env<2>* env2;
 	Env<3>* env3;
 	Env<4>* env4;
+
+	// Fixing the "plop" when all notes are buisy...
+	bool newNotePending;
+	char nextNote;
+	char nextVelocity;
+	unsigned int nextIndex;
+
 };
 
 #endif

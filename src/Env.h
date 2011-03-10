@@ -19,15 +19,23 @@
 
 #include "SynthState.h"
 
-struct EnvState {
+
+enum EnvState {
+	ENV_STATE_ON_A = 0,
+	ENV_STATE_ON_D,
+	ENV_STATE_ON_S,
+	ENV_STATE_ON_R,
+	ENV_STATE_QUICK_OFF,
+	ENV_STATE_DEAD
+};
+
+struct EnvData {
 	// life cycle of the env
 	int index;
 	// Higher sample before release
 	int releaseSample;
-	// Is the note still playing
-	bool noteon;
-	// Is the env available.. the release is finished
-	bool dead;
+	// State of the env
+	EnvState envState;
 };
 
 
@@ -50,46 +58,66 @@ public:
 		release = envState->release * envState->release;
 	}
 
-	int getAmp(struct EnvState& env) {
-		if (env.dead) {
+	int getAmp(struct EnvData& env) {
+		switch (env.envState) {
+		case ENV_STATE_DEAD:
 			return 0;
-		}
-		if (env.noteon) {
-			if (env.index<attack) {
-				return (env.index << 15) / attack;
-			} else if (env.index < (attack+decay)) {
-				int index2 = env.index - attack;
-				return (((decay - index2) << 15) +  index2 * sustain ) / decay;
-			} else  {
-				return sustain;
-			}
-		} else {
-			if (env.index< release) {
-				return env.releaseSample - env.index * env.releaseSample / release;
+			break;
+		case ENV_STATE_QUICK_OFF:
+			if (env.index < 32) {
+				return env.releaseSample - ((env.index * env.releaseSample) >> 5);
 			} else {
-				env.dead = true;
+				env.envState = ENV_STATE_DEAD;
 				return 0;
 			}
+			break;
+		case ENV_STATE_ON_A:
+			if (env.index<attack) {
+				return (env.index << 15) / attack;
+			}
+			env.index = 0;
+			env.envState = ENV_STATE_ON_D;
+			// No break go to next state
+		case ENV_STATE_ON_D:
+			if (env.index <  decay) {
+				return (((decay - env.index) << 15) +  env.index * sustain ) / decay;
+			}
+			// No break go to next state
+			env.envState = ENV_STATE_ON_S;
+		case ENV_STATE_ON_S:
+			return sustain;
+		case ENV_STATE_ON_R:
+			if (env.index< release) {
+				return env.releaseSample - env.index * env.releaseSample / release;
+			}
+			env.envState = ENV_STATE_DEAD;
 		}
+		return 0;
 	}
 
-	void noteOn(struct EnvState& env) {
-		env.dead = false;
+	void noteOn(struct EnvData& env) {
+		env.envState = ENV_STATE_ON_A;
 		env.index = 0;
-		env.noteon = true;
 	}
 
-	void noteOff(struct EnvState& env) {
+	void noteOffQuick(struct EnvData& env) {
 		env.releaseSample = this->getAmp(env);
-		env.noteon = false;
+		env.envState = ENV_STATE_QUICK_OFF;
 		env.index = 0;
 	}
 
-	static void nextSample(struct EnvState& env) {
+
+	void noteOff(struct EnvData& env) {
+		env.releaseSample = this->getAmp(env);
+		env.envState = ENV_STATE_ON_R;
+		env.index = 0;
+	}
+
+	static void nextSample(struct EnvData& env) {
 		env.index++;
 	}
-	static bool isDead(struct EnvState& env) {
-		return env.dead;
+	static bool isDead(struct EnvData& env) {
+		return env.envState == ENV_STATE_DEAD;
 	}
 
 private:

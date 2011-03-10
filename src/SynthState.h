@@ -56,8 +56,8 @@ enum Algorithm {
 	ALGO1 = 0,
 	ALGO2,
 	ALGO3,
-	ALGO4,
-	ALGO_END
+	ALGO_END,
+	ALGO4
 };
 
 enum OscShape {
@@ -290,7 +290,7 @@ private:
 // Global structure used all over the code
 extern struct AllParameterRowsDisplay allParameterRows;
 extern SynthState	synthState;
-
+extern struct AllSynthParams presets[];
 
 
 #endif /* SYNTHSTATUS_H_ */
