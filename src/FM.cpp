@@ -24,7 +24,7 @@
 #include "MidiDecoder.h"
 #include "Encoders.h"
 
-#define AUDIO_PIN    7
+#define AUDIO_PIN    8
 
 SynthState		   synthState;
 Synth              synth;
@@ -55,12 +55,13 @@ void setup()
     lcd.print("IxOx FM Synth V0.1");
 
 
-    encoders.insertListener(&fmDisplay);
-	// synthStatus must be called before display so we add it after
+	// synthstate is updated by encoder change
     encoders.insertListener(&synthState);
 
-    // Synth must reassigned
-    synthState.insertListener(&synth);
+    // fmDisplay and synth needs to be aware of synthState changes
+    synthState.insertParamListener(&fmDisplay);
+    synthState.insertMenuListener(&fmDisplay);
+    synthState.insertParamListener(&synth);
 
 
 	midiDecoder.setSynth(&synth);
@@ -81,7 +82,7 @@ void setup()
 	Timer1.setChannel1Mode(TIMER_OUTPUTCOMPARE);
 	Timer1.attachCompare1Interrupt(IRQSendSample);
 
-	Timer1.setChannel2Mode(TIMER_PWM);
+	Timer1.setChannel3Mode(TIMER_PWM);
 	pinMode(AUDIO_PIN, PWM);
 
 	Timer1.resume();

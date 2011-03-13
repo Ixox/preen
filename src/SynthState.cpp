@@ -28,10 +28,10 @@ struct ParameterRowDisplay engineParameterRow= {
 		"Engine" ,
 		{ "Algo", "IM1 ", "IM2 ", "IM3 " },
 		{
-					{ALGO1, ALGO_END-1, algoNames},
-					{0, 255, nullNames },
-					{0, 255, nullNames },
-					{0, 255, nullNames }
+					{ALGO1, ALGO_END-1, DISPLAY_TYPE_STRINGS, algoNames},
+					{0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames },
+					{0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames },
+					{0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames }
 		}
 };
 
@@ -41,10 +41,10 @@ struct ParameterRowDisplay oscParameterRow = {
 		"Oscillator",
 		{ "Shap", "FTyp", "Freq", "FTun" },
 		{
-					{ OSC_SHAPE_SIN, OSC_SHAPE_OFF, oscShapeNames },
-					{ OSC_FT_KEYBOARD, OSC_FT_FIXE, oscTypeNames },
-					{ 0, 127, nullNames },
-					{ (char)-127, 127, nullNames }
+					{ OSC_SHAPE_SIN, OSC_SHAPE_OFF, DISPLAY_TYPE_STRINGS, oscShapeNames },
+					{ OSC_FT_KEYBOARD, OSC_FT_FIXE, DISPLAY_TYPE_STRINGS, oscTypeNames },
+					{ 0, 128, DISPLAY_TYPE_FLOAT_4_4 , nullNames },
+					{ (char)-127, 127, DISPLAY_TYPE_SIGNED_CHAR, nullNames }
 		}
 };
 
@@ -52,10 +52,10 @@ struct ParameterRowDisplay envParameterRow = {
 		"Enveloppe",
 		{ "Attk", "Rele", "Sust", "Deca" },
 		{
-					{ 0, 255, nullNames },
-					{ 0, 255, nullNames },
-					{ 0, 255, nullNames },
-					{ 0, 255, nullNames }
+					{ 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
+					{ 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
+					{ 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
+					{ 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames }
 		}
 };
 
@@ -66,10 +66,10 @@ struct ParameterRowDisplay matrixParameterRow = {
 		"Matrix",
 		{ "Srce", "Mult", "Dest", "    " },
 		{
-					{ SOURCE_NONE, SOURCE_MAX-1, matrixSourceNames},
-					{ (char)-127, 127, nullNames },
-					{ DESTINATION_NONE, DESTINATION_MAX-1, matrixDestNames},
-					{ 0, 0, nullNames }
+					{ SOURCE_NONE, SOURCE_MAX-1, DISPLAY_TYPE_STRINGS, matrixSourceNames},
+					{ (char)-127, 127, DISPLAY_TYPE_SIGNED_CHAR, nullNames },
+					{ DESTINATION_NONE, DESTINATION_MAX-1, DISPLAY_TYPE_STRINGS, matrixDestNames},
+					{ 0, 0, DISPLAY_TYPE_NONE, nullNames }
 		}
 };
 
@@ -79,10 +79,10 @@ struct ParameterRowDisplay lfoParameterRow = {
 		"LFO",
 		{ "Shap", "Freq", "    ", "    " },
 		{
-					{ LFO_SAW, LFO_TYPE_MAX-1, lfoShapeNames},
-					{ 0, 255, nullNames },
-					{ 0, 0, nullNames },
-					{ 0, 0, nullNames }
+					{ LFO_SAW, LFO_TYPE_MAX-1, DISPLAY_TYPE_STRINGS,  lfoShapeNames},
+					{ 0, 255, DISPLAY_TYPE_FLOAT_4_4, nullNames },
+					{ 0, 0, DISPLAY_TYPE_NONE, nullNames },
+					{ 0, 0, DISPLAY_TYPE_NONE, nullNames }
 		}
 };
 
@@ -223,17 +223,17 @@ SynthState::SynthState() {
 	matrixRow = 9;
 	lfoRow = 15;
 	// First default preset
-	editMode = MODE_EDIT;
+	fullState.synthMode = SYNTH_MODE_EDIT;
 	currentRow = 0;
 	// enable the i2c bus
 	for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
 		((char*)&params)[k] = ((char*)presets)[k];
 	}
-	Wire.begin(2, 3);
+    i2c_master_enable(I2C1, 0);
 }
 
 void SynthState::incParameter(int encoder) {
-	if (editMode == MODE_EDIT) {
+	if (fullState.synthMode == SYNTH_MODE_EDIT) {
 		int num = currentRow * NUMBER_OF_ENCODERS + encoder;
 		struct ParameterDisplay* param = &(allParameterRows.row[currentRow]->params[encoder]);
 		int newValue;
@@ -255,33 +255,33 @@ void SynthState::incParameter(int encoder) {
 		}
 
 		if (newValue != oldValue) {
-			for (SynthParamListener* listener = firstListener; listener !=0; listener = listener->nextListener) {
-				SynthParamListenerType listenerType = getListenerType(currentRow);
-				if (listener->getListenerType() == listenerType) {
-					listener->newParamValue(getListenerType(currentRow), encoder, oldValue, newValue);
-				}
-			}
+			propagateNewParamValue(currentRow, encoder, oldValue, newValue);
 		}
 	} else {
-		if (currentMenuState == MENU_LOAD_INTERNAL_BANK) {
-			if (menuSelect< INTERNAL_LAST_BANK) {
-				menuSelect = menuSelect + 1;
+		int oldMenuSelect = fullState.menuSelect;
+		if (fullState.currentMenuState == MENU_LOAD_INTERNAL_BANK) {
+			if (fullState.menuSelect< INTERNAL_LAST_BANK) {
+				fullState.menuSelect = fullState.menuSelect + 1;
+				copyPatch((char*)&presets[fullState.menuSelect], (char*)&params);
 			}
-		} else if (currentMenuState == MENU_NONE || currentMenuState == MENU_LOAD) {
-			if (menuSelect<1) {
-				menuSelect = menuSelect + 1;
+		} else if (fullState.currentMenuState == MENU_NONE || fullState.currentMenuState == MENU_LOAD) {
+			if (fullState.menuSelect<1) {
+				fullState.menuSelect = fullState.menuSelect + 1;
 			}
 		} else {
-			if (menuSelect<255) {
-				menuSelect = menuSelect + 1;
+			if (fullState.menuSelect<255) {
+				fullState.menuSelect = fullState.menuSelect + 1;
 			}
+		}
+		if (fullState.menuSelect != oldMenuSelect) {
+			propagateNewMenuSelect();
 		}
 	}
 
 }
 
 void SynthState::decParameter(int encoder) {
-	if (editMode == MODE_EDIT) {
+	if (fullState.synthMode == SYNTH_MODE_EDIT) {
 		int num = currentRow * NUMBER_OF_ENCODERS + encoder;
 		struct ParameterDisplay* param = &(allParameterRows.row[currentRow]->params[encoder]);
 		int newValue;
@@ -302,29 +302,38 @@ void SynthState::decParameter(int encoder) {
 			newValue = value;
 		}
 		if (newValue != oldValue) {
-			for (SynthParamListener* listener = firstListener; listener !=0; listener = listener->nextListener) {
-				SynthParamListenerType listenerType = getListenerType(currentRow);
-				if (listener->getListenerType() == listenerType) {
-					listener->newParamValue(getListenerType(currentRow), encoder, oldValue, newValue);
-				}
-			}
+			propagateNewParamValue(currentRow, encoder, oldValue, newValue);
 		}
 	} else {
-		if (currentMenuState == MENU_NONE || currentMenuState == MENU_LOAD) {
-			if (menuSelect>0) {
-				menuSelect = menuSelect - 1;
-			}
-		} else {
-			if (menuSelect>0) {
-				menuSelect = menuSelect - 1;
-			}
+		int oldMenuSelect = fullState.menuSelect;
+		if (fullState.menuSelect>0) {
+			fullState.menuSelect = fullState.menuSelect - 1;
+		}
+
+		if (MENU_LOAD_INTERNAL_BANK) {
+			copyPatch((char*)&presets[fullState.menuSelect], (char*)&params);
+		}
+		if (fullState.menuSelect != oldMenuSelect) {
+			propagateNewMenuSelect();
 		}
 	}
 }
 
+void SynthState::copyPatch(char* source, char* dest) {
+	for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
+		dest[k] = source[k];
+	}
+}
+
+
 
 void SynthState::buttonPressed(int button) {
-	if (editMode == MODE_EDIT)  {
+	SynthMode oldSynthMode = fullState.synthMode;
+	int oldCurrentRow = currentRow;
+	int oldMenuSelect = fullState.menuSelect;
+	MenuState oldMenuState = fullState.currentMenuState;
+
+	if (fullState.synthMode == SYNTH_MODE_EDIT)  {
 		switch (button) {
 		case BUTTON_SYNTH:
 			currentRow = 0;
@@ -373,60 +382,66 @@ void SynthState::buttonPressed(int button) {
 			}
 			break;
 		case BUTTON_MENU:
-			editMode = MODE_MENU;
-			currentMenuState = MENU_NONE;
-			menuSelect = 0;
+			fullState.synthMode = SYNTH_MODE_MENU;
+			fullState.currentMenuState = MENU_NONE;
+			fullState.menuSelect = 0;
+			// allow undo event after trying some patches
+			copyPatch((char*)&params, (char*)&backupParams);
 			break;
 		}
 	} else {
+
 		switch (button) {
 		case BUTTON_SELECT:
-			switch (currentMenuState) {
+			switch (fullState.currentMenuState) {
 				case MENU_NONE:
-					if (menuSelect == 0) {
-						currentMenuState = MENU_LOAD;
+					if (fullState.menuSelect == 0) {
+						fullState.currentMenuState = MENU_LOAD;
 					} else {
-						currentMenuState = MENU_SAVE;
+						fullState.currentMenuState = MENU_SAVE;
 					}
-					menuSelect = 0;
+					fullState.menuSelect = 0;
 					break;
 				case MENU_LOAD:
-					if (menuSelect == 0) {
-						currentMenuState = MENU_LOAD_INTERNAL_BANK;
+					if (fullState.menuSelect == 0) {
+						fullState.currentMenuState = MENU_LOAD_INTERNAL_BANK;
+						// Load first patch
+						copyPatch((char*)&presets[0], (char*)&params);
 					} else {
-						currentMenuState = MENU_LOAD_USER_BANK;
+						fullState.currentMenuState = MENU_LOAD_USER_BANK;
 					}
-					menuSelect = 0;
+					fullState.menuSelect = 0;
 					break;
 				case MENU_SAVE:
-					pruneToEEPROM(menuSelect);
+					pruneToEEPROM(fullState.menuSelect);
 					break;
 				case MENU_LOAD_INTERNAL_BANK:
-					for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
-						((char*)&params)[k] = ((char*)(&presets[menuSelect]))[k];
-					}
+					fullState.synthMode = SYNTH_MODE_EDIT;
+					// without putting back old patch...
 					break;
 				case MENU_LOAD_USER_BANK:
-					readFromEEPROM(menuSelect);
+					readFromEEPROM(fullState.menuSelect);
 					break;
 				default:
 					break;
 			}
 			break;
 		case BUTTON_BACK:
-			switch (currentMenuState) {
+			switch (fullState.currentMenuState) {
 				case MENU_SAVE:
-					menuSelect = 1;
-					currentMenuState = MENU_NONE;
+					fullState.menuSelect = 1;
+					fullState.currentMenuState = MENU_NONE;
 					break;
 				case MENU_LOAD:
-					menuSelect = 0;
-					currentMenuState = MENU_NONE;
+					fullState.menuSelect = 0;
+					fullState.currentMenuState = MENU_NONE;
 					break;
 				case MENU_LOAD_INTERNAL_BANK:
 				case MENU_LOAD_USER_BANK:
-					menuSelect = 0;
-					currentMenuState = MENU_LOAD;
+					fullState.menuSelect = 0;
+					fullState.currentMenuState = MENU_LOAD;
+					// put back old patch (has been overwritten if a new patch has been loaded)
+					copyPatch((char*)&backupParams, (char*)&params);
 					break;
 				default:
 					break;
@@ -456,53 +471,74 @@ void SynthState::buttonPressed(int button) {
 			break;
 		}
 		case BUTTON_MENU:
-			editMode = MODE_EDIT;
+			fullState.synthMode = SYNTH_MODE_EDIT;
+			// put back old patch (has been overwritten if a new patch has been loaded)
+			copyPatch((char*)&backupParams, (char*)&params);
+
 			break;
 		}
 
 		// MENU MODE
 	}
+	if (oldSynthMode != fullState.synthMode) {
+		propagateNewSynthMode();
+	}
+	if (oldCurrentRow != currentRow) {
+		propagateNewCurrentRow(currentRow);
+	}
+	if (oldMenuSelect != fullState.menuSelect) {
+		propagateNewMenuSelect();
+	}
+	if (oldMenuState != fullState.currentMenuState) {
+		propagateNewMenuState();
+	}
 }
 
 
-extern LiquidCrystal lcd;
+
 void SynthState::pruneToEEPROM(int preset) {
-	int deviceaddress = 0x50;
-	unsigned int eeaddress = preset * 128;
-	eeaddress = 0;
+//	uint8 deviceaddress = 0x50;
+	uint8 deviceaddress = 0b1010000;
+	i2c_msg msgs[2];
 
-//or (unsigned int k=0; k<sizeof(struct SynthState); k++) {
-	    Wire.beginTransmission(deviceaddress);
-	    Wire.send((int)(eeaddress >> 8)); // MSB
-	    Wire.send((int)(eeaddress & 0xFF)); // LSB
-	    Wire.send(((uint8*)&params), 32);
-	    Wire.endTransmission();
-	    delay(10);
-	    eeaddress++;
-//	}
+	uint8 toSend[32];
+	toSend[0] = 0;
+	toSend[1] = 0;
+
+	for (unsigned int k=0; k<30; k++) {
+		 toSend[k+2] = ((char*)&params)[k];
+	}
+
+    msgs[0].addr = deviceaddress;
+    msgs[0].flags = 0;
+    msgs[0].length = 32;
+    msgs[0].data = toSend;
+
+    i2c_master_xfer(I2C1, msgs, 1);
+    delay(5);
+
 }
 
+
+static const uint8 slave_address = 0b1010000;
 
 void SynthState::readFromEEPROM(int preset) {
-	int deviceaddress = 0x50;
-	int eeaddress = preset * 128;
-	eeaddress = 0;
+	//uint8 deviceaddress = 0x50;
+	uint8 deviceaddress = 0b1010000;
+	uint8 address[] = {0x0, 0x0};
+	i2c_msg msgs[2];
 
-//	for (unsigned int k=0; k<sizeof(struct SynthState); k++) {
-		Wire.beginTransmission(deviceaddress);
-		Wire.send((int)(eeaddress >> 8)); // MSB
-		Wire.send((int)(eeaddress & 0xFF)); // LSB
-		Wire.endTransmission();
-		Wire.requestFrom(eeaddress,32);
-		delay(10);
-		for (int k=0; k<32; k++) {
-			if (Wire.available()) {
-				((char*)&params)[k]= Wire.receive();
-			}
-		}
-		delay(10);
-		eeaddress++;
-//
+	/* Write slave address to read */
+    msgs[0].addr = deviceaddress;
+    msgs[0].flags = 0;
+    msgs[0].length = 2;
+    msgs[0].data = address;
 
+    /* Repeated start condition, then read NR_ELEMENTS bytes back */
+    msgs[1].addr = deviceaddress;
+    msgs[1].flags = I2C_MSG_READ;
+    msgs[1].length = 30;
+    msgs[1].data = (uint8*)&params;
+    i2c_master_xfer(I2C1, msgs, 2);
 
 }

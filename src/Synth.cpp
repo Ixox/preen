@@ -35,8 +35,6 @@ Synth::Synth(void)
 	for (int k=0; k<NUMBER_OF_VOICES; k++) {
 		voices[k].init(&this->matrix, &this->env1, &this->env2, &this->env3, &this->env4, &this->osc1, &this->osc2, &this->osc3, &this->osc4);
 	}
-	setListenerType(SYNTH_PARAM_ENVELOPE_LISTENER);
-
 }
 
 

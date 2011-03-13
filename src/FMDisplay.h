@@ -20,17 +20,19 @@
 
 
 #include "SynthState.h"
+#include "LiquidCrystal.h"
 
-
-class FMDisplay : public EncodersListener {
+class FMDisplay : public SynthParamListener, public SynthMenuListener {
 public:
 	FMDisplay();
 	~FMDisplay();
 	void init(LiquidCrystal* lcd);
 
-	void drawMenu();
+	void drawMenu(FullState* fullState);
 	inline void updateEncoderValue(int row, int encoder);
 	inline void updateEncoderName(int row, int encoder);
+	inline void printShortValue(short value);
+
 	int getLength(const char *str) {
 		int length = 0;
 		for (const char *c = str; *c != '\0'; c++) {
@@ -54,9 +56,14 @@ public:
 	void refreshAllScreenByStep();
 	void displayPreset();
 
-	void incParameter(int encoder);
-	void decParameter(int encoder);
-	void buttonPressed(int button);
+
+    void newSynthMode(FullState* fullState) ;
+    void newMenuState(FullState* fullState) ;
+    void newMenuSelect(FullState* fullState);
+
+    void newParamValue(SynthParamListenerType type, int currentRow, int encoder, int oldValue, int newValue);
+    void newcurrentRow(int newcurrentRow);
+
 
 
 private:

@@ -23,8 +23,6 @@
 #include "Env.h"
 
 
-extern LiquidCrystal lcd;
-extern int vvcpt;
 
 class Voice
 {

@@ -53,7 +53,7 @@ public:
 		jmp <<= 12;
 		jmp /= SAMPLE_RATE_x_8;
 		jmp <<= 4;
-		  Every thing canceled if we go 4 times further
+  	        Every thing canceled if we go 4 times further
 		*/
 		oscState.index += jmp;
 		oscState.index &= 0x3ffff;

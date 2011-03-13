@@ -20,10 +20,10 @@
 
 #include "libmaple_types.h"
 #include "wirish.h"
-#include "LiquidCrystal.h"
-#include "Wire.h"
+#include "i2c.h"
 #include "EncodersListener.h"
 #include "SynthParamListener.h"
+#include "SynthMenuListener.h"
 
 #define BUTTON_SYNTH  0
 #define BUTTON_OSC    1
@@ -36,15 +36,6 @@
 #define BUTTON_SELECT 4
 #define BUTTON_BACK   3
 #define BUTTON_DUMP   0
-
-enum MenuState {
-	MENU_NONE = 0,
-	MENU_LOAD,
-	MENU_SAVE,
-	MENU_LOAD_INTERNAL_BANK,
-	MENU_LOAD_USER_BANK,
-	MENU_SAVE_PRESET
-};
 
 
 #define NUMBER_OF_ENCODERS 4
@@ -172,9 +163,19 @@ struct AllSynthParams {
 
 // Display information
 
+enum ParameterDisplayType {
+	DISPLAY_TYPE_NONE = 0,
+	DISPLAY_TYPE_SIGNED_CHAR,
+	DISPLAY_TYPE_UNSIGNED_CHAR,
+	DISPLAY_TYPE_STRINGS,
+	DISPLAY_TYPE_FLOAT_5_3,
+	DISPLAY_TYPE_FLOAT_4_4
+};
+
 struct ParameterDisplay {
 	char minValue;
 	unsigned char maxValue;
+	ParameterDisplayType displayType;
 	const char** valueName;
 };
 
@@ -199,11 +200,6 @@ enum PresetBank {
 	BANK_USER
 };
 
-enum EditMode {
-	MODE_EDIT,
-	MODE_MENU
-};
-
 
 class SynthState : public EncodersListener {
 public:
@@ -226,13 +222,12 @@ public:
 		return SYNTH_PARAM_INVALID_LISTENER;
 	}
 
+	void copyPatch(char* source, char* dest);
+
 	void buttonPressed(int number);
 
 	int getCurrentRow() {
 		return currentRow;
-	}
-	EditMode getEditMode() {
-		return editMode;
 	}
 
 	void setBank(PresetBank bank) {
@@ -254,21 +249,50 @@ public:
 		SerialUSB.println(", ");
 	}
 
-	MenuState getMenuState() {
-		return currentMenuState;
-	}
 
-	int getMenuSelect() {
-		return menuSelect;
-	}
-
-	void insertListener(SynthParamListener *listener) {
-		if (firstListener!=0) {
-			listener->nextListener = firstListener;
+	void insertParamListener(SynthParamListener *listener) {
+		if (firstParamListener!=0) {
+			listener->nextListener = firstParamListener;
 		}
-		firstListener = listener;
+		firstParamListener = listener;
 	}
 
+	void insertMenuListener(SynthMenuListener *listener) {
+		if (firstMenuListener!=0) {
+			listener->nextListener = firstMenuListener;
+		}
+		firstMenuListener = listener;
+	}
+
+	void propagateNewSynthMode() {
+		for (SynthMenuListener* listener = firstMenuListener; listener !=0; listener = listener->nextListener) {
+			listener->newSynthMode(&fullState);
+		}
+	}
+
+	void propagateNewMenuState() {
+		for (SynthMenuListener* listener = firstMenuListener; listener !=0; listener = listener->nextListener) {
+			listener->newMenuState(&fullState);
+		}
+	}
+
+	void propagateNewMenuSelect() {
+		for (SynthMenuListener* listener = firstMenuListener; listener !=0; listener = listener->nextListener) {
+			listener->newMenuSelect(&fullState);
+		}
+	}
+
+	void propagateNewParamValue(int currentRow, int encoder, int oldValue, int newValue) {
+		for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
+			listener->newParamValue(getListenerType(currentRow), currentRow, encoder, oldValue, newValue);
+		}
+	}
+
+	void propagateNewCurrentRow(int newCurrentRow) {
+		for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
+			listener->newcurrentRow(newCurrentRow);
+		}
+	}
 
 	struct AllSynthParams params;
 
@@ -279,12 +303,11 @@ private:
 	int oscRow, envRow, matrixRow, lfoRow;
 	int currentRow;
 
-	EditMode editMode;
+	FullState fullState;
 
-	MenuState currentMenuState;
-	int menuSelect;
-
-	SynthParamListener* firstListener;
+	SynthParamListener* firstParamListener;
+	SynthMenuListener* firstMenuListener;
+	struct AllSynthParams backupParams;
 };
 
 // Global structure used all over the code

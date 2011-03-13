@@ -40,6 +40,10 @@ Preen Current Features:
 
 --------------------------------------------
 DONE
+Update March 13th 2011
+. Several types of parameter display : fixed point decimal supported
+. Load internal preset can be listen while browsing and cancelled if not really loaded
+
 Update March 8th 2011
 . Removed click when all the voices are buisy and a 6th note arrive...
 . Remove click when a same note is hit quickly several time.
@@ -57,11 +61,6 @@ Update March 5th 2011
 
 --------------------------------------------
 
-In progress: 
-. Use a 4*20 LCD instead of current 2*20... Cheap and usefull.
-. (More) Presets in FLASH
-. Write a synth menu (patch name... midi channel...)
-
 
 To do before v0.1 (in no order) :
 . Number of voices depenndent of the algo
@@ -75,6 +74,7 @@ To do before v0.1 (in no order) :
 	. send CC when user move encoders
 . Clean hardware design
 . Hide parameters not used by the current ALGO.
+
 
 Later V1.0 : 
 . a nice PCB and a Box

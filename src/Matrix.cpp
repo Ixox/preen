@@ -27,6 +27,8 @@ Matrix::~Matrix() {
 }
 
 void Matrix::reinitUsage(int param, int oldValue, int newValue) {
+	//
+
 	int k = param % NUMBER_OF_ENCODERS;
 	// Source
 	if (k==0) {

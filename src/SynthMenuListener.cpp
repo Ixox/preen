@@ -16,28 +16,12 @@
  */
 
 
-#ifndef SYNTHPARAMLISTENER_H_
-#define SYNTHPARAMLISTENER_H_
+#include "SynthMenuListener.h"
 
-enum SynthParamListenerType {
-	SYNTH_PARAM_ENGINE_LISTENER = 0,
-	SYNTH_PARAM_OSCILLATOR_LISTENER,
-	SYNTH_PARAM_ENVELOPE_LISTENER,
-	SYNTH_PARAM_MATRIX_LISTENER,
-	SYNTH_PARAM_LFO_LISTENER,
-	SYNTH_PARAM_INVALID_LISTENER
-};
+SynthMenuListener::SynthMenuListener() {
+}
+
+SynthMenuListener::~SynthMenuListener() {
+}
 
 
-class SynthParamListener {
-public:
-	SynthParamListener();
-	~SynthParamListener();
-
-    virtual void newParamValue(SynthParamListenerType type, int currentrow, int encoder, int oldValue, int newValue) = 0;
-    virtual void newcurrentRow(int newcurrentRow) = 0;
-
-	SynthParamListener* nextListener;
-};
-
-#endif /* SYNTHPARAMLISTENER_H_ */

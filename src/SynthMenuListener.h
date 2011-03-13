@@ -16,28 +16,42 @@
  */
 
 
-#ifndef SYNTHPARAMLISTENER_H_
-#define SYNTHPARAMLISTENER_H_
+#ifndef SYNTHMENULISTENER_H_
+#define SYNTHMENULISTENER_H_
 
-enum SynthParamListenerType {
-	SYNTH_PARAM_ENGINE_LISTENER = 0,
-	SYNTH_PARAM_OSCILLATOR_LISTENER,
-	SYNTH_PARAM_ENVELOPE_LISTENER,
-	SYNTH_PARAM_MATRIX_LISTENER,
-	SYNTH_PARAM_LFO_LISTENER,
-	SYNTH_PARAM_INVALID_LISTENER
+
+enum SynthMode {
+	SYNTH_MODE_EDIT = 0,
+	SYNTH_MODE_MENU
+};
+
+enum MenuState {
+	MENU_NONE = 0,
+	MENU_LOAD,
+	MENU_SAVE,
+	MENU_LOAD_INTERNAL_BANK,
+	MENU_LOAD_USER_BANK,
+	MENU_SAVE_PRESET
+};
+
+struct FullState {
+	SynthMode synthMode;
+	MenuState currentMenuState;
+	int menuSelect;
 };
 
 
-class SynthParamListener {
+class SynthMenuListener {
 public:
-	SynthParamListener();
-	~SynthParamListener();
+	SynthMenuListener();
+	~SynthMenuListener();
 
-    virtual void newParamValue(SynthParamListenerType type, int currentrow, int encoder, int oldValue, int newValue) = 0;
-    virtual void newcurrentRow(int newcurrentRow) = 0;
+    virtual void newSynthMode(FullState* fullState) = 0;
+    virtual void newMenuState(FullState* fullState) = 0;
+    virtual void newMenuSelect(FullState* fullState) = 0;
 
-	SynthParamListener* nextListener;
+
+    SynthMenuListener* nextListener;
 };
 
-#endif /* SYNTHPARAMLISTENER_H_ */
+#endif /* SYNTHMENULISTENER_H_ */

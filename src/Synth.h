@@ -45,16 +45,19 @@ public:
 	int getSample();
 	void nextSample();
 
-	void newParamValue(SynthParamListenerType type, int param, int oldValue, int newValue) {
+	void newParamValue(SynthParamListenerType type, int currentRow, int encoder, int oldValue, int newValue) {
 		if (type == SYNTH_PARAM_ENVELOPE_LISTENER) {
 			env1.loadADSR();
 			env2.loadADSR();
 			env3.loadADSR();
 			env4.loadADSR();
 		} else if (type == SYNTH_PARAM_MATRIX_LISTENER) {
-			matrix.reinitUsage(param, oldValue, newValue);
+			matrix.reinitUsage(encoder, oldValue, newValue);
 		}
 	}
+    void newcurrentRow(int newcurrentRow)  {
+    	// Nothing to do
+    }
 
 private:
 	Matrix matrix;
