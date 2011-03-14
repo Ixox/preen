@@ -35,11 +35,11 @@ public:
 	void nextValue() {
 
 		// then new value
-		//	index = (index +  ((lfo[number].freq << 16) / LFO_SAMPLE_RATE_x_8 ))  & 0xffff;
-		//		int jmp = lfo[number].freq << 3 ; // << 16 >> 13
-		index = (index + (lfo[number].freq << 3)) & 0xffff;
+		//	index = (index +  ((lfo->freq << 16) / LFO_SAMPLE_RATE_x_8 ))  & 0xffff;
+		//		int jmp = lfo->freq << 3 ; // << 16 >> 13
+		index = (index + (lfo->freq << 3)) & 0xffff;
 
-		switch (lfo[number].shape) {
+		switch (lfo->shape) {
 		case LFO_RAMP:
 			matrix->setSource(source, (index>>8)-128);
 			break;

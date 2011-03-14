@@ -30,7 +30,11 @@
 #define HC165_LOAD   10
 
 
-
+enum LastEncoderMove {
+	LAST_MOVE_NONE = 0,
+	LAST_MOVE_INC,
+	LAST_MOVE_DEC
+};
 
 
 struct EncoderStatus {
@@ -53,17 +57,13 @@ public:
 		firstListener = listener;
 	}
 
-	void incEncoder(int num) {
+	void encoderTurned(int num, int ticks) {
 		for (EncodersListener* listener = firstListener; listener !=0; listener = listener->nextListener) {
-			listener->incParameter(num);
+			listener->encoderTurned(num, ticks);
 		}
 	}
 
-	void decEncoder(int num) {
-		for (EncodersListener* listener = firstListener; listener !=0; listener = listener->nextListener) {
-			listener->decParameter(num);
-		}
-	}
+
 
 	void buttonPressed(int num) {
 		for (EncodersListener* listener = firstListener; listener !=0; listener = listener->nextListener) {
@@ -75,6 +75,7 @@ private:
 	bool encoderOldBit1[NUMBER_OF_ENCODERS];
 	int encoderBit1[NUMBER_OF_ENCODERS];
 	int encoderBit2[NUMBER_OF_ENCODERS];
+	LastEncoderMove lastMove[NUMBER_OF_ENCODERS];
 
 	int buttonBit[NUMBER_OF_BUTTONS];
 	bool buttonOldState[NUMBER_OF_BUTTONS];

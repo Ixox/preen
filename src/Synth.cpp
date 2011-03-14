@@ -44,8 +44,13 @@ Synth::~Synth(void)
 
 
 void Synth::noteOn(char note, char velocity) {
+	int numberOfNote = NUMBER_OF_VOICES;
+	if (synthState.params.engine.algo >= ALGO4) {
+		numberOfNote --;
+	}
 	int freeNote = -1;
-	for (int k=0; k<NUMBER_OF_VOICES && freeNote==-1; k++) {
+
+	for (int k=0; k<numberOfNote && freeNote==-1; k++) {
 		if (!voices[k].isPlaying()) {
 			freeNote = k;
 		}
@@ -54,7 +59,7 @@ void Synth::noteOn(char note, char velocity) {
 		voices[freeNote].noteOn(note, velocity, voiceIndex++);
 	} else {
 		unsigned int indexMin =  4294967295;
-		for (int k=0; k<NUMBER_OF_VOICES; k++) {
+		for (int k=0; k<numberOfNote; k++) {
 			if (voices[k].getNote()==note || voices[k].isReleased()) {
 				indexMin = 0;
 				freeNote = k;
@@ -103,21 +108,44 @@ int Synth::getSample() {
 void Synth::nextSample() {
 
 	// step 32 : update lfo1 , step 33 update lfo2 etc....
-	if ((cpt & 0x1c) == 0) {
-		this->lfo[cpt & 3].nextValue();
-	}
+		int step32 = cpt & 0x1f;
+		switch (step32) {
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+				this->lfo[step32].nextValue();
+				break;
+			case 4:
+				this->matrix.resetDestination();
+				break;
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+			case 10:
+				this->matrix.computeFutureDestintation(step32 - 5);
+				break;
+			case 11:
+				this->matrix.useNewValues();
+				break;
+			case 12:
+				// Update static members, can be called a ony voice
+				this->voices[0].updateModulationIndex1();
+				break;
+			case 13:
+				this->voices[0].updateModulationIndex2();
+				break;
+			case 14:
+				this->voices[0].updateModulationIndex3();
+				break;
+			default:
+				break;
 
-	// Update Matrix every 32 steps
-	if ((cpt & 0x1f) == 4) {
-		this->matrix.resetDestination();
-		this->matrix.computeDestintation();
-		// Update static members, can be called a ony voice
-		this->voices[0].updateModulationIndex1();
-		this->voices[0].updateModulationIndex2();
-		this->voices[0].updateModulationIndex3();
-	}
+		}
 
-	// Compute sample
+		// Compute sample
 	for (int k=0; k<NUMBER_OF_VOICES; k++) {
 		this->voices[k].nextSample();
 	}

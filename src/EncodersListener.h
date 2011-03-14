@@ -21,11 +21,7 @@
 
 class EncodersListener {
 public:
-	EncodersListener();
-	~EncodersListener();
-
-	virtual void incParameter(int num) = 0;
-	virtual void decParameter(int num) = 0;
+	virtual void encoderTurned(int num, int ticks) = 0;
 	virtual void buttonPressed(int number) = 0;
 	EncodersListener* nextListener;
 

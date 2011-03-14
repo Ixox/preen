@@ -33,6 +33,7 @@ Encoders::Encoders() {
 		encoderBit1[k] = 1 << encoderPins[k*2];
 		encoderBit2[k] = 1 << encoderPins[k*2 + 1];
 		encoderOldBit1[k] = true;
+		lastMove[k] = LAST_MOVE_NONE;
 	}
 
 	for (int k=0; k<NUMBER_OF_BUTTONS; k++) {
@@ -63,11 +64,15 @@ void Encoders::checkStatus() {
 		bool b1 = ((registerBits & encoderBit1[k]) == 0);
 		if (!encoderOldBit1[k] && b1) {
 			bool b2 = ((registerBits & encoderBit2[k]) == 0);
-			if (b2) {
-				decEncoder(k);
-			} else {
-				incEncoder(k);
+			if (b2 && lastMove[k]!=LAST_MOVE_INC) {
+				encoderTurned(k, -1);
+				lastMove[k] = LAST_MOVE_DEC;
+			} else if (lastMove[k]!=LAST_MOVE_DEC) {
+				encoderTurned(k, 1);
+				lastMove[k] = LAST_MOVE_INC;
 			}
+		} else {
+			lastMove[k] = LAST_MOVE_NONE;
 		}
 		encoderOldBit1[k] = b1;
 	}

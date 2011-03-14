@@ -23,7 +23,7 @@
 // Ex : const char* nullNames [] __attribute__ ((section (".USER_FLASH")))= {};
 // DISPLAY structures
 const char* nullNames []= {};
-const char* algoNames []= { "alg1", "alg2", "alg3", "alg4" };
+const char* algoNames []= { "alg1", "alg2", "alg3", "alg4", "alg5" };
 struct ParameterRowDisplay engineParameterRow= {
 		"Engine" ,
 		{ "Algo", "IM1 ", "IM2 ", "IM3 " },
@@ -43,8 +43,8 @@ struct ParameterRowDisplay oscParameterRow = {
 		{
 					{ OSC_SHAPE_SIN, OSC_SHAPE_OFF, DISPLAY_TYPE_STRINGS, oscShapeNames },
 					{ OSC_FT_KEYBOARD, OSC_FT_FIXE, DISPLAY_TYPE_STRINGS, oscTypeNames },
-					{ 0, 128, DISPLAY_TYPE_FLOAT_4_4 , nullNames },
-					{ (char)-127, 127, DISPLAY_TYPE_SIGNED_CHAR, nullNames }
+					{ 0, 128, DISPLAY_TYPE_OSC_FREQUENCY , nullNames },
+					{ (char)-127, 127, DISPLAY_TYPE_OSC_FREQUENCY, nullNames }
 		}
 };
 
@@ -61,7 +61,7 @@ struct ParameterRowDisplay envParameterRow = {
 
 
 const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW"} ;
-const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "o1Am", "o2Am", "o3Am", "o4Am", "IM1 ", "IM2 ", "IM3 "} ;
+const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "IM1 ", "IM2 ", "IM3 "} ;
 struct ParameterRowDisplay matrixParameterRow = {
 		"Matrix",
 		{ "Srce", "Mult", "Dest", "    " },
@@ -232,45 +232,68 @@ SynthState::SynthState() {
     i2c_master_enable(I2C1, 0);
 }
 
-void SynthState::incParameter(int encoder) {
+void SynthState::encoderTurned(int encoder, int ticks) {
 	if (fullState.synthMode == SYNTH_MODE_EDIT) {
 		int num = currentRow * NUMBER_OF_ENCODERS + encoder;
 		struct ParameterDisplay* param = &(allParameterRows.row[currentRow]->params[encoder]);
 		int newValue;
 		int oldValue;
-		if (param->minValue<0) {
+
+		if ((param->displayType == DISPLAY_TYPE_SIGNED_CHAR) || (param->displayType == DISPLAY_TYPE_OSC_FREQUENCY && param->minValue<0)) {
 			char &value = ((char*)&params)[num];
 			oldValue = value;
-			if (value<param->maxValue) {
-				value++;
+			value+=ticks;
+			if (ticks>0 && value>param->maxValue) {
+				value = param->maxValue;
+			}
+			if (ticks<0 && value<param->minValue) {
+				value = param->minValue;
 			}
 			newValue = value;
 		} else {
 			unsigned char &value = ((unsigned char*)&params)[num];
 			oldValue = value;
-			if (value<param->maxValue) {
-				value++;
+			// Must use oldValue (int) so that the minValue comparaison works
+			newValue = value + ticks;
+			if (ticks>0 && newValue>param->maxValue) {
+				newValue = param->maxValue;
 			}
-			newValue = value;
+			if (ticks<0 && newValue<param->minValue) {
+				newValue = param->minValue;
+			}
+			value = (char)newValue;
 		}
 
 		if (newValue != oldValue) {
-			propagateNewParamValue(currentRow, encoder, oldValue, newValue);
+			propagateNewParamValue(currentRow, encoder, param, oldValue, newValue);
 		}
 	} else {
 		int oldMenuSelect = fullState.menuSelect;
-		if (fullState.currentMenuState == MENU_LOAD_INTERNAL_BANK) {
-			if (fullState.menuSelect< INTERNAL_LAST_BANK) {
-				fullState.menuSelect = fullState.menuSelect + 1;
+		if (ticks>0) {
+			if (fullState.currentMenuState == MENU_LOAD_INTERNAL_BANK) {
+				if (fullState.menuSelect< INTERNAL_LAST_BANK) {
+					fullState.menuSelect = fullState.menuSelect + 1;
+					copyPatch((char*)&presets[fullState.menuSelect], (char*)&params);
+				}
+			} else if (fullState.currentMenuState == MENU_NONE || fullState.currentMenuState == MENU_LOAD) {
+				if (fullState.menuSelect<1) {
+					fullState.menuSelect = fullState.menuSelect + 1;
+				}
+			} else {
+				if (fullState.menuSelect<255) {
+					fullState.menuSelect = fullState.menuSelect + 1;
+				}
+			}
+		} else {
+			if (fullState.menuSelect>0) {
+				fullState.menuSelect = fullState.menuSelect - 1;
+			}
+
+			if (MENU_LOAD_INTERNAL_BANK) {
 				copyPatch((char*)&presets[fullState.menuSelect], (char*)&params);
 			}
-		} else if (fullState.currentMenuState == MENU_NONE || fullState.currentMenuState == MENU_LOAD) {
-			if (fullState.menuSelect<1) {
-				fullState.menuSelect = fullState.menuSelect + 1;
-			}
-		} else {
-			if (fullState.menuSelect<255) {
-				fullState.menuSelect = fullState.menuSelect + 1;
+			if (fullState.menuSelect != oldMenuSelect) {
+				propagateNewMenuSelect();
 			}
 		}
 		if (fullState.menuSelect != oldMenuSelect) {
@@ -280,44 +303,6 @@ void SynthState::incParameter(int encoder) {
 
 }
 
-void SynthState::decParameter(int encoder) {
-	if (fullState.synthMode == SYNTH_MODE_EDIT) {
-		int num = currentRow * NUMBER_OF_ENCODERS + encoder;
-		struct ParameterDisplay* param = &(allParameterRows.row[currentRow]->params[encoder]);
-		int newValue;
-		int oldValue;
-		if (param->minValue<0) {
-			char &value = ((char*)&params)[num];
-			oldValue = value;
-			if (value>param->minValue) {
-				value--;
-			}
-			newValue = value;
-		} else {
-			unsigned char &value = ((unsigned char*)&params)[num];
-			oldValue = value;
-			if (value>param->minValue) {
-				value--;
-			}
-			newValue = value;
-		}
-		if (newValue != oldValue) {
-			propagateNewParamValue(currentRow, encoder, oldValue, newValue);
-		}
-	} else {
-		int oldMenuSelect = fullState.menuSelect;
-		if (fullState.menuSelect>0) {
-			fullState.menuSelect = fullState.menuSelect - 1;
-		}
-
-		if (MENU_LOAD_INTERNAL_BANK) {
-			copyPatch((char*)&presets[fullState.menuSelect], (char*)&params);
-		}
-		if (fullState.menuSelect != oldMenuSelect) {
-			propagateNewMenuSelect();
-		}
-	}
-}
 
 void SynthState::copyPatch(char* source, char* dest) {
 	for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
@@ -493,7 +478,6 @@ void SynthState::buttonPressed(int button) {
 		propagateNewMenuState();
 	}
 }
-
 
 
 void SynthState::pruneToEEPROM(int preset) {

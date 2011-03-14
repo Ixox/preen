@@ -47,8 +47,9 @@ enum Algorithm {
 	ALGO1 = 0,
 	ALGO2,
 	ALGO3,
-	ALGO_END,
-	ALGO4
+	ALGO4,
+	ALGO5,
+	ALGO_END
 };
 
 enum OscShape {
@@ -82,10 +83,6 @@ enum DestinationEnum {
 	OSC2_FREQ,
 	OSC3_FREQ,
 	OSC4_FREQ,
-	OSC2_AMP,
-	OSC1_AMP,
-	OSC3_AMP,
-	OSC4_AMP,
 	INDEX_MODULATION1,
 	INDEX_MODULATION2,
 	INDEX_MODULATION3,
@@ -163,21 +160,7 @@ struct AllSynthParams {
 
 // Display information
 
-enum ParameterDisplayType {
-	DISPLAY_TYPE_NONE = 0,
-	DISPLAY_TYPE_SIGNED_CHAR,
-	DISPLAY_TYPE_UNSIGNED_CHAR,
-	DISPLAY_TYPE_STRINGS,
-	DISPLAY_TYPE_FLOAT_5_3,
-	DISPLAY_TYPE_FLOAT_4_4
-};
 
-struct ParameterDisplay {
-	char minValue;
-	unsigned char maxValue;
-	ParameterDisplayType displayType;
-	const char** valueName;
-};
 
 struct ParameterRowDisplay {
 	const char* rowName;
@@ -204,8 +187,7 @@ enum PresetBank {
 class SynthState : public EncodersListener {
 public:
 	SynthState();
-	void incParameter(int num);
-	void decParameter(int num);
+	void encoderTurned(int num, int ticks);
 
 	SynthParamListenerType getListenerType(int row) {
 		if (row == 0) {
@@ -282,9 +264,9 @@ public:
 		}
 	}
 
-	void propagateNewParamValue(int currentRow, int encoder, int oldValue, int newValue) {
+	void propagateNewParamValue(int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
 		for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
-			listener->newParamValue(getListenerType(currentRow), currentRow, encoder, oldValue, newValue);
+			listener->newParamValue(getListenerType(currentRow), currentRow, encoder, param, oldValue, newValue);
 		}
 	}
 

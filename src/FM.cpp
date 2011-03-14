@@ -52,7 +52,12 @@ void setup()
 	timer_disable_all();
 
 	lcd.begin(20, 4);
-    lcd.print("IxOx FM Synth V0.1");
+	lcd.setCursor(0,0);
+    lcd.print("Preen FM Synth V0.1");
+	lcd.setCursor(0,1);
+    lcd.print("          By Ixox");
+	lcd.setCursor(0,3);
+    lcd.print("Powered by Leaflabs");
 
 
 	// synthstate is updated by encoder change

@@ -2,7 +2,7 @@
 
 LIB_MAPLE_HOME=/home/xhosxe/libmaple
 
-OBJECTS= build/Env.o build/FM.o build/Osc.o build/Synth.o build/Voice.o build/Lfo.o build/Matrix.o build/RingBuffer.o build/MidiDecoder.o build/Encoders.o build/FMDisplay.o build/SynthState.o build/EncodersListener.o build/SynthParamListener.o build/SynthMenuListener.o
+OBJECTS= build/Env.o build/FM.o build/Osc.o build/Synth.o build/Voice.o build/Lfo.o build/Matrix.o build/RingBuffer.o build/MidiDecoder.o build/Encoders.o build/FMDisplay.o build/SynthState.o
 	
 LIBMAPLE_OBJECTS=$(LIB_MAPLE_HOME)/build/libmaple/systick.o $(LIB_MAPLE_HOME)/build/libmaple/timers.o $(LIB_MAPLE_HOME)/build/libmaple/adc.o $(LIB_MAPLE_HOME)/build/libmaple/syscalls.o $(LIB_MAPLE_HOME)/build/libmaple/exti.o $(LIB_MAPLE_HOME)/build/libmaple/gpio.o $(LIB_MAPLE_HOME)/build/libmaple/nvic.o $(LIB_MAPLE_HOME)/build/libmaple/usart.o $(LIB_MAPLE_HOME)/build/libmaple/i2c.o $(LIB_MAPLE_HOME)/build/libmaple/util.o $(LIB_MAPLE_HOME)/build/libmaple/rcc.o $(LIB_MAPLE_HOME)/build/libmaple/flash.o $(LIB_MAPLE_HOME)/build/libmaple/spi.o $(LIB_MAPLE_HOME)/build/libmaple/fsmc.o $(LIB_MAPLE_HOME)/build/libmaple/dac.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_callbacks.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_hardware.o $(LIB_MAPLE_HOME)/build/libmaple/usb/descriptors.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_core.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_init.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_int.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_mem.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_regs.o $(LIB_MAPLE_HOME)/build/libmaple/exc.o $(LIB_MAPLE_HOME)/build/wirish/wirish.o $(LIB_MAPLE_HOME)/build/wirish/wirish_shift.o $(LIB_MAPLE_HOME)/build/wirish/wirish_analog.o $(LIB_MAPLE_HOME)/build/wirish/time.o $(LIB_MAPLE_HOME)/build/wirish/pwm.o $(LIB_MAPLE_HOME)/build/wirish/ext_interrupts.o $(LIB_MAPLE_HOME)/build/wirish/wirish_digital.o $(LIB_MAPLE_HOME)/build/wirish/wirish_math.o $(LIB_MAPLE_HOME)/build/wirish/Print.o $(LIB_MAPLE_HOME)/build/wirish/comm/HardwareSerial.o $(LIB_MAPLE_HOME)/build/wirish/comm/HardwareSPI.o $(LIB_MAPLE_HOME)/build/wirish/usb_serial.o $(LIB_MAPLE_HOME)/build/wirish/HardwareTimer.o $(LIB_MAPLE_HOME)/build/wirish/cxxabi-compat.o $(LIB_MAPLE_HOME)/build/libraries/Servo/Servo.o $(LIB_MAPLE_HOME)/build/libraries/LiquidCrystal/LiquidCrystal.o $(LIB_MAPLE_HOME)/build/libraries/Wire/Wire.o
 
@@ -184,19 +184,10 @@ build/RingBuffer.o: src/RingBuffer.cpp
 build/Encoders.o: src/Encoders.cpp
 	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
-build/EncodersListener.o: src/EncodersListener.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
-
 build/FMDisplay.o: src/FMDisplay.cpp
 	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/SynthState.o: src/SynthState.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
-
-build/SynthParamListener.o: src/SynthParamListener.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
-
-build/SynthMenuListener.o: src/SynthMenuListener.cpp
 	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 $(PROJECT_BUILD_PATH)/$(BOARD).elf: $(OBJECTS) $(BUILDDIRS) 

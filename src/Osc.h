@@ -41,7 +41,7 @@ public:
 	void newNote(struct OscState& oscState, int note);
 
 	int getSample(struct OscState &oscState) {
-		return sinTable[oscState.index >> 7]; // *(256-(index&0xff)) + table_sin[(index >>8) + 1]*(index&0xff)) >>8)  - 32768;
+		return sinTable[oscState.index >> 7]; // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
 	}
 
 	void nextSample(struct OscState &oscState) {
@@ -75,19 +75,19 @@ Osc<number>::Osc()
 	switch (number-1) {
 	case 0:
 		this->destFreq = OSC1_FREQ;
-		this->destAmp = OSC1_AMP;
+//		this->destAmp = OSC1_AMP;
 		break;
 	case 1:
 		this->destFreq = OSC2_FREQ;
-		this->destAmp = OSC2_AMP;
+//		this->destAmp = OSC2_AMP;
 		break;
 	case 2:
 		this->destFreq = OSC3_FREQ;
-		this->destAmp = OSC3_AMP;
+//		this->destAmp = OSC3_AMP;
 		break;
 	case 3:
 		this->destFreq = OSC4_FREQ;
-		this->destAmp = OSC4_AMP;
+//		this->destAmp = OSC4_AMP;
 		break;
 	}
 	OscillatorParams * o = (OscillatorParams *)(&(synthState.params.osc1));

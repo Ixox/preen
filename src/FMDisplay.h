@@ -29,9 +29,9 @@ public:
 	void init(LiquidCrystal* lcd);
 
 	void drawMenu(FullState* fullState);
-	inline void updateEncoderValue(int row, int encoder);
+	inline void updateEncoderValue(int row, int encoder, ParameterDisplay* param, int newValue);
 	inline void updateEncoderName(int row, int encoder);
-	inline void printShortValue(short value);
+	inline void printValueWithSpace(int value);
 
 	int getLength(const char *str) {
 		int length = 0;
@@ -61,7 +61,7 @@ public:
     void newMenuState(FullState* fullState) ;
     void newMenuSelect(FullState* fullState);
 
-    void newParamValue(SynthParamListenerType type, int currentRow, int encoder, int oldValue, int newValue);
+    void newParamValue(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newcurrentRow(int newcurrentRow);
 
 

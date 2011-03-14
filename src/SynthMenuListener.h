@@ -43,8 +43,6 @@ struct FullState {
 
 class SynthMenuListener {
 public:
-	SynthMenuListener();
-	~SynthMenuListener();
 
     virtual void newSynthMode(FullState* fullState) = 0;
     virtual void newMenuState(FullState* fullState) = 0;

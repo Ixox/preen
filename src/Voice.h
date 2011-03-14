@@ -134,10 +134,84 @@ public:
 				break;
 			case ALGO4:
 				{
-				oscState1.frequency =  oscState1.mainFrequency;
+				osc3->nextSample(oscState3);
+				env3->nextSample(envState3);
+				int freq = osc3->getSample(oscState3) * env3->getAmp(envState3);
+				freq >>= 19;
+				freq *= oscState3.mainFrequency;
+				freq >>= 15;
+				freq *= IM1;
+
+				oscState1.frequency =  freq + oscState1.mainFrequency;
+				env1->nextSample(envState1);
 				osc1->nextSample(oscState1);
-				currentSample = osc1->getSample(oscState1);
+
+				osc4->nextSample(oscState4);
+				env4->nextSample(envState4);
+				freq = osc4->getSample(oscState4) * env4->getAmp(envState4);
+				freq >>= 19;
+				freq *= oscState4.mainFrequency;
+				freq >>= 15;
+				freq *= IM2;
+
+				oscState2.frequency =  freq + oscState2.mainFrequency;
+				env2->nextSample(envState2);
+				osc2->nextSample(oscState2);
+
+				int currentSample2 = osc2->getSample(oscState2)*env2->getAmp(envState2);
+				currentSample2  >>= 15;
+
+				currentSample = osc1->getSample(oscState1)*env1->getAmp(envState1);
+				currentSample  >>= 15;
+				currentSample += currentSample2;
+
+				currentSample *= velocity;
+				currentSample >>=8; // >>7 >> 1(we added 2 samples)
+				if (env1->isDead(envState1) && env2->isDead(envState2)) {
+					endNoteOfBeginNextOne();
 				}
+				}
+				break;
+			case ALGO5:
+				{
+				osc4->nextSample(oscState4);
+				env4->nextSample(envState4);
+				int freq = osc4->getSample(oscState4) * env4->getAmp(envState4);
+				freq >>= 19;
+				freq *= oscState4.mainFrequency;
+				freq >>= 15;
+				freq *= IM3;
+
+				oscState3.frequency =  freq + oscState3.mainFrequency;
+				osc3->nextSample(oscState3);
+				env3->nextSample(envState3);
+				freq = osc3->getSample(oscState3) * env3->getAmp(envState3);
+				freq >>= 19;
+				freq *= oscState3.mainFrequency;
+				freq >>= 15;
+				freq *= IM2;
+
+				oscState2.frequency =  freq + oscState2.mainFrequency;
+				osc2->nextSample(oscState2);
+				env2->nextSample(envState2);
+				freq = osc2->getSample(oscState2) * env2->getAmp(envState2);
+				freq >>= 19;
+				freq *= oscState2.mainFrequency; // Convertion in Hertz
+				freq >>= 15;
+				freq *= IM1;
+
+				oscState1.frequency =  freq + oscState1.mainFrequency;
+				env1->nextSample(envState1);
+				osc1->nextSample(oscState1);
+				currentSample = osc1->getSample(oscState1)*env1->getAmp(envState1);
+				currentSample  >>= 15;
+				currentSample *= velocity;
+				currentSample >>=7;
+				}
+				if (env1->isDead(envState1)) {
+					endNoteOfBeginNextOne();
+				}
+				break;
 			}
 		}
 	}

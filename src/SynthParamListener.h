@@ -28,13 +28,27 @@ enum SynthParamListenerType {
 	SYNTH_PARAM_INVALID_LISTENER
 };
 
+enum ParameterDisplayType {
+	DISPLAY_TYPE_NONE = 0,
+	DISPLAY_TYPE_SIGNED_CHAR,
+	DISPLAY_TYPE_UNSIGNED_CHAR,
+	DISPLAY_TYPE_STRINGS,
+	DISPLAY_TYPE_OSC_FREQUENCY,
+	DISPLAY_TYPE_FLOAT_5_3,
+	DISPLAY_TYPE_FLOAT_4_4
+};
+
+struct ParameterDisplay {
+	char minValue;
+	unsigned char maxValue;
+	ParameterDisplayType displayType;
+	const char** valueName;
+};
+
 
 class SynthParamListener {
 public:
-	SynthParamListener();
-	~SynthParamListener();
-
-    virtual void newParamValue(SynthParamListenerType type, int currentrow, int encoder, int oldValue, int newValue) = 0;
+    virtual void newParamValue(SynthParamListenerType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) = 0;
     virtual void newcurrentRow(int newcurrentRow) = 0;
 
 	SynthParamListener* nextListener;

@@ -36,47 +36,46 @@ public:
 
 	void resetDestination() {
 		for (int k=0; k< MATRIX_SIZE; k++) {
-			destinations[(int)rows[k].destination] = 0;
+			currentDestinations[(int)rows[k].destination] = 0;
 		}
 	}
 
-	void computeDestintation() {
-		for (int k=0; k< MATRIX_SIZE; k++) {
-			destinations[(int)rows[k].destination] += sources[(int)rows[k].source] * rows[k].mul;
-		}
+	void computeFutureDestintation(int k) {
+		futurDestinations[(int)rows[k].destination] += sources[(int)rows[k].source] * rows[k].mul;
 	}
 
-	bool isDestinationUsed(DestinationEnum index) {
-		return destinationUsed[index];
-	}
-	bool isSourceUsed(SourceEnum index) {
-		return sourceUsed[index];
-	}
 	void setRowSource(int index, SourceEnum source);
 	void setRowDestination(int index, DestinationEnum destination) ;
 	void setRowMul(int index, short mul);
 	void checkRow(int index);
-	void setDestination(DestinationEnum destination, int value) {
-		destinations[destination] = value;
-	}
+
 	void setSource(SourceEnum source, int value) {
 		this->sources[source] = value;
 	}
 	int getDestination(DestinationEnum destination) {
-		return this->destinations[destination];
-	}
-	int getSource(SourceEnum source) {
-		return this->sources[source];
+		return this->currentDestinations[destination];
 	}
 
     void newParamValue(int param, int oldValue, int newValue);;
 
+    void useNewValues() {
+    	if (currentDestinations == destinations1) {
+    		currentDestinations = destinations2;
+    		futurDestinations = destinations1;
+    	} else {
+    		currentDestinations = destinations1;
+    		futurDestinations = destinations2;
+    	}
+    }
 
 private:
 	bool sourceUsed[SOURCE_MAX];
 	bool destinationUsed[DESTINATION_MAX];
 	int sources[SOURCE_MAX];
-	int destinations[DESTINATION_MAX];
+	int destinations1[DESTINATION_MAX];
+	int destinations2[DESTINATION_MAX];
+	int *currentDestinations;
+	int *futurDestinations;
 	MatrixRowParams* rows;
 };
 

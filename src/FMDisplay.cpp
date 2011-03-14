@@ -31,7 +31,7 @@ void FMDisplay::init(LiquidCrystal* lcd) {
 	displayPreset();
 }
 
-void FMDisplay::printShortValue(short value) {
+void FMDisplay::printValueWithSpace(int value) {
 	lcd->print(value);
 	if (value>99) {
 		lcd->print(" ");
@@ -46,40 +46,87 @@ void FMDisplay::printShortValue(short value) {
 	}
 }
 
-void FMDisplay::updateEncoderValue(int row, int encoder) {
-	struct ParameterDisplay param = allParameterRows.row[row]->params[encoder];
+void FMDisplay::updateEncoderValue(int row, int encoder, ParameterDisplay* param, int newValue) {
+
+
 	lcd->setCursor(encoder*5, 3);
-	short value;
-	switch (param.displayType) {
+
+	switch (param->displayType) {
 	case DISPLAY_TYPE_STRINGS :
-		lcd->print(param.valueName[(((unsigned char*)&synthState.params)[row*NUMBER_OF_ENCODERS+encoder])]);
+		lcd->print(param->valueName[newValue]);
 		break;
 	case DISPLAY_TYPE_FLOAT_4_4:
-		value = ((unsigned char*)&synthState.params)[row*NUMBER_OF_ENCODERS+encoder];
-		lcd->print(value>>4);
+displayFloat44:
+		lcd->print(newValue>>4);
 		lcd->print(".");
-		lcd->print(((value & 0xf) *10) >>4);
-		if (value < 160) {
-			lcd->print(" ");
+		if (newValue < 160) {
+			int v = ((newValue & 0xf) *100) >>4;
+			if (v > 10) {
+				lcd->print(v);
+			} else if (v > 0){
+				lcd->print("0");
+				lcd->print(v);
+			} else {
+				lcd->print("00");
+			}
+		} else {
+			int v = ((newValue & 0xf) *10) >>4;
+			if (v == 0) {
+				lcd->print("0");
+			} else {
+				lcd->print(v);
+			}
 		}
 		break;
 	case DISPLAY_TYPE_FLOAT_5_3:
-		value = ((unsigned char*)&synthState.params)[row*NUMBER_OF_ENCODERS+encoder];
-		lcd->print(value>>3);
+		lcd->print(newValue>>3);
 		lcd->print(".");
-		lcd->print(((value & 0x7) *10) >>3);
-		if (value < 80) {
-			lcd->print(" ");
+		if (newValue < 80) {
+			int v= ((newValue & 0x7) *100) >>3;
+			if (v > 10) {
+				lcd->print(v);
+			} else if (v > 0){
+				lcd->print("0");
+				lcd->print(v);
+			} else {
+				lcd->print("00");
+			}
+		} else {
+			int v = ((newValue & 0x7) *10) >>3;
+			if (v == 0) {
+				lcd->print("0");
+			} else {
+				lcd->print(v);
+			}
 		}
 		break;
 	case DISPLAY_TYPE_SIGNED_CHAR:
-		printShortValue(((char*)&synthState.params)[row*NUMBER_OF_ENCODERS+encoder]);
-		break;
+displaySignedChar:
 	case DISPLAY_TYPE_UNSIGNED_CHAR:
-		printShortValue(((unsigned char*)&synthState.params)[row*NUMBER_OF_ENCODERS+encoder]);
+		printValueWithSpace(newValue);
 		break;
+	case DISPLAY_TYPE_OSC_FREQUENCY:
+	{
+		// Hack... to deal with the special case of the fixe frequency.....
+		int oRow = row -1;
+		OscillatorParams* oParam = (OscillatorParams*)&synthState.params.osc1;
+		OscFrequencyType ft = (OscFrequencyType)oParam[oRow].frequencyType;
+
+		if (ft == OSC_FT_FIXE) {
+			lcd->setCursor(10, 3);
+			lcd->print( (oParam[oRow].frequencyMul << 7) + oParam[oRow].detune);
+			lcd->print("     ");
+		} else {
+			// Freq
+			if (encoder == 2) goto displayFloat44;
+			// Fine tune
+			if (encoder == 3) goto displaySignedChar;
+		}
+		break;
+	}
 	case DISPLAY_TYPE_NONE:
 		lcd->print("    ");
+		break;
 	}
 }
 
@@ -104,7 +151,15 @@ void FMDisplay::refreshAllScreenByStep() {
 	} else if (refreshStatus>4) {
 		updateEncoderName(synthState.getCurrentRow(), refreshStatus -5);
 	} else {
-		updateEncoderValue(synthState.getCurrentRow(), refreshStatus -1);
+		int row = synthState.getCurrentRow();
+		struct ParameterDisplay param = allParameterRows.row[row]->params[refreshStatus -1];
+		int newValue;
+		if (param.displayType == DISPLAY_TYPE_SIGNED_CHAR) {
+			newValue = ((char*)&synthState.params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
+		} else {
+			newValue = ((unsigned char*)&synthState.params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
+		}
+		updateEncoderValue(synthState.getCurrentRow(), refreshStatus -1, &param, newValue);
 	}
 	refreshStatus --;
 }
@@ -189,8 +244,14 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 	drawMenu(fullState);
 }
 
-void FMDisplay::newParamValue(SynthParamListenerType type, int currentRow, int encoder, int oldValue, int newValue) {
-	updateEncoderValue(currentRow, encoder);
+void FMDisplay::newParamValue(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param,  int oldValue, int newValue) {
+	// If we change frequency type of OScillator rows, it's a bit special....
+	if (currentRow>=1 && currentRow<=4 && encoder == 1) {
+		refreshStatus = 10;
+		return;
+	}
+
+	updateEncoderValue(currentRow, encoder, param, newValue);
 }
 
 void FMDisplay::newcurrentRow(int newcurrentRow) {
