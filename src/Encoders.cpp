@@ -34,12 +34,16 @@ Encoders::Encoders() {
 		encoderBit2[k] = 1 << encoderPins[k*2 + 1];
 		encoderOldBit1[k] = true;
 		lastMove[k] = LAST_MOVE_NONE;
+		ticks[k] = 0;
+		tickSpeed[k] = 4;
 	}
 
 	for (int k=0; k<NUMBER_OF_BUTTONS; k++) {
 		buttonBit[k] = 1 << buttonPins[k];
 		buttonOldState[k] = true;
 	}
+
+	cpt = 0;
 }
 
 Encoders::~Encoders() {
@@ -65,14 +69,22 @@ void Encoders::checkStatus() {
 		if (!encoderOldBit1[k] && b1) {
 			bool b2 = ((registerBits & encoderBit2[k]) == 0);
 			if (b2 && lastMove[k]!=LAST_MOVE_INC) {
-				encoderTurned(k, -1);
+				encoderTurned(k, -tickSpeed[k]);
+				tickSpeed[k] +=3;
 				lastMove[k] = LAST_MOVE_DEC;
 			} else if (lastMove[k]!=LAST_MOVE_DEC) {
-				encoderTurned(k, 1);
+				encoderTurned(k, tickSpeed[k]);
+				tickSpeed[k] +=3;
 				lastMove[k] = LAST_MOVE_INC;
 			}
 		} else {
 			lastMove[k] = LAST_MOVE_NONE;
+			if (tickSpeed[k] > 1 && ((cpt & 0xf) == 0)) {
+				tickSpeed[k] = tickSpeed[k] - 1;
+			}
+		}
+		if (tickSpeed[k]>10) {
+			tickSpeed[k] = 10;
 		}
 		encoderOldBit1[k] = b1;
 	}
@@ -87,4 +99,5 @@ void Encoders::checkStatus() {
 		buttonOldState[k] = b1;
 	}
 
+	cpt++;
 }

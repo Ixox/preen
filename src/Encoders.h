@@ -79,7 +79,10 @@ private:
 
 	int buttonBit[NUMBER_OF_BUTTONS];
 	bool buttonOldState[NUMBER_OF_BUTTONS];
+	int ticks[NUMBER_OF_BUTTONS];
+	int tickSpeed[NUMBER_OF_BUTTONS];
 
+	int cpt;
 	EncodersListener* firstListener;
 };
 
