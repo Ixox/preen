@@ -31,15 +31,14 @@
 #define BUTTON_MATRIX 3
 #define BUTTON_LFO    4
 
-#define BUTTON_MENU   5
+#define BUTTON_BACK         5
+#define BUTTON_MENUSELECT   6
 
-#define BUTTON_SELECT 4
-#define BUTTON_BACK   3
 #define BUTTON_DUMP   0
 
 
 #define NUMBER_OF_ENCODERS 4
-#define NUMBER_OF_BUTTONS 6
+#define NUMBER_OF_BUTTONS 7
 
 typedef unsigned char uchar;
 
@@ -153,7 +152,7 @@ struct AllSynthParams {
 	struct LfoParams lfo2;
 	struct LfoParams lfo3;
 	struct LfoParams lfo4;
-	const char presetName[13];
+	char presetName[13];
 };
 
 
@@ -204,7 +203,7 @@ public:
 		return SYNTH_PARAM_INVALID_LISTENER;
 	}
 
-	void copyPatch(char* source, char* dest);
+	void copyPatch(char* source, char* dest, bool propagate);
 
 	void buttonPressed(int number);
 
@@ -231,6 +230,13 @@ public:
 		SerialUSB.println(", ");
 	}
 
+	int getLength(const char *str) {
+		int length = 0;
+		for (const char *c = str; *c != '\0'; c++) {
+			length++;
+		}
+		return length;
+	}
 
 	void insertParamListener(SynthParamListener *listener) {
 		if (firstParamListener!=0) {
@@ -276,6 +282,10 @@ public:
 		}
 	}
 
+	SynthMode getSynthMode() {
+		return fullState.synthMode;
+	}
+
 	struct AllSynthParams params;
 
 private:
@@ -295,7 +305,7 @@ private:
 // Global structure used all over the code
 extern struct AllParameterRowsDisplay allParameterRows;
 extern SynthState	synthState;
-extern struct AllSynthParams presets[];
-
+extern const struct AllSynthParams presets[];
+extern const char* allChars;
 
 #endif /* SYNTHSTATUS_H_ */

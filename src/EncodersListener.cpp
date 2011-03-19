@@ -15,45 +15,5 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "EncodersListener.h"
 
-#ifndef SYNTHMENULISTENER_H_
-#define SYNTHMENULISTENER_H_
-
-
-enum SynthMode {
-	SYNTH_MODE_EDIT = 0,
-	SYNTH_MODE_MENU
-};
-
-enum MenuState {
-	MENU_NONE = 0,
-	MENU_LOAD,
-	MENU_SAVE,
-	MENU_LOAD_INTERNAL_BANK,
-	MENU_LOAD_USER_BANK,
-	MENU_SAVE_PRESET,
-	MENU_DONE,
-	MENU_ENTER_NAME
-};
-
-struct FullState {
-	SynthMode synthMode;
-	MenuState currentMenuState;
-	int menuSelect;
-	int presetNumber;
-	char name[13];
-};
-
-
-class SynthMenuListener {
-public:
-
-    virtual void newSynthMode(FullState* fullState) = 0;
-    virtual void newMenuState(FullState* fullState) = 0;
-    virtual void newMenuSelect(FullState* fullState) = 0;
-
-
-    SynthMenuListener* nextListener;
-};
-
-#endif /* SYNTHMENULISTENER_H_ */

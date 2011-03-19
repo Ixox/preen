@@ -40,6 +40,19 @@ public:
 
 	void newNote(struct OscState& oscState, int note);
 
+/*
+	int getSample(struct OscState &oscState) {
+
+		int rest = oscState.index & 0x7f;
+		int div128 = oscState.index >> 7;
+		int div128plus1 = div128 + 1;
+		if (div128plus1 > 2047) {
+			div128plus1 = 0;
+		}
+		return (sinTable[div128]* (128-rest) + sinTable[div128plus1]*rest) >> 8;
+	}
+	*/
+
 	int getSample(struct OscState &oscState) {
 		return sinTable[oscState.index >> 7]; // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
 	}

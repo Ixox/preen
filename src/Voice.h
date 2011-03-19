@@ -42,6 +42,19 @@ public:
 		if (playing) {
 			switch (synthState.params.engine.algo) {
 			case ALGO1:
+				/*
+
+				 	 |---|  |---|
+				 	 | 2 |  | 3 |
+				 	 |---|  |---|
+				       |      |
+				       \------/
+				           |
+				         |---|
+				         | 1 |
+				         |---|
+
+				 */
 				{
 				osc2->nextSample(oscState2);
 				env2->nextSample(envState2);
@@ -72,6 +85,18 @@ public:
 				break;
 				}
 			case ALGO2:
+				/*
+				         |---|
+				         | 3 |
+				         |---|
+				           |
+				       /------\
+				       |      |
+				 	 |---|  |---|
+				 	 | 1 |  | 2 |
+				 	 |---|  |---|
+
+				 */
 				{
 				osc3->nextSample(oscState3);
 				env3->nextSample(envState3);
@@ -104,6 +129,20 @@ public:
 				}
 				break;
 			case ALGO3:
+				/*
+				         |---|
+				         | 3 |
+				         |---|
+				           |
+				         |---|
+				         | 2 |
+				         |---|
+				           |
+				         |---|
+				         | 1 |
+				         |---|
+
+				 */
 				{
 				osc3->nextSample(oscState3);
 				env3->nextSample(envState3);
@@ -133,6 +172,17 @@ public:
 				}
 				break;
 			case ALGO4:
+				/*
+				 	 |---|  |---|
+				 	 | 2 |  | 4 |
+				 	 |---|  |---|
+                       |      |
+				 	 |---|  |---|
+				 	 | 1 |  | 2 |
+				 	 |---|  |---|
+
+
+				 */
 				{
 				osc3->nextSample(oscState3);
 				env3->nextSample(envState3);
@@ -173,6 +223,24 @@ public:
 				}
 				break;
 			case ALGO5:
+				/*
+				         |---|
+				         | 4 |
+				         |---|
+				           |
+				         |---|
+				         | 3 |
+				         |---|
+				           |
+				         |---|
+				         | 2 |
+				         |---|
+				           |
+				         |---|
+				         | 1 |
+				         |---|
+
+				 */
 				{
 				osc4->nextSample(oscState4);
 				env4->nextSample(envState4);

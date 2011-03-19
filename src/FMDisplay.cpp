@@ -173,14 +173,6 @@ void FMDisplay::drawMenu(FullState* fullState) {
 		lcd->setCursor(fullState->menuSelect*6+2, 1);
 		lcd->print("^^");
 		break;
-	case MENU_SAVE:
-		lcd->clear();
-		lcd->setCursor(0,0);
-		lcd->print(" LOAD >SAVE<");
-		lcd->setCursor(0, 3);
-		lcd->print(" User Preset ");
-		lcd->print(fullState->menuSelect);
-		break;
 	case MENU_LOAD:
 		lcd->clear();
 		lcd->setCursor(0,0);
@@ -211,6 +203,32 @@ void FMDisplay::drawMenu(FullState* fullState) {
 		lcd->print(" Preset ");
 		lcd->print(fullState->menuSelect);
 		break;
+	case MENU_DONE:
+		lcd->clear();
+		lcd->setCursor(8,1);
+		lcd->print("DONE");
+		break;
+	case MENU_SAVE:
+		lcd->clear();
+		lcd->setCursor(0,0);
+		lcd->print(" LOAD >SAVE<");
+		lcd->setCursor(0, 1);
+		lcd->print(" User Preset ");
+		lcd->print(fullState->menuSelect);
+		break;
+	case MENU_ENTER_NAME:
+		lcd->clear();
+		lcd->setCursor(0,0);
+		lcd->print(" LOAD >SAVE<");
+		lcd->setCursor(0, 1);
+		lcd->print(" User Preset ");
+		lcd->print(fullState->presetNumber);
+		lcd->setCursor(1, 2);
+		for (int k=0;k<12; k++) {
+			lcd->print(allChars[(int)fullState->name[k]]);
+		}
+		lcd->setCursor(1+fullState->menuSelect, 3);
+		lcd->print("^");
 	default:
 		break;
 	}
@@ -245,13 +263,15 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 }
 
 void FMDisplay::newParamValue(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param,  int oldValue, int newValue) {
-	// If we change frequency type of OScillator rows, it's a bit special....
-	if (currentRow>=1 && currentRow<=4 && encoder == 1) {
-		refreshStatus = 10;
-		return;
-	}
+	if (synthState.getSynthMode() == SYNTH_MODE_EDIT) {
+		// If we change frequency type of OScillator rows, it's a bit special....
+		if (currentRow>=1 && currentRow<=4 && encoder == 1) {
+			refreshStatus = 10;
+			return;
+		}
 
-	updateEncoderValue(currentRow, encoder, param, newValue);
+		updateEncoderValue(currentRow, encoder, param, newValue);
+	}
 }
 
 void FMDisplay::newcurrentRow(int newcurrentRow) {

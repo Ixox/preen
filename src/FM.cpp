@@ -49,7 +49,7 @@ unsigned int fullDelay;
 
 void setup() 
 {
-	timer_disable_all();
+//	timer_disable_all();
 
 	lcd.begin(20, 4);
 	lcd.setCursor(0,0);
@@ -83,19 +83,22 @@ void setup()
 
 	Timer1.setOverflow(2197);
 	Timer1.setPrescaleFactor(1);
-	Timer1.setCompare1(2100);
-	Timer1.setChannel1Mode(TIMER_OUTPUTCOMPARE);
-	Timer1.attachCompare1Interrupt(IRQSendSample);
+
 
 	Timer1.setChannel3Mode(TIMER_PWM);
 	pinMode(AUDIO_PIN, PWM);
 
-	Timer1.resume();
+	for (int k=0; k<1024; k++) {
+		pwmWrite(AUDIO_PIN , k);
+		delay(1);
+	}
+
+	Timer1.setCompare1(2100);
+	Timer1.setChannel1Mode(TIMER_OUTPUTCOMPARE);
+	Timer1.attachCompare1Interrupt(IRQSendSample);
 
 	delay(1000);
     fmDisplay.init(&lcd);
-
-
 }
 
 int lcdMod = 0;

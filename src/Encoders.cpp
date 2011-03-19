@@ -20,7 +20,7 @@
 
 Encoders::Encoders() {
 	char encoderPins[] = {12, 13, 14, 15, 4, 5, 6, 7};
-	char buttonPins[] = { 8, 9,3, 10, 11, 2};
+	char buttonPins[] = { 8, 9, 3, 10, 11, 2, 1};
 	firstListener= 0;
 
 	pinMode(HC165_DATA, INPUT);
