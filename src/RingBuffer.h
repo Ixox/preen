@@ -8,12 +8,6 @@
 #ifndef RINGBUFFER_H_
 #define RINGBUFFER_H_
 
-#ifdef linux
-#include "stdlib.h"
-typedef unsigned short uint16;
-#else
-#include "libmaple.h"
-#endif
 
 template <typename T, int size>
 class RingBuffer {
@@ -38,7 +32,8 @@ public:
 
 	T getOneAfter() {
 		if (getCount()<=1) {
-			return NULL;
+			T empty;
+			return empty;
 		} else {
 			return this->buf[(this->head == size-1) ? 0 : this->head + 1];
 		}
@@ -61,7 +56,7 @@ public:
 private:
     volatile int head;
     volatile int tail;
-    volatile T buf[size+1];
+    T buf[size+1];
 
 };
 

@@ -61,6 +61,7 @@ public:
     void newMenuState(FullState* fullState) ;
     void newMenuSelect(FullState* fullState);
 
+    void newParamValueFromExternal(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newParamValue(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newcurrentRow(int newcurrentRow);
 
@@ -69,6 +70,7 @@ public:
 private:
 	LiquidCrystal* lcd;
 	int refreshStatus;
+	int displayedRow;
 };
 
 #endif /* FMDISPLAY_H_ */

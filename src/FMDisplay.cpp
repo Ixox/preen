@@ -262,8 +262,18 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 	drawMenu(fullState);
 }
 
+void FMDisplay::newParamValueFromExternal(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+	if (currentRow == this->displayedRow) {
+		updateEncoderValue(currentRow, encoder, param, newValue);
+	}
+}
+
 void FMDisplay::newParamValue(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param,  int oldValue, int newValue) {
 	if (synthState.getSynthMode() == SYNTH_MODE_EDIT) {
+		if (currentRow != this->displayedRow) {
+			newcurrentRow(currentRow);
+			return;
+		}
 		// If we change frequency type of OScillator rows, it's a bit special....
 		if (currentRow>=1 && currentRow<=4 && encoder == 1) {
 			refreshStatus = 10;
@@ -276,6 +286,7 @@ void FMDisplay::newParamValue(SynthParamListenerType type, int currentRow, int e
 
 void FMDisplay::newcurrentRow(int newcurrentRow) {
 	refreshStatus = 10;
+	this->displayedRow = newcurrentRow;
 }
 
 

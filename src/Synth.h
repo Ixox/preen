@@ -45,6 +45,10 @@ public:
 	int getSample();
 	void nextSample();
 
+	void newParamValueFromExternal(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+		newParamValue(type, currentRow, encoder, param, oldValue, newValue);
+	}
+
 	void newParamValue(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
 		if (type == SYNTH_PARAM_ENVELOPE_LISTENER) {
 			if (currentRow == 5) {

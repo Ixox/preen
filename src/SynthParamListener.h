@@ -49,6 +49,7 @@ struct ParameterDisplay {
 class SynthParamListener {
 public:
     virtual void newParamValue(SynthParamListenerType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) = 0;
+    virtual void newParamValueFromExternal(SynthParamListenerType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) = 0;
     virtual void newcurrentRow(int newcurrentRow) = 0;
 
 	SynthParamListener* nextListener;

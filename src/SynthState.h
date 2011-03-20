@@ -188,7 +188,7 @@ public:
 	SynthState();
 	void encoderTurned(int num, int ticks);
 
-	SynthParamListenerType getListenerType(int row) {
+	static SynthParamListenerType getListenerType(int row) {
 		if (row == 0) {
 			return SYNTH_PARAM_ENGINE_LISTENER;
 		} else if (row>=1 && row<=4) {
@@ -206,6 +206,8 @@ public:
 	void copyPatch(char* source, char* dest, bool propagate);
 
 	void buttonPressed(int number);
+
+	void setNewValue(int row, int number, int newValue);
 
 	int getCurrentRow() {
 		return currentRow;
@@ -273,6 +275,12 @@ public:
 	void propagateNewParamValue(int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
 		for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
 			listener->newParamValue(getListenerType(currentRow), currentRow, encoder, param, oldValue, newValue);
+		}
+	}
+
+	void propagateNewParamValueFromExternal(int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+		for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
+			listener->newParamValueFromExternal(getListenerType(currentRow), currentRow, encoder, param, oldValue, newValue);
 		}
 	}
 

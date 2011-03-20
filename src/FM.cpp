@@ -65,8 +65,10 @@ void setup()
 
     // fmDisplay and synth needs to be aware of synthState changes
     synthState.insertParamListener(&fmDisplay);
-    synthState.insertMenuListener(&fmDisplay);
     synthState.insertParamListener(&synth);
+    synthState.insertParamListener(&midiDecoder);
+
+    synthState.insertMenuListener(&fmDisplay);
 
 
 	midiDecoder.setSynth(&synth);
@@ -101,20 +103,26 @@ void setup()
     fmDisplay.init(&lcd);
 }
 
-int lcdMod = 0;
+int mainCpt = 0;
 
 void loop() {
+	mainCpt++;
 
-	unsigned int numberOfEvents = Serial2.available();
-	while (numberOfEvents>0) {
-		midiDecoder.newByte(Serial2.read());
-		numberOfEvents--;
+	if ((mainCpt&0x3) == 0) {
+		unsigned int numberOfEvents = Serial2.available();
+		while (numberOfEvents>0) {
+			midiDecoder.newByte(Serial2.read());
+			numberOfEvents--;
+		}
 	}
 
 	encoders.checkStatus();
 
-	lcdMod++;
-	if (fmDisplay.needRefresh() && ((lcdMod & 0xf) == 0)) {
+	if ((mainCpt&0xf) == 1) {
+		midiDecoder.sendOneMidiEvent();
+	}
+
+	if (fmDisplay.needRefresh() && ((mainCpt & 0x7) == 0)) {
 		fmDisplay.refreshAllScreenByStep();
 	}
 
