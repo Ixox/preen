@@ -469,6 +469,13 @@ void SynthState::buttonPressed(int button) {
 				fullState.currentMenuState = MENU_ENTER_NAME;
 				fullState.presetNumber = fullState.menuSelect;
 				fullState.menuSelect = 0;
+				for (int k=0; k<12 && params.presetName[k] != 0; k++) {
+					for (int j=0; j<getLength(allChars); j++) {
+						if (params.presetName[k] == allChars[j]) {
+							fullState.name[k] = j;
+						}
+					}
+				}
 				break;
 			case MENU_ENTER_NAME:
 			{
@@ -575,8 +582,8 @@ void SynthState::pruneToEEPROM(int preset) {
 	int address = preset * 128;
 	uint8 bufWrite1[block1Size + 2];
 
-	bufWrite1[0] = (uint8)address >> 8;
-	bufWrite1[1] = (uint8)address & 0xff;
+	bufWrite1[0] = (uint8)((int)address >> 8);
+	bufWrite1[1] = (uint8)((int)address & 0xff);
 	for (int k=0; k<block1Size; k++) {
 		bufWrite1[k+2] = ((uint8*)&params)[k];
 	}
@@ -591,8 +598,8 @@ void SynthState::pruneToEEPROM(int preset) {
 	int block2Size = sizeof(struct AllSynthParams) - block1Size;
 	uint8 bufWrite2[block2Size + 2];
 	address = address + block1Size;
-	bufWrite2[0] = (uint8)address >> 8;
-	bufWrite2[1] = (uint8)address & 0xff;
+	bufWrite2[0] = (uint8)((int)address >> 8);
+	bufWrite2[1] = (uint8)((int)address & 0xff);
 	for (int k=0; k<block2Size; k++) {
 		bufWrite2[k+2] = ((uint8*)&params)[k+block1Size];
 	}
@@ -614,8 +621,8 @@ void SynthState::readFromEEPROM(int preset) {
 	i2c_msg msgsRead[2];
 	int block1Size = 64;
 
-	bufReadAddress[0] = (uint8)address >> 8;
-	bufReadAddress[1] = (uint8)address & 0xff;
+	bufReadAddress[0] = (uint8)((int)address >> 8);
+	bufReadAddress[1] = (uint8)((int)address & 0xff);
 
 	msgsRead[0].addr = deviceaddress;
 	msgsRead[0].flags = 0;
@@ -633,8 +640,8 @@ void SynthState::readFromEEPROM(int preset) {
 	int block2Size = sizeof(struct AllSynthParams) - block1Size;
 
 	address = address + block1Size;
-	bufReadAddress[0] = (uint8)address>>8;
-	bufReadAddress[1] = (uint8)address & 0xff;
+	bufReadAddress[0] = (uint8)((int)address >> 8);
+	bufReadAddress[1] = (uint8)((int)address & 0xff);
 
 	msgsRead[0].addr = deviceaddress;
 	msgsRead[0].flags = 0;
