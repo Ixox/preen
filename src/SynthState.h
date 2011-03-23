@@ -24,6 +24,7 @@
 #include "EncodersListener.h"
 #include "SynthParamListener.h"
 #include "SynthMenuListener.h"
+#include "Menu.h"
 
 #define BUTTON_SYNTH  0
 #define BUTTON_OSC    1
@@ -39,6 +40,7 @@
 
 #define NUMBER_OF_ENCODERS 4
 #define NUMBER_OF_BUTTONS 7
+
 
 typedef unsigned char uchar;
 
@@ -92,7 +94,6 @@ enum OscFrequencyType {
 	OSC_FT_KEYBOARD = 0,
 	OSC_FT_FIXE
 };
-
 
 struct OscillatorParams {
 	uchar shape; // OSC_SHAPE_*
@@ -177,10 +178,6 @@ struct AllParameterRowsDisplay {
 
 
 
-enum PresetBank {
-	BANK_INTERNAL = 0,
-	BANK_USER
-};
 
 
 class SynthState : public EncodersListener {
@@ -204,20 +201,18 @@ public:
 	}
 
 	void copyPatch(char* source, char* dest, bool propagate);
-
 	void buttonPressed(int number);
-
 	void setNewValue(int row, int number, int newValue);
+
+	MenuItem* newMenuSelect();
+	MenuItem* menuBack();
 
 	int getCurrentRow() {
 		return currentRow;
 	}
 
-	void setBank(PresetBank bank) {
-		this->bank = bank;
-	}
-	void pruneToEEPROM(int preset);
-	void readFromEEPROM(int preset);
+	void pruneToEEPROM(int bankNumber, int preset);
+	void readFromEEPROM(int bankNumber, int preset);
 
 	void dumpLine(int a, int b, int c, int d) {
 		SerialUSB.print("{ ");
@@ -260,6 +255,12 @@ public:
 		}
 	}
 
+	void propagateMenuBack() {
+		for (SynthMenuListener* listener = firstMenuListener; listener !=0; listener = listener->nextListener) {
+			listener->menuBack(&fullState);
+		}
+	}
+
 	void propagateNewMenuState() {
 		for (SynthMenuListener* listener = firstMenuListener; listener !=0; listener = listener->nextListener) {
 			listener->newMenuState(&fullState);
@@ -295,15 +296,12 @@ public:
 	}
 
 	struct AllSynthParams params;
+	struct FullState fullState;
 
 private:
-	PresetBank bank;
-	int preset;
-
 	int oscRow, envRow, matrixRow, lfoRow;
 	int currentRow;
 
-	FullState fullState;
 
 	SynthParamListener* firstParamListener;
 	SynthMenuListener* firstMenuListener;

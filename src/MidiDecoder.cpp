@@ -36,7 +36,7 @@ void MidiDecoder::newByte(unsigned char byte) {
 	bool eventComplete = false;
 	if (newEvent) {
 		unsigned char hi = byte & 0xf0;
-		//unsigned char lo = byte & 0x0f;
+		channel = byte & 0x0f;
 		switch (hi) {
 		case 0x80:
 		case 0x90:
@@ -79,6 +79,14 @@ void MidiDecoder::newByte(unsigned char byte) {
 extern LiquidCrystal lcd;
 
 void MidiDecoder::sendMidiEvent() {
+	if (channel != synthState.fullState.midiChannel) {
+		Serial2.print((unsigned char)(currentEvent[0] + channel));
+		for (int k=0; k<numberOfBytes-1; k++) {
+			Serial2.print((unsigned char)(currentEvent[k+1]));
+		}
+		return;
+	}
+
 	switch (currentEvent[0]) {
 	case 0x80:
 		this->synth->noteOff(currentEvent[1]);
@@ -291,7 +299,7 @@ void MidiDecoder::sendOneMidiEvent() {
 			lcd.print(maxInARow);
 		}
 		*/
-		Serial2.print((unsigned char)0xb0);
+		Serial2.print((unsigned char)(0xb0 + synthState.fullState.midiChannel));
 		Serial2.print((unsigned char)toSend.control);
 		Serial2.print((unsigned char)toSend.value);
 		/* debug

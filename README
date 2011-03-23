@@ -25,10 +25,10 @@ Preen Current Features:
 
 . 5 FM voices for 3 ops algo - 4 voices for 4 ops algo
 . Each voice 3 FM operators (sin only for the moment) 
-. Each operator has a ADSR envelope
+. Each operator has an ADSR envelope
 . 4 LFO (saw, square, ramp)
 . 6 rows modulation matrix
-. 3 FM algo available... to be explained
+. 5 FM algo available... to be explained
 
 . Sampling rate : 
   32768 Hz (makes division faster ;-) for audio
@@ -37,11 +37,17 @@ Preen Current Features:
 . The full synth state (19 * 4 parameters) can be edited with the 4 Encoders throw the 19 rows.
 . The 5 buttons allow easy navigation into the 19 rows (1 engine, 4 osc, 4 env, 6 matrix rows, 4 lfos)
 . LCD is updated in realtime showing the parameter you modify.
-. Menu to load (from EEPROM and flash) and save to Flash.. 2 buttons to navigate.
+. Load and save preset to EEPROM.
 . Read and send midi
 
 --------------------------------------------
 DONE
+
+Update March 23th
+. Refactor menu - much easier to add new menu/submenu
+. New midi menu
+. Take care of midi channel - redirect to midi out if not the same channel
+. Can now load and save to 3 different user banks
 
 Update March 20th
 . Read midi CC to change parameters
@@ -77,14 +83,13 @@ Update March 5th 2011
 
 To do before v0.1 (in no order) :
 . Full midi implementation
-	. Take care of midi channel
 	. Implement all midi events
 . More Algos (4 operators)
 . More presets
 . Documentation
 . Clean hardware design
 . Hide parameters not used by the current ALGO.
-
+. SYSEX pach/bank receive/dump
 
 Later V1.0 : 
 . a nice PCB and a Box

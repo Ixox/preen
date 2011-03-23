@@ -21,6 +21,7 @@
 
 #include "SynthState.h"
 #include "LiquidCrystal.h"
+#include "Menu.h"
 
 class FMDisplay : public SynthParamListener, public SynthMenuListener {
 public:
@@ -28,10 +29,11 @@ public:
 	~FMDisplay();
 	void init(LiquidCrystal* lcd);
 
-	void drawMenu(FullState* fullState);
 	inline void updateEncoderValue(int row, int encoder, ParameterDisplay* param, int newValue);
 	inline void updateEncoderName(int row, int encoder);
 	inline void printValueWithSpace(int value);
+
+
 
 	int getLength(const char *str) {
 		int length = 0;
@@ -60,6 +62,8 @@ public:
     void newSynthMode(FullState* fullState) ;
     void newMenuState(FullState* fullState) ;
     void newMenuSelect(FullState* fullState);
+	void menuBack(FullState* fullState);
+	void eraseRow(int row);
 
     void newParamValueFromExternal(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newParamValue(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
@@ -71,6 +75,8 @@ private:
 	LiquidCrystal* lcd;
 	int refreshStatus;
 	int displayedRow;
+
+	int menuRow;
 };
 
 #endif /* FMDISPLAY_H_ */

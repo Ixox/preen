@@ -81,6 +81,7 @@ private:
 	bool newEvent;
 	short index;
 	short numberOfBytes;
+	unsigned char channel;
 	Synth* synth;
 	Matrix* matrix;
 	RingBuffer<ControlChange, 16> midiToSend;

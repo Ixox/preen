@@ -164,103 +164,15 @@ void FMDisplay::refreshAllScreenByStep() {
 	refreshStatus --;
 }
 
-void FMDisplay::drawMenu(FullState* fullState) {
-	switch(fullState->currentMenuState) {
-	case MENU_NONE:
-		lcd->clear();
-		lcd->setCursor(0,0);
-		lcd->print(" LOAD  SAVE ");
-		lcd->setCursor(fullState->menuSelect*6+2, 1);
-		lcd->print("^^");
-		break;
-	case MENU_LOAD:
-		lcd->clear();
-		lcd->setCursor(0,0);
-		lcd->print(">LOAD< SAVE ");
-		lcd->setCursor(0, 1);
-		lcd->print(" Internal  User");
-		lcd->setCursor(fullState->menuSelect*8+4, 2);
-		lcd->print("^^");
-		break;
-	case MENU_LOAD_INTERNAL_BANK:
-		lcd->clear();
-		lcd->setCursor(0,0);
-		lcd->print(">LOAD< SAVE");
-		lcd->setCursor(0, 1);
-		lcd->print(">Internal< User");
-		lcd->setCursor(0, 3);
-		lcd->print(fullState->menuSelect);
-		lcd->print(" - ");
-		lcd->print(presets[fullState->menuSelect].presetName);
-		break;
-	case MENU_LOAD_USER_BANK:
-		lcd->clear();
-		lcd->setCursor(0,0);
-		lcd->print(">LOAD<");
-		lcd->setCursor(0, 1);
-		lcd->print(" Internal >User<");
-		lcd->setCursor(0, 3);
-		lcd->print(" Preset ");
-		lcd->print(fullState->menuSelect);
-		break;
-	case MENU_DONE:
-		lcd->clear();
-		lcd->setCursor(8,1);
-		lcd->print("DONE");
-		break;
-	case MENU_SAVE:
-		lcd->clear();
-		lcd->setCursor(0,0);
-		lcd->print(" LOAD >SAVE<");
-		lcd->setCursor(0, 1);
-		lcd->print(" User Preset ");
-		lcd->print(fullState->menuSelect);
-		break;
-	case MENU_ENTER_NAME:
-		lcd->clear();
-		lcd->setCursor(0,0);
-		lcd->print(" LOAD >SAVE<");
-		lcd->setCursor(0, 1);
-		lcd->print(" User Preset ");
-		lcd->print(fullState->presetNumber);
-		lcd->setCursor(1, 2);
-		for (int k=0;k<12; k++) {
-			lcd->print(allChars[(int)fullState->name[k]]);
-		}
-		lcd->setCursor(1+fullState->menuSelect, 3);
-		lcd->print("^");
-	default:
-		break;
-	}
-}
-
 
 void FMDisplay::displayPreset() {
 	int length = getLength(synthState.params.presetName);
-	lcd->clear();
 	lcd->setCursor(19-length,0);
 	lcd->print(synthState.params.presetName);
 }
 
 // Update FMDisplay regarding the callbacks from SynthState
 
-
-void FMDisplay::newSynthMode(FullState* fullState)  {
-	if (fullState->synthMode == SYNTH_MODE_EDIT) {
-		displayPreset();
-		refreshStatus = 10;
-	} else {
-		drawMenu(fullState);
-	}
-}
-
-void FMDisplay::newMenuState(FullState* fullState) {
-	drawMenu(fullState);
-}
-
-void FMDisplay::newMenuSelect(FullState* fullState) {
-	drawMenu(fullState);
-}
 
 void FMDisplay::newParamValueFromExternal(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
 	if (currentRow == this->displayedRow) {
@@ -289,4 +201,120 @@ void FMDisplay::newcurrentRow(int newcurrentRow) {
 	this->displayedRow = newcurrentRow;
 }
 
+
+/*
+ * Menu Listener
+ */
+
+void FMDisplay::newSynthMode(FullState* fullState)  {
+	lcd->clear();
+	if (fullState->synthMode == SYNTH_MODE_EDIT) {
+		displayPreset();
+		refreshStatus = 10;
+	} else {
+		menuRow = 0;
+		newMenuState(fullState);
+	}
+}
+
+void FMDisplay::newMenuState(FullState* fullState) {
+	menuRow++;
+	if (fullState->currentMenuItem->hasSubMenu) {
+		for (int k=0; k<fullState->currentMenuItem->maxValue; k++) {
+			lcd->setCursor(k*5+1, menuRow-1);
+			lcd->print(MenuItemUtil::getMenuItem(fullState->currentMenuItem->subMenu[k])->name);
+		}
+	}
+
+	switch (fullState->currentMenuItem->menuState) {
+		case MENU_LOAD_CHOOSE_USER_BANK:
+		case MENU_SAVE_CHOOSE_USER_BANK:
+			lcd->setCursor(1, menuRow-1);
+			lcd->print("Bnk1 Bnk2 Bnk3");
+			break;
+		case MENU_ENTER_NAME:
+			lcd->setCursor(1, menuRow-1);
+			for (int k=0;k<12; k++) {
+				lcd->print(allChars[(int)fullState->name[k]]);
+			}
+			break;
+		case MENU_MIDI_CHANNEL:
+			lcd->setCursor(1, menuRow-1);
+			lcd->print("Midi channel:");
+			break;
+	}
+
+	newMenuSelect(fullState);
+
+}
+
+void FMDisplay::newMenuSelect(FullState* fullState) {
+	lcd->noCursor();
+
+	switch(fullState->currentMenuItem->menuState) {
+	case MAIN_MENU:
+	case MENU_LOAD:
+	case MENU_MIDI:
+	case MENU_MIDI_BANK:
+	case MENU_MIDI_PATCH:
+	case MENU_LOAD_CHOOSE_USER_BANK:
+	case MENU_SAVE_CHOOSE_USER_BANK:
+		for (int k=0; k<4; k++) {
+			lcd->setCursor(k*5, menuRow-1);
+			lcd->print(" ");
+		}
+		lcd->setCursor(fullState->menuSelect*5, menuRow-1);
+		lcd->print(">");
+		break;
+	case MENU_LOAD_USER_BANK:
+	case MENU_LOAD_INTERNAL_BANK:
+		eraseRow(menuRow-1);
+		lcd->setCursor(4, menuRow-1);
+		lcd->print(fullState->menuSelect);
+		lcd->print(" - ");
+		lcd->print(synthState.params.presetName);
+		break;
+	case MENU_DONE:
+		lcd->clear();
+		lcd->setCursor(8,1);
+		lcd->print("DONE");
+		break;
+	case MENU_SAVE_CHOOSE_PRESET:
+		eraseRow(menuRow-1);
+		lcd->setCursor(4, menuRow-1);
+		lcd->print(" Preset ");
+		lcd->print(fullState->menuSelect);
+		break;
+	case MENU_ENTER_NAME:
+		/*
+		lcd->setCursor(1, menuRow-1);
+		for (int k=0;k<12; k++) {
+			lcd->print(allChars[(int)fullState->name[k]]);
+		}*/
+		lcd->setCursor(1+fullState->menuSelect, menuRow-1);
+		lcd->print(allChars[(int)fullState->name[fullState->menuSelect]]);
+		lcd->setCursor(1+fullState->menuSelect, menuRow-1);
+		lcd->cursor();
+		break;
+	case MENU_MIDI_CHANNEL:
+		lcd->setCursor(15, menuRow-1);
+		lcd->print(fullState->menuSelect);
+		lcd->print(" ");
+		break;
+	default:
+		break;
+	}
+}
+
+void FMDisplay::eraseRow(int row) {
+	lcd->setCursor(0, row);
+	lcd->print("                    ");
+}
+
+void FMDisplay::menuBack(FullState* fullState) {
+	menuRow --;
+	eraseRow(menuRow);
+	// -2 because new menu will add 1...
+	menuRow--;
+}
 

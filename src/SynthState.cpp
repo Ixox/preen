@@ -255,17 +255,16 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
 		}
 };
 
-#define INTERNAL_LAST_BANK 3
 
 SynthState::SynthState() {
-	preset = 0;
-	bank = BANK_INTERNAL;
 	oscRow = 1;
 	envRow = 5;
 	matrixRow = 9;
 	lfoRow = 15;
 	// First default preset
 	fullState.synthMode = SYNTH_MODE_EDIT;
+	fullState.bankNumber = 0;
+	fullState.midiChannel = 0;
 	for (int k=0; k<12; k++) {
 		fullState.name[k] = 0;
 	}
@@ -276,6 +275,7 @@ SynthState::SynthState() {
 	}
 	// enable the i2c bus
 	i2c_master_enable(I2C1, 0);
+
 
 }
 
@@ -318,41 +318,27 @@ void SynthState::encoderTurned(int encoder, int ticks) {
 		if (encoder==0) {
 			int oldMenuSelect = fullState.menuSelect;
 			if (ticks>0) {
-				if (fullState.currentMenuState == MENU_LOAD_INTERNAL_BANK) {
-					if (fullState.menuSelect< INTERNAL_LAST_BANK) {
-						fullState.menuSelect = fullState.menuSelect + 1;
-						char* preset = (char*)&(presets[fullState.menuSelect].engine);
-						copyPatch(preset, (char*)&params, true);
-					}
-				} else if (fullState.currentMenuState == MENU_NONE || fullState.currentMenuState == MENU_LOAD) {
-					if (fullState.menuSelect<1) {
-						fullState.menuSelect = fullState.menuSelect + 1;
-					}
-				} else if (fullState.currentMenuState == MENU_ENTER_NAME) {
-					if (fullState.menuSelect<11) {
-						fullState.menuSelect = fullState.menuSelect + 1;
-					}
-				} else {
-					if (fullState.menuSelect<255) {
-						fullState.menuSelect = fullState.menuSelect + 1;
-					}
+				if (fullState.menuSelect< fullState.currentMenuItem->maxValue-1) {
+					fullState.menuSelect = fullState.menuSelect + 1;
 				}
 			} else if (ticks<0) {
 				if (fullState.menuSelect>0) {
 					fullState.menuSelect = fullState.menuSelect - 1;
 				}
-
-				if (fullState.currentMenuState == MENU_LOAD_INTERNAL_BANK) {
-					char* preset = (char*)&(presets[fullState.menuSelect].engine);
-					copyPatch(preset, (char*)&params, true);
-				}
 			}
 			if (fullState.menuSelect != oldMenuSelect) {
+				if (fullState.currentMenuItem->menuState == MENU_LOAD_INTERNAL_BANK) {
+					char* preset = (char*)&(presets[fullState.menuSelect].engine);
+					copyPatch(preset, (char*)&params, true);
+				} else if (fullState.currentMenuItem->menuState == MENU_LOAD_USER_BANK) {
+					readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
+				}
+
 				propagateNewMenuSelect();
 			}
 		} else if (encoder==3) {
-			if (fullState.currentMenuState == MENU_ENTER_NAME) {
-				fullState.name[fullState.menuSelect] = (fullState.name[fullState.menuSelect] + ticks);
+			if (fullState.currentMenuItem->menuState == MENU_ENTER_NAME) {
+				fullState.name[fullState.menuSelect] = (fullState.name[fullState.menuSelect] + (ticks>0? 1: -1));
 				if (fullState.name[fullState.menuSelect]<0) {
 					fullState.name[fullState.menuSelect]=0;
 				}
@@ -383,8 +369,8 @@ void SynthState::copyPatch(char* source, char* dest, bool propagate) {
 void SynthState::buttonPressed(int button) {
 	SynthMode oldSynthMode = fullState.synthMode;
 	int oldCurrentRow = currentRow;
-	int oldMenuSelect = fullState.menuSelect;
-	MenuState oldMenuState = fullState.currentMenuState;
+	// int oldMenuSelect = fullState.menuSelect;
+	MenuState oldMenuState = fullState.currentMenuItem->menuState;
 
 	if (fullState.synthMode == SYNTH_MODE_EDIT)  {
 		switch (button) {
@@ -436,102 +422,20 @@ void SynthState::buttonPressed(int button) {
 			break;
 		case BUTTON_MENUSELECT:
 			fullState.synthMode = SYNTH_MODE_MENU;
-			fullState.currentMenuState = MENU_NONE;
 			fullState.menuSelect = 0;
 			// allow undo event after trying some patches
 			copyPatch((char*)&params, (char*)&backupParams, true);
+			fullState.currentMenuItem = MenuItemUtil::getMenuItem(MAIN_MENU);
 			break;
 		}
 	} else {
-
 		switch (button) {
 		case BUTTON_MENUSELECT:
-			switch (fullState.currentMenuState) {
-			case MENU_NONE:
-				if (fullState.menuSelect == 0) {
-					fullState.currentMenuState = MENU_LOAD;
-				} else {
-					fullState.currentMenuState = MENU_SAVE;
-				}
-				fullState.menuSelect = 0;
-				break;
-			case MENU_LOAD:
-				if (fullState.menuSelect == 0) {
-					// Load first patch
-					copyPatch((char*)&presets[0], (char*)&params, true);
-					fullState.currentMenuState = MENU_LOAD_INTERNAL_BANK;
-				} else {
-					fullState.currentMenuState = MENU_LOAD_USER_BANK;
-				}
-				fullState.menuSelect = 0;
-				break;
-			case MENU_SAVE:
-				fullState.currentMenuState = MENU_ENTER_NAME;
-				fullState.presetNumber = fullState.menuSelect;
-				fullState.menuSelect = 0;
-				for (int k=0; k<12 && params.presetName[k] != 0; k++) {
-					for (int j=0; j<getLength(allChars); j++) {
-						if (params.presetName[k] == allChars[j]) {
-							fullState.name[k] = j;
-						}
-					}
-				}
-				break;
-			case MENU_ENTER_NAME:
-			{
-				int length;
-				for (length=12; fullState.name[length-1] == 0; length--);
-				for (int k=0; k<length; k++) {
-					params.presetName[k] = allChars[(int)fullState.name[k]];
-				}
-				params.presetName[length] = '\0';
-				pruneToEEPROM(fullState.presetNumber);
-				fullState.currentMenuState = MENU_DONE;
-				break;
-			}
-			case MENU_LOAD_INTERNAL_BANK:
-				copyPatch((char*)&params, (char*)&backupParams, true);
-				fullState.currentMenuState = MENU_DONE;
-				break;
-			case MENU_LOAD_USER_BANK:
-				readFromEEPROM(fullState.menuSelect);
-				copyPatch((char*)&params, (char*)&backupParams, true);
-				fullState.currentMenuState = MENU_DONE;
-				break;
-			case MENU_DONE:
-				fullState.synthMode = SYNTH_MODE_EDIT;
-				break;
-			default:
-				break;
-			}
+			fullState.currentMenuItem = newMenuSelect();
 			break;
 		case BUTTON_BACK:
-			switch (fullState.currentMenuState) {
-			case MENU_SAVE:
-				fullState.menuSelect = 1;
-				fullState.currentMenuState = MENU_NONE;
-				break;
-			case MENU_LOAD:
-				fullState.menuSelect = 0;
-				fullState.currentMenuState = MENU_NONE;
-				break;
-			case MENU_LOAD_INTERNAL_BANK:
-			case MENU_LOAD_USER_BANK:
-				fullState.menuSelect = 0;
-				fullState.currentMenuState = MENU_LOAD;
-				// put back old patch (has been overwritten if a new patch has been loaded)
-				copyPatch((char*)&backupParams, (char*)&params, true);
-				break;
-			case MENU_NONE:
-				fullState.synthMode = SYNTH_MODE_EDIT;
-				// put back old patch (has been overwritten if a new patch has been loaded)
-				copyPatch((char*)&backupParams, (char*)&params, true);
-				break;
-			case MENU_ENTER_NAME:
-				fullState.menuSelect = fullState.presetNumber;
-				fullState.currentMenuState = MENU_SAVE;
-				break;
-			}
+			fullState.currentMenuItem = menuBack();
+			propagateMenuBack();
 			break;
 		case BUTTON_DUMP:
 			{
@@ -560,26 +464,29 @@ void SynthState::buttonPressed(int button) {
 				// MENU MODE
 		}
 	}
+/*
 	if (oldMenuSelect != fullState.menuSelect) {
 		propagateNewMenuSelect();
 	}
+	*/
 	if (oldSynthMode != fullState.synthMode) {
 		propagateNewSynthMode();
+		return;
 	}
 	if (oldCurrentRow != currentRow) {
 		propagateNewCurrentRow(currentRow);
 	}
-	if (oldMenuState != fullState.currentMenuState) {
+	if (oldMenuState != fullState.currentMenuItem->menuState) {
 		propagateNewMenuState();
 	}
 }
 
 
-void SynthState::pruneToEEPROM(int preset) {
+void SynthState::pruneToEEPROM(int bankNumber, int preset) {
 	uint8 deviceaddress = 0b1010000;
 	i2c_msg msgWrite1, msgWrite2;
 	int block1Size = 64;
-	int address = preset * 128;
+	int address = preset*128 +  bankNumber * 128*128;
 	uint8 bufWrite1[block1Size + 2];
 
 	bufWrite1[0] = (uint8)((int)address >> 8);
@@ -614,9 +521,9 @@ void SynthState::pruneToEEPROM(int preset) {
 
 
 
-void SynthState::readFromEEPROM(int preset) {
+void SynthState::readFromEEPROM(int bankNumber, int preset) {
 	uint8 deviceaddress = 0b1010000;
-	int address = preset*128;
+	int address = preset*128 +  bankNumber * 128*128;
 	uint8 bufReadAddress[2];
 	i2c_msg msgsRead[2];
 	int block1Size = 64;
@@ -668,4 +575,122 @@ void SynthState::setNewValue(int row, int number, int newValue) {
 	}
 	int oldValue = ((char*)&params)[index];
 	propagateNewParamValueFromExternal(row, number, param, oldValue, newValue);
+}
+
+MenuItem* SynthState::newMenuSelect() {
+	MenuItem* rMenuItem = 0;
+
+	if (fullState.currentMenuItem->hasSubMenu ) {
+		rMenuItem = MenuItemUtil::getMenuItem(fullState.currentMenuItem->subMenu[fullState.menuSelect]);
+	} else {
+		rMenuItem = MenuItemUtil::getMenuItem(fullState.currentMenuItem->subMenu[0]);
+	}
+
+	switch (fullState.currentMenuItem->menuState) {
+	case MAIN_MENU:
+		break;
+	case MENU_LOAD:
+		switch (rMenuItem->menuState) {
+		case MENU_LOAD_INTERNAL_BANK:
+			copyPatch((char*)&presets[0], (char*)&params, true);
+			break;
+		case MENU_LOAD_USER_BANK:
+			break;
+		}
+		break;
+	case MENU_MIDI:
+		switch (rMenuItem->menuState) {
+		case MENU_MIDI_CHANNEL:
+			fullState.menuSelect = fullState.midiChannel;
+			// We return now, don't want to set menuSelect to 0
+			return rMenuItem;
+			break;
+		}
+		break;
+	case MENU_MIDI_CHANNEL:
+		fullState.midiChannel = fullState.menuSelect;
+		break;
+	case MENU_SAVE_CHOOSE_USER_BANK:
+		fullState.bankNumber = fullState.menuSelect;
+		break;
+	case MENU_LOAD_CHOOSE_USER_BANK:
+		fullState.bankNumber = fullState.menuSelect;
+		readFromEEPROM(fullState.bankNumber, 0);
+		break;
+	case MENU_LOAD_INTERNAL_BANK:
+		copyPatch((char*)&params, (char*)&backupParams, true);
+		break;
+	case MENU_LOAD_USER_BANK:
+		readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
+		copyPatch((char*)&params, (char*)&backupParams, true);
+		break;
+	case MENU_SAVE_CHOOSE_PRESET:
+		for (int k=0; k<12 && params.presetName[k] != 0; k++) {
+			for (int j=0; j<getLength(allChars); j++) {
+				if (params.presetName[k] == allChars[j]) {
+					fullState.name[k] = j;
+				}
+			}
+		}
+		fullState.presetNumber = fullState.menuSelect;
+		break;
+	case MENU_ENTER_NAME:
+	{
+		int length;
+		for (length=12; fullState.name[length-1] == 0; length--);
+		for (int k=0; k<length; k++) {
+			params.presetName[k] = allChars[(int)fullState.name[k]];
+		}
+		params.presetName[length] = '\0';
+		pruneToEEPROM(fullState.bankNumber, fullState.presetNumber);
+		break;
+	}
+	case MENU_DONE:
+		fullState.synthMode = SYNTH_MODE_EDIT;
+		break;
+
+	default:
+		break;
+	}
+
+	fullState.menuSelect = 0;
+	return rMenuItem;
+}
+
+
+MenuItem* SynthState::menuBack() {
+	MenuItem* rMenuItem = 0;
+	fullState.menuSelect = 0;
+
+	switch (fullState.currentMenuItem->menuState) {
+	case MENU_ENTER_NAME:
+		fullState.menuSelect = fullState.presetNumber;
+		break;
+	case MENU_SAVE_CHOOSE_PRESET:
+		fullState.menuSelect = fullState.bankNumber;
+		break;
+	case MENU_LOAD_USER_BANK:
+		fullState.menuSelect = fullState.bankNumber;
+		copyPatch((char*)&backupParams, (char*)&params, true);
+		break;
+	case MENU_LOAD_INTERNAL_BANK:
+		copyPatch((char*)&backupParams, (char*)&params, true);
+		break;
+	case MAIN_MENU:
+		fullState.synthMode = SYNTH_MODE_EDIT;
+		// put back old patch (has been overwritten if a new patch has been loaded)
+		break;
+	case MENU_SAVE_CHOOSE_USER_BANK:
+	case MENU_LOAD_CHOOSE_USER_BANK:
+	case MENU_MIDI:
+	case MENU_MIDI_PATCH:
+		fullState.menuSelect = 2;
+		break;
+	case MENU_MIDI_BANK:
+		fullState.menuSelect = 1;
+		break;
+	}
+
+		rMenuItem = MenuItemUtil::getMenuItem(fullState.currentMenuItem->menuBack);
+	return rMenuItem;
 }
