@@ -242,6 +242,10 @@ void FMDisplay::newMenuState(FullState* fullState) {
 			lcd->setCursor(1, menuRow-1);
 			lcd->print("Midi channel:");
 			break;
+		case MENU_FORMAT_BANK:
+			lcd->setCursor(1, menuRow-1);
+			lcd->print("Confirm Format ?");
+			break;
 	}
 
 	newMenuSelect(fullState);
@@ -298,7 +302,7 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 		break;
 	case MENU_MIDI_CHANNEL:
 		lcd->setCursor(15, menuRow-1);
-		lcd->print(fullState->menuSelect);
+		lcd->print(fullState->menuSelect+1);
 		lcd->print(" ");
 		break;
 	default:

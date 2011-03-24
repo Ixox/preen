@@ -23,8 +23,8 @@ struct MenuItem allMenus[] = {
 		MAIN_MENU,
 		"",
 		true,
-		3,
-		{MENU_LOAD, MENU_SAVE_CHOOSE_USER_BANK, MENU_MIDI },
+		4,
+		{MENU_LOAD, MENU_SAVE_CHOOSE_USER_BANK, MENU_MIDI, MENU_FORMAT_BANK },
 		MAIN_MENU
 	},
 	// === LOAD
@@ -98,7 +98,7 @@ struct MenuItem allMenus[] = {
 		MENU_MIDI_CHANNEL,
 		"Chan",
 		false,
-		15,
+		16,
 		{MENU_DONE},
 		MENU_MIDI
 	},
@@ -158,6 +158,15 @@ struct MenuItem allMenus[] = {
 		0,
 		{MENU_DONE},
 		MENU_DONE
-	}
+	},
+	// ==  FORMAT BANK
+	{
+		MENU_FORMAT_BANK,
+		"Frmt",
+		true,
+		1,
+		{MENU_DONE},
+		MAIN_MENU
+	},
 };
 

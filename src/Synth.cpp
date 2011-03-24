@@ -117,7 +117,7 @@ void Synth::nextSample() {
 				this->lfo[step32].nextValue();
 				break;
 			case 4:
-				this->matrix.resetDestination();
+				this->matrix.resetUsedDestination();
 				break;
 			case 5:
 			case 6:

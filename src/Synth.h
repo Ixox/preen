@@ -64,6 +64,11 @@ public:
 				env4.loadADSR();
 			}
 		}
+		if (type == SYNTH_PARAM_MATRIX_LISTENER && encoder == 3) {
+			// Reset all destination
+			matrix.resetAllDestination();
+		}
+
 	}
 
     void newcurrentRow(int newcurrentRow)  {

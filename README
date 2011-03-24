@@ -55,7 +55,7 @@ Update March 20th
 
 Update March 19th
 . Compile against "i2c-wip" libmaple branch
-. Add EEPROM Load and Save (24LC256)
+. Add EEPROM Load and Save (24LC512)
 . Can edit preset names with 2 encoders
 . New 4 ops algo
 . Number of voices depenndent of the algo
@@ -100,11 +100,15 @@ Later V2.0 :
 
 --------------------------------------------
 Hardware (to be detailed)
-. LCD LiquidCrystal compatible 4x20
-. 2 74HC165 to plug buttons and rotary encoder
-  (I used the DIN schema from midibox.org).
-. 2 condensators and 1 resistor to make the 1st order Low pass filter.
-. Midi plugs
+. LCD LiquidCrystal compatible 4x20 + variable resistance for contrast
+. 2 74HC165 to plug buttons and rotary encoders  (I used the DIN schema from midibox.org).
+. 4 rotary encodeers + 7 buttons
+. 2 condensators and 2 resistor to make the 2nd order Low pass filter.
+. 1 chimical condo to remove the constant voltage bias
+. 1 chip of 2 omp amps (MC32202): impedance adaptation + volume
+. Midi plugs + optocoupler 6N138 + diodes
+. 24lc512 to save the preset
+
 .... Full schema soon... 
 
 ---------------------------------------------

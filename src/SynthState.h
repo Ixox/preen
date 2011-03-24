@@ -213,6 +213,7 @@ public:
 
 	void pruneToEEPROM(int bankNumber, int preset);
 	void readFromEEPROM(int bankNumber, int preset);
+	void formatEEPROM();
 
 	void dumpLine(int a, int b, int c, int d) {
 		SerialUSB.print("{ ");

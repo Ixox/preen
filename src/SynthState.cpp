@@ -519,6 +519,47 @@ void SynthState::pruneToEEPROM(int bankNumber, int preset) {
 
 }
 
+void SynthState::formatEEPROM() {
+
+	uint8 deviceaddress = 0b1010000;
+	for (int bankNumber=0; bankNumber<3; bankNumber++) {
+		for (int preset =0; preset<128; preset++) {
+
+			i2c_msg msgWrite1, msgWrite2;
+			int block1Size = 64;
+			int address = preset*128 +  bankNumber * 128*128;
+			uint8 bufWrite1[block1Size + 2];
+
+			bufWrite1[0] = (uint8)((int)address >> 8);
+			bufWrite1[1] = (uint8)((int)address & 0xff);
+			for (int k=0; k<block1Size; k++) {
+				bufWrite1[k+2] = ((uint8*)&presets[bankNumber])[k];
+			}
+			/* Write test pattern  */
+			msgWrite1.addr = deviceaddress;
+			msgWrite1.flags = 0;
+			msgWrite1.length = block1Size +2;
+			msgWrite1.data = bufWrite1;
+			i2c_master_xfer(I2C1, &msgWrite1, 1);
+			delay(5);
+
+			int block2Size = sizeof(struct AllSynthParams) - block1Size;
+			uint8 bufWrite2[block2Size + 2];
+			address = address + block1Size;
+			bufWrite2[0] = (uint8)((int)address >> 8);
+			bufWrite2[1] = (uint8)((int)address & 0xff);
+			for (int k=0; k<block2Size; k++) {
+				bufWrite2[k+2] = ((uint8*)&presets[bankNumber])[k+block1Size];
+			}
+			msgWrite2.addr = deviceaddress;
+			msgWrite2.flags = 0;
+			msgWrite2.length = block2Size + 2;
+			msgWrite2.data = bufWrite2;
+			i2c_master_xfer(I2C1, &msgWrite2, 1);
+			delay(5);
+		}
+	}
+}
 
 
 void SynthState::readFromEEPROM(int bankNumber, int preset) {
@@ -648,7 +689,9 @@ MenuItem* SynthState::newMenuSelect() {
 	case MENU_DONE:
 		fullState.synthMode = SYNTH_MODE_EDIT;
 		break;
-
+	case MENU_FORMAT_BANK:
+		formatEEPROM();
+		break;
 	default:
 		break;
 	}
@@ -680,17 +723,20 @@ MenuItem* SynthState::menuBack() {
 		fullState.synthMode = SYNTH_MODE_EDIT;
 		// put back old patch (has been overwritten if a new patch has been loaded)
 		break;
-	case MENU_SAVE_CHOOSE_USER_BANK:
+	case MENU_FORMAT_BANK:
+		fullState.menuSelect = 3;
+		break;
 	case MENU_LOAD_CHOOSE_USER_BANK:
 	case MENU_MIDI:
 	case MENU_MIDI_PATCH:
 		fullState.menuSelect = 2;
 		break;
+	case MENU_SAVE_CHOOSE_USER_BANK:
 	case MENU_MIDI_BANK:
 		fullState.menuSelect = 1;
 		break;
 	}
 
-		rMenuItem = MenuItemUtil::getMenuItem(fullState.currentMenuItem->menuBack);
+	rMenuItem = MenuItemUtil::getMenuItem(fullState.currentMenuItem->menuBack);
 	return rMenuItem;
 }

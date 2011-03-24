@@ -34,7 +34,13 @@ public:
 	void reinitUsage();
 	void reinitUsage(int k, int oldValue, int value);
 
-	void resetDestination() {
+	void resetAllDestination() {
+		for (int k=0; k< DESTINATION_MAX; k++) {
+			currentDestinations[k] = 0;
+		}
+	}
+
+	void resetUsedDestination() {
 		for (int k=0; k< MATRIX_SIZE; k++) {
 			currentDestinations[(int)rows[k].destination] = 0;
 		}
