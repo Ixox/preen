@@ -10,7 +10,7 @@
                                             
 V0.0 pre alpha
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-March 20th 2011
+March 27th 2011
 
 -----------------------------------------
 Frequency modulation synth for the Maple :
@@ -24,7 +24,7 @@ as published by the Free Software Foundation version 3.
 Preen Current Features:
 
 . 5 FM voices for 3 ops algo - 4 voices for 4 ops algo
-. Each voice 3 FM operators (sin only for the moment) 
+. Each voice 3/4 FM operators (sin only for the moment) 
 . Each operator has an ADSR envelope
 . 4 LFO (saw, square, ramp)
 . 6 rows modulation matrix
@@ -42,6 +42,12 @@ Preen Current Features:
 
 --------------------------------------------
 DONE
+Update March 27th
+. New menu - keyboard velocity sensitivity - number of voice
+. Laverage the 11 bit resolution
+. Refactor parameters - much easier to add param rows
+. Mix1 params ready to be able to mix serveral "final" oscillator
+. Fixes env refresh when browsing preset/User banks
 
 Update March 23th
 . Refactor menu - much easier to add new menu/submenu
@@ -82,8 +88,9 @@ Update March 5th 2011
 --------------------------------------------
 
 To do before v0.1 (in no order) :
-. Full midi implementation
-	. Implement all midi events
+. Add synth param : glide when voice = 1.
+. Ne able to mix final osc
+. Implement all midi events
 . More Algos (4 operators)
 . More presets
 . Documentation
@@ -106,7 +113,7 @@ Hardware (to be detailed)
 . 2 condensators and 2 resistor to make the 2nd order Low pass filter.
 . 1 chimical condo to remove the constant voltage bias
 . 1 chip of 2 omp amps (MC32202): impedance adaptation + volume
-. Midi plugs + optocoupler 6N138 + diodes
+. Midi Jack + optocoupler 6N138 + diodes
 . 24lc512 to save the preset
 
 .... Full schema soon... 

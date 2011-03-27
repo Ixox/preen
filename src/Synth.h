@@ -26,7 +26,7 @@
 #include "wirish.h"
 #include "LiquidCrystal.h"
 
-#define NUMBER_OF_VOICES 5
+#define MAX_NUMBER_OF_VOICES 5
 #define NUMBER_OF_LFOS 4
 #define NUMBER_OF_ENV 4
 
@@ -45,30 +45,30 @@ public:
 	int getSample();
 	void nextSample();
 
-	void newParamValueFromExternal(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+	void newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
 		newParamValue(type, currentRow, encoder, param, oldValue, newValue);
 	}
 
-	void newParamValue(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
-		if (type == SYNTH_PARAM_ENVELOPE_LISTENER) {
-			if (currentRow == 5) {
-				env1.loadADSR();
-			}
-			if (currentRow == 6) {
-				env2.loadADSR();
-			}
-			if (currentRow == 7) {
-				env3.loadADSR();
-			}
-			if (currentRow == 8) {
-				env4.loadADSR();
-			}
-		}
-		if (type == SYNTH_PARAM_MATRIX_LISTENER && encoder == 3) {
+	void newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+	    if (type == SYNTH_PARAM_TYPE_ENV) {
+            switch (currentRow) {
+            case ROW_ENV1:
+                env1.loadADSR();
+                break;
+            case ROW_ENV2:
+                env2.loadADSR();
+                break;
+            case ROW_ENV3:
+                env3.loadADSR();
+                break;
+            case ROW_ENV4:
+                env4.loadADSR();
+                break;
+            }
+	    } else if (type == SYNTH_PARAM_TYPE_MATRIX && encoder == ENCODER_MATRIX_DEST) {
 			// Reset all destination
 			matrix.resetAllDestination();
 		}
-
 	}
 
     void newcurrentRow(int newcurrentRow)  {
@@ -77,7 +77,7 @@ public:
 
 private:
 	Matrix matrix;
-	Voice voices[NUMBER_OF_VOICES];
+	Voice voices[MAX_NUMBER_OF_VOICES];
 	unsigned int voiceIndex;
 	int cpt;
 

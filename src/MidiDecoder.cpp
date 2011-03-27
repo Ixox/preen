@@ -214,11 +214,11 @@ void MidiDecoder::sendMidiEvent() {
 	}
 }
 
-void MidiDecoder::newParamValueFromExternal(SynthParamListenerType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+void MidiDecoder::newParamValueFromExternal(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
 	// Do nothing here...
 }
 
-void MidiDecoder::newParamValue(SynthParamListenerType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+void MidiDecoder::newParamValue(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
 	// Send control change
 	struct ControlChange cc;
 	cc.control = 0;

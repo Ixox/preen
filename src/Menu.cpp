@@ -18,7 +18,7 @@
 
 #include "Menu.h"
 
-struct MenuItem allMenus[] = {
+struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 	{
 		MAIN_MENU,
 		"",

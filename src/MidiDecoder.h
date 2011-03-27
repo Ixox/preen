@@ -71,8 +71,8 @@ public:
 	void newByte(unsigned char byte);
 	void sendMidiEvent();
 	void setSynth(Synth* synth);
-	void newParamValueFromExternal(SynthParamListenerType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
-    void newParamValue(SynthParamListenerType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
+	void newParamValueFromExternal(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
+    void newParamValue(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newcurrentRow(int newcurrentRow) {}
     void sendOneMidiEvent();
 

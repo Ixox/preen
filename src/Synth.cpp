@@ -32,7 +32,7 @@ Synth::Synth(void)
 	for (int k=0; k<NUMBER_OF_LFOS; k++) {
 		lfo[k].init(k, &this->matrix, (SourceEnum)(LFO1 + k));
 	}
-	for (int k=0; k<NUMBER_OF_VOICES; k++) {
+	for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
 		voices[k].init(&this->matrix, &this->env1, &this->env2, &this->env3, &this->env4, &this->osc1, &this->osc2, &this->osc3, &this->osc4);
 	}
 }
@@ -44,10 +44,11 @@ Synth::~Synth(void)
 
 
 void Synth::noteOn(char note, char velocity) {
-	int numberOfNote = NUMBER_OF_VOICES;
-	if (synthState.params.engine.algo >= ALGO4) {
-		numberOfNote --;
-	}
+	int numberOfNote = synthState.params.engine1.numberOfVoice;
+
+	int zeroVelo = (16-synthState.params.engine1.velocity)*8;
+    velocity = zeroVelo + velocity*(128-zeroVelo)/128;
+
 	int freeNote = -1;
 
 	for (int k=0; k<numberOfNote && freeNote==-1; k++) {
@@ -74,7 +75,7 @@ void Synth::noteOn(char note, char velocity) {
 }
 
 void Synth::noteOff(char note) {
-	for (int k=0; k<NUMBER_OF_VOICES; k++) {
+	for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
 		if (voices[k].getNote() == note) {
 			voices[k].noteOff();
 		}
@@ -82,13 +83,13 @@ void Synth::noteOff(char note) {
 }
 
 void Synth::allNoteOff() {
-	for (int k=0; k<NUMBER_OF_VOICES; k++) {
+	for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
 		voices[k].noteOff();
 	}
 }
 
 bool Synth::isPlaying() {
-	for (int k=0; k<NUMBER_OF_VOICES; k++) {
+	for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
 		if (voices[k].isPlaying()) {
 			return true;
 		}
@@ -99,10 +100,12 @@ bool Synth::isPlaying() {
 
 int Synth::getSample() {
 	int sample = 0;
-	for (int k=0; k<NUMBER_OF_VOICES; k++) {
+	for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
 		sample += voices[k].getSample();
 	}
-	return sample / NUMBER_OF_VOICES;
+	return sample / synthState.params.engine1.numberOfVoice;
+	// 4 voices :
+	//return sample >> 2;
 }
 
 void Synth::nextSample() {
@@ -146,7 +149,7 @@ void Synth::nextSample() {
 		}
 
 		// Compute sample
-	for (int k=0; k<NUMBER_OF_VOICES; k++) {
+	for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
 		this->voices[k].nextSample();
 	}
 	cpt++;

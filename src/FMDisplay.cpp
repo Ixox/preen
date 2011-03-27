@@ -118,9 +118,9 @@ displaySignedChar:
 			lcd->print("     ");
 		} else {
 			// Freq
-			if (encoder == 2) goto displayFloat44;
+			if (encoder == ENCODER_OSC_FREQ) goto displayFloat44;
 			// Fine tune
-			if (encoder == 3) goto displaySignedChar;
+			if (encoder == ENCODER_OSC_FTUNE) goto displaySignedChar;
 		}
 		break;
 	}
@@ -144,9 +144,9 @@ void FMDisplay::refreshAllScreenByStep() {
 		int row = synthState.getCurrentRow();
 		lcd->setCursor(0,1);
 		lcd->print(allParameterRows.row[row]->rowName);
-		if (row>0) {
-			lcd->print(" ");
-			lcd->print(getRowNumberRelative(row));
+		if (row> ROW_ENGINE_LAST) {
+            lcd->print(" ");
+            lcd->print(getRowNumberRelative(row));
 		}
 	} else if (refreshStatus>4) {
 		updateEncoderName(synthState.getCurrentRow(), refreshStatus -5);
@@ -174,20 +174,20 @@ void FMDisplay::displayPreset() {
 // Update FMDisplay regarding the callbacks from SynthState
 
 
-void FMDisplay::newParamValueFromExternal(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+void FMDisplay::newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
 	if (currentRow == this->displayedRow) {
 		updateEncoderValue(currentRow, encoder, param, newValue);
 	}
 }
 
-void FMDisplay::newParamValue(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param,  int oldValue, int newValue) {
+void FMDisplay::newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param,  int oldValue, int newValue) {
 	if (synthState.getSynthMode() == SYNTH_MODE_EDIT) {
 		if (currentRow != this->displayedRow) {
 			newcurrentRow(currentRow);
 			return;
 		}
 		// If we change frequency type of OScillator rows, it's a bit special....
-		if (currentRow>=1 && currentRow<=4 && encoder == 1) {
+		if (SynthState::getListenerType(currentRow)==SYNTH_PARAM_TYPE_OSC && encoder == ENCODER_OSC_FTYPE) {
 			refreshStatus = 10;
 			return;
 		}

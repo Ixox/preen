@@ -22,6 +22,8 @@
 #include "Osc.h"
 #include "Env.h"
 
+extern int max;
+extern int min;
 
 
 class Voice
@@ -40,7 +42,7 @@ public:
 
 	void nextSample() {
 		if (playing) {
-			switch (synthState.params.engine.algo) {
+			switch (synthState.params.engine1.algo) {
 			case ALGO1:
 				/*
 
@@ -73,11 +75,13 @@ public:
 				oscState1.frequency =  freq + freq2 + oscState1.mainFrequency;
 				env1->nextSample(envState1);
 				osc1->nextSample(oscState1);
-				currentSample = osc1->getSample(oscState1)*env1->getAmp(envState1);
+				currentSample = env1->getAmp(envState1); //*env1->getAmp(envState1);
+
+				currentSample *= osc1->getSample(oscState1);
 				currentSample  >>= 15;
+
 				currentSample *= velocity;
 				currentSample >>=7;
-
 
 				if (env1->isDead(envState1)) {
 					endNoteOfBeginNextOne();
@@ -220,6 +224,8 @@ public:
 				if (env1->isDead(envState1) && env2->isDead(envState2)) {
 					endNoteOfBeginNextOne();
 				}
+
+
 				}
 				break;
 			case ALGO5:
@@ -286,13 +292,13 @@ public:
 
 
 	void updateModulationIndex1() {
-		IM1 = synthState.params.engine.modulationIndex1 + (matrix->getDestination(INDEX_MODULATION1)>>4);
+		IM1 = synthState.params.engine2.modulationIndex1 + (matrix->getDestination(INDEX_MODULATION1)>>4);
 	}
 	void updateModulationIndex2() {
-		IM2 = synthState.params.engine.modulationIndex2 + (matrix->getDestination(INDEX_MODULATION2)>>4);
+		IM2 = synthState.params.engine2.modulationIndex2 + (matrix->getDestination(INDEX_MODULATION2)>>4);
 	}
 	void updateModulationIndex3() {
-		IM3 = synthState.params.engine.modulationIndex3 + (matrix->getDestination(INDEX_MODULATION3)>>4);
+		IM3 = synthState.params.engine2.modulationIndex3 + (matrix->getDestination(INDEX_MODULATION3)>>4);
 	}
 
 	void endNoteOfBeginNextOne() {

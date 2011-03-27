@@ -19,13 +19,13 @@
 #ifndef SYNTHPARAMLISTENER_H_
 #define SYNTHPARAMLISTENER_H_
 
-enum SynthParamListenerType {
-	SYNTH_PARAM_ENGINE_LISTENER = 0,
-	SYNTH_PARAM_OSCILLATOR_LISTENER,
-	SYNTH_PARAM_ENVELOPE_LISTENER,
-	SYNTH_PARAM_MATRIX_LISTENER,
-	SYNTH_PARAM_LFO_LISTENER,
-	SYNTH_PARAM_INVALID_LISTENER
+enum SynthParamType {
+	SYNTH_PARAM_TYPE_ENGINE = 0,
+	SYNTH_PARAM_TYPE_OSC,
+	SYNTH_PARAM_TYPE_ENV,
+	SYNTH_PARAM_TYPE_MATRIX,
+	SYNTH_PARAM_TYPE_LFO,
+	SYNTH_PARAM_TYPE_INVALID
 };
 
 enum ParameterDisplayType {
@@ -48,8 +48,8 @@ struct ParameterDisplay {
 
 class SynthParamListener {
 public:
-    virtual void newParamValue(SynthParamListenerType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) = 0;
-    virtual void newParamValueFromExternal(SynthParamListenerType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) = 0;
+    virtual void newParamValue(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) = 0;
+    virtual void newParamValueFromExternal(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) = 0;
     virtual void newcurrentRow(int newcurrentRow) = 0;
 
 	SynthParamListener* nextListener;

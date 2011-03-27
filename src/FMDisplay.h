@@ -43,15 +43,18 @@ public:
 		return length;
 	}
 	int getRowNumberRelative(int row) {
-		if (row<5) {
-			return row;
-		} else if (row<9) {
-			return row - 4;
-		} else if (row<15) {
-			return row- 8;
-		} else {
-			return row - 14;
-		}
+		if (row <= ROW_ENGINE_LAST) {
+			return row - ROW_ENGINE_FIRST +1;
+		} else if (row <= ROW_OSC_LAST) {
+            return row - ROW_OSC_FIRST +1;
+        } else if (row <= ROW_ENV_LAST) {
+            return row - ROW_ENV_FIRST +1;
+        } else if (row <= ROW_MATRIX_LAST) {
+            return row - ROW_MATRIX_FIRST +1;
+        } else if (row <= ROW_LFO_LAST) {
+            return row - ROW_LFO_FIRST +1;
+        }
+		return 0;
 	}
 
 	boolean needRefresh() { return refreshStatus != 0; }
@@ -65,8 +68,8 @@ public:
 	void menuBack(FullState* fullState);
 	void eraseRow(int row);
 
-    void newParamValueFromExternal(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
-    void newParamValue(SynthParamListenerType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
+    void newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
+    void newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newcurrentRow(int newcurrentRow);
 
 

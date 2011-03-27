@@ -31,7 +31,7 @@ enum EnvState {
 
 struct EnvData {
 	// life cycle of the env
-	int index;
+	unsigned int index;
 	// Higher sample before release
 	int releaseSample;
 	// State of the env
@@ -54,7 +54,7 @@ public:
 
 		attack = envState->attack * envState->attack;
 		decay = envState->decay * envState->decay;
-		sustain = envState->sustain << 8;
+		sustain = envState->sustain << 7;
 		release = envState->release * envState->release;
 	}
 
@@ -122,9 +122,9 @@ public:
 
 private:
 	// ADSR
-	int attack;
-	int decay;
-	int sustain;
-	int release;
+	unsigned int attack;
+	unsigned int decay;
+	unsigned int sustain;
+	unsigned int release;
 };
 

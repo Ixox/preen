@@ -34,12 +34,28 @@ Encoders		   encoders;
 FMDisplay          fmDisplay;
 LiquidCrystal      lcd(23,24, 25,26,27,28,29,30,31,32);
 
-uint16 currentSample = 1024;
+int mainCpt = 0;
+
+
+uint16 currentSample = 1050;
+/*
+int max = 1024;
+int min = 1024;
+*/
 
 void IRQSendSample() {
 	pwmWrite(AUDIO_PIN , currentSample);
 	synth.nextSample();
-	currentSample = (uint16)(synth.getSample()>>5) + 1024;
+	currentSample = (uint16)(synth.getSample()>>5) + 1050;
+/*
+	if (currentSample > max) {
+        max = currentSample ;
+    }
+    if (currentSample < min) {
+        min = currentSample ;
+    }
+    */
+
 }
 
 
@@ -90,20 +106,22 @@ void setup()
 	Timer1.setChannel3Mode(TIMER_PWM);
 	pinMode(AUDIO_PIN, PWM);
 
-	for (int k=0; k<1024; k++) {
+	for (int k=0; k<1050; k++) {
 		pwmWrite(AUDIO_PIN , k);
 		delay(1);
 	}
 
-	Timer1.setCompare1(2100);
-	Timer1.setChannel1Mode(TIMER_OUTPUTCOMPARE);
-	Timer1.attachCompare1Interrupt(IRQSendSample);
 
 	delay(1000);
+
+    // At 2048 it should be ok to set the new one.
+    Timer1.setCompare1(2090);
+    Timer1.setChannel1Mode(TIMER_OUTPUTCOMPARE);
+    Timer1.attachCompare1Interrupt(IRQSendSample);
+
     fmDisplay.init(&lcd);
 }
 
-int mainCpt = 0;
 
 void loop() {
 	mainCpt++;
@@ -125,7 +143,15 @@ void loop() {
 	if (fmDisplay.needRefresh() && ((mainCpt & 0x7) == 0)) {
 		fmDisplay.refreshAllScreenByStep();
 	}
-
+/*
+	if ((mainCpt & 0xff) == 0) {
+        lcd.setCursor(0,0);
+        lcd.print(max);
+        lcd.setCursor(6,0);
+        lcd.print(min);
+        lcd.print("  ");
+    }
+*/
 	delayMicroseconds(300);
 }
 
