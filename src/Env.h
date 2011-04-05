@@ -59,6 +59,7 @@ public:
 	}
 
 	int getAmp(struct EnvData& env) {
+	    int rAmp = 0;
 		switch (env.envState) {
 		case ENV_STATE_DEAD:
 			return 0;
@@ -87,12 +88,33 @@ public:
 		case ENV_STATE_ON_S:
 			return sustain;
 		case ENV_STATE_ON_R:
-			if (env.index< release) {
+/*
+            int tmp;
+		    asm volatile("  cmp %4, %3\n\t"
+		        "   beq 1\n\t"
+		        "   mov %4, %2\n\t"
+		        "   mul %4, %4, %2\n\t"
+		        "   sdiv %4, %4, %3\n\t"
+                "   mov %0, %2\n\t"
+		        "   sub %0, %0, %4\n\t"
+		        "   b 2\n\t"
+		        "1:\n\t"
+		        "   mov %1, #4\n\t"
+		        "2:\n\t"
+                "nop\n\t"
+		            : "=r" (rAmp), "=r "(env.envState)
+		            : "r" (&env), "r" (release), "r" (tmp));
+*/
+
+
+            if (env.index< release) {
 				return env.releaseSample - env.index * env.releaseSample / release;
 			}
 			env.envState = ENV_STATE_DEAD;
+		    break;
 		}
-		return 0;
+//		asm volatile("mov %0, %0, ror #1" : "=r" (rAmp) );
+		return rAmp;
 	}
 
 	void noteOn(struct EnvData& env) {

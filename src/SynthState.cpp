@@ -59,7 +59,7 @@ struct ParameterRowDisplay engine3ParameterRow = {
         }
 };
 
-const char* oscShapeNames []=  {"sin ", "off " } ;
+const char* oscShapeNames []=  {"sin ", "s^2 ", "1/2s", "spos", "off" } ;
 const char* oscTypeNames [] = { "keyb", "fixe"};
 struct ParameterRowDisplay oscParameterRow = {
         "Oscillator",
@@ -288,6 +288,30 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 3, 0, 0} ,
                 { 0, 4, 0, 0} ,
                 "Medieval"
+        },
+        {
+                { 3, 4, 8, 0} ,
+                { 14, 20, 0, 1} ,
+                { 128, 128, 128, 0} ,
+                { 0, 0, 16, 0} ,
+                { 0, 0, 8, 0} ,
+                { 0, 0, 24, 0} ,
+                { 0, 0, 4, 0} ,
+                { 0, 120, 0, 120} ,
+                { 0, 136, 0, 130} ,
+                { 0, 120, 0, 100} ,
+                { 0, 88, 0, 81} ,
+                { 7, 8, 5, 0} ,
+                { 7, 24, 6, 0} ,
+                { 1, 9, 1, 0} ,
+                { 5, 40, 2, 0} ,
+                { 5, 6, 4, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 83, 0, 0} ,
+                { 0, 20, 0, 0} ,
+                { 0, 3, 0, 0} ,
+                { 0, 4, 0, 0} ,
+                "Klong"
         },
         {
                 { 1, 3, 28, 7} ,

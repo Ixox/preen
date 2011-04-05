@@ -85,5 +85,9 @@ void Voice::noteOff() {
 	env4->noteOff(envState4);
 }
 
+void Voice::TESTASM() {
+    osc3->nextSample(oscState3);
+}
+
 
 

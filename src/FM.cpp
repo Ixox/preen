@@ -37,16 +37,18 @@ LiquidCrystal      lcd(23,24, 25,26,27,28,29,30,31,32);
 int mainCpt = 0;
 
 
-uint16 currentSample = 1050;
+uint16 currentSample = 1024;
 /*
 int max = 1024;
 int min = 1024;
 */
 
+int bias = 0;
+
 void IRQSendSample() {
-	pwmWrite(AUDIO_PIN , currentSample);
-	synth.nextSample();
-	currentSample = (uint16)(synth.getSample()>>5) + 1050;
+    pwmWrite(AUDIO_PIN , currentSample);
+    synth.nextSample();
+	currentSample = (uint16)(synth.getSample()>>5) + 1024;
 /*
 	if (currentSample > max) {
         max = currentSample ;
@@ -76,18 +78,19 @@ void setup()
     lcd.print("Powered by Leaflabs");
 
 
-	// synthstate is updated by encoder change
+    // Dependencies injection
+
+    // synthstate is updated by encoder change
     encoders.insertListener(&synthState);
 
     // fmDisplay and synth needs to be aware of synthState changes
     synthState.insertParamListener(&fmDisplay);
     synthState.insertParamListener(&synth);
     synthState.insertParamListener(&midiDecoder);
-
     synthState.insertMenuListener(&fmDisplay);
 
-
 	midiDecoder.setSynth(&synth);
+    fmDisplay.init(&lcd);
 /*
 	int cpt= 0;
 	while (cpt<20) {
@@ -101,48 +104,47 @@ void setup()
 
 	Timer1.setOverflow(2197);
 	Timer1.setPrescaleFactor(1);
+    pwmWrite(AUDIO_PIN , 0);
 
 
 	Timer1.setChannel3Mode(TIMER_PWM);
+    pwmWrite(AUDIO_PIN , 0);
 	pinMode(AUDIO_PIN, PWM);
 
-	for (int k=0; k<1050; k++) {
-		pwmWrite(AUDIO_PIN , k);
-		delay(1);
-	}
-
-
-	delay(1000);
-
     // At 2048 it should be ok to set the new one.
-    Timer1.setCompare1(2090);
+    Timer1.setCompare1(1024);
     Timer1.setChannel1Mode(TIMER_OUTPUTCOMPARE);
     Timer1.attachCompare1Interrupt(IRQSendSample);
 
-    fmDisplay.init(&lcd);
+    for (int k=0; k<12; k++) {
+        synth.noteOn(60+k,100);
+        delay(50);
+        synth.noteOff(60+k);
+        delay(5);
+    }
 }
 
 
 void loop() {
+
 	mainCpt++;
 
-	if ((mainCpt&0x3) == 0) {
-		unsigned int numberOfEvents = Serial2.available();
-		while (numberOfEvents>0) {
-			midiDecoder.newByte(Serial2.read());
-			numberOfEvents--;
-		}
-	}
-
-	encoders.checkStatus();
+    while (Serial2.available()) {
+        midiDecoder.newByte(Serial2.read());
+    }
 
 	if ((mainCpt&0xf) == 1) {
 		midiDecoder.sendOneMidiEvent();
 	}
 
-	if (fmDisplay.needRefresh() && ((mainCpt & 0x7) == 0)) {
+	if (fmDisplay.needRefresh() && ((mainCpt & 0x3) == 0)) {
 		fmDisplay.refreshAllScreenByStep();
 	}
+
+	// 16*25 micros of dealy to remove hissing noise (????).....
+    encoders.checkStatus();
+
+
 /*
 	if ((mainCpt & 0xff) == 0) {
         lcd.setCursor(0,0);
@@ -152,7 +154,7 @@ void loop() {
         lcd.print("  ");
     }
 */
-	delayMicroseconds(300);
+//	delayMicroseconds(300);
 }
 
 // Force init to be called *first*, i.e. before static object allocation.

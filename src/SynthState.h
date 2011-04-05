@@ -86,6 +86,9 @@ enum Algorithm {
 
 enum OscShape {
 	OSC_SHAPE_SIN = 0,
+    OSC_SHAPE_SIN2,
+    OSC_SHAPE_SIN3,
+    OSC_SHAPE_SIN4,
 	OSC_SHAPE_OFF
 };
 

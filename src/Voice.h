@@ -313,6 +313,7 @@ public:
 	void noteOnWithoutPop(short note, char velocity, unsigned int index);
 	void noteOn(short note, char velocity, unsigned int index);
 	void noteOff();
+	void TESTASM();
 
 	bool isReleased() { return this->released; }
 	bool isPlaying() { return this->playing; }

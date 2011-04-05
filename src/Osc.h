@@ -21,6 +21,7 @@
 
 #define SAMPLE_RATE_x_8 264144
 
+
 extern short sinTable[];
 extern int frequenciesx8[];
 
@@ -50,8 +51,28 @@ public:
 */
 
 	int getSample(struct OscState &oscState) {
-		return sinTable[oscState.index >> 7]; // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
-	}
+	    switch(oscillator->shape) {
+	    case 0:
+	        return sinTable[oscState.index >> 7]; // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
+	    case 1:
+	    {
+	        int s = sinTable[oscState.index >> 7];
+	        return (s*s) >> 16;
+	    }
+        case 2:
+            if (oscState.index<0x1ffff) {
+                return sinTable[oscState.index >> 7]; // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
+            } else {
+                return 0;
+            }
+            break;
+        case 3:
+            oscState.index &= 0x1ffff;
+            return sinTable[oscState.index >> 7];
+            break;
+	    }
+	    return 0;
+	};
 
 	void nextSample(struct OscState &oscState) {
 		// oscState.index = (oscState.index + (((oscState.frequency + (this->matrix->getDestination(destFreq)>>4)) << 16) / SAMPLE_RATE_x_8 )) & 0xffff;

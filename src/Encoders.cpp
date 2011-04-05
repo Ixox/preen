@@ -19,13 +19,14 @@
 
 
 Encoders::Encoders() {
-	char encoderPins[] = {12, 13, 14, 15, 4, 5, 6, 7};
-	char buttonPins[] = { 8, 9, 3, 10, 11, 2, 1};
+	char encoderPins[] = { 2,3,0,1,10,11, 8,9 };
+	char buttonPins[] = { 7,6,5,4, 12,14,13 };
 	firstListener= 0;
 
 	pinMode(HC165_DATA, INPUT);
 	pinMode(HC165_CLOCK, OUTPUT);
 	pinMode(HC165_LOAD, OUTPUT);
+
 	digitalWrite(HC165_CLOCK, 0);
 	digitalWrite(HC165_LOAD, 0);
 
@@ -50,7 +51,6 @@ Encoders::~Encoders() {
 }
 
 
-
 void Encoders::checkStatus() {
 	// Copy the values in the HC165 registers
 	digitalWrite(HC165_LOAD, 0);
@@ -60,7 +60,9 @@ void Encoders::checkStatus() {
 	int registerBits = 0;
 	for(int i=0; i<16; i++) {
 		digitalWrite(HC165_CLOCK, 0);
+        delayMicroseconds(20);
 		registerBits |= (digitalRead(HC165_DATA) << i) ;
+        delayMicroseconds(5);
 		digitalWrite(HC165_CLOCK, 1);
 	}
 
@@ -89,7 +91,6 @@ void Encoders::checkStatus() {
 		encoderOldBit1[k] = b1;
 	}
 
-
 	for (int k=0; k<NUMBER_OF_BUTTONS; k++) {
 		bool b1 = ((registerBits & buttonBit[k]) == 0);
 
@@ -98,6 +99,5 @@ void Encoders::checkStatus() {
 		}
 		buttonOldState[k] = b1;
 	}
-
 	cpt++;
 }

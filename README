@@ -10,7 +10,7 @@
                                             
 V0.0 pre alpha
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-March 27th 2011
+April 5th 2011
 
 -----------------------------------------
 Frequency modulation synth for the Maple :
@@ -30,18 +30,24 @@ Preen Current Features:
 . 6 rows modulation matrix
 . 5 FM algo available... to be explained
 
+. Load and save preset to EEPROM.
+. Read and send midi
+. LCD is updated in realtime showing the parameter you modify.
+. The full synth state (19 * 4 parameters) can be edited with the 4 Encoders throw the 19 rows.
+. The 5 buttons allow easy navigation into the 19 rows (1 engine, 4 osc, 4 env, 6 matrix rows, 4 lfos)
+
 . Sampling rate : 
   32768 Hz (makes division faster ;-) for audio
   1024 Hz for LFO and Matrix
 
-. The full synth state (19 * 4 parameters) can be edited with the 4 Encoders throw the 19 rows.
-. The 5 buttons allow easy navigation into the 19 rows (1 engine, 4 osc, 4 env, 6 matrix rows, 4 lfos)
-. LCD is updated in realtime showing the parameter you modify.
-. Load and save preset to EEPROM.
-. Read and send midi
 
 --------------------------------------------
 DONE
+Update 	April 5th
+. Add 3 variations around sinusoid for oscillator (many new sounds possible)
+. Add delay during 74hc165 reading to get rid of a HISS noise.
+. Hardware wise : validate the PCB.
+
 Update March 27th
 . New menu - keyboard velocity sensitivity - number of voice
 . Laverage the 11 bit resolution
@@ -97,6 +103,8 @@ To do before v0.1 (in no order) :
 . Clean hardware design
 . Hide parameters not used by the current ALGO.
 . SYSEX pach/bank receive/dump
+. increase matrix size and add Control Change as source
+
 
 Later V1.0 : 
 . a nice PCB and a Box
