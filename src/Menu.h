@@ -19,7 +19,7 @@
 #ifndef MENU_H_
 #define MENU_H_
 
-#define INTERNAL_LAST_BANK 6
+#define INTERNAL_LAST_BANK 7
 
 
 enum SynthMode {
@@ -58,12 +58,12 @@ struct MenuItem {
 	bool hasSubMenu;
 	short maxValue;
 	MenuState subMenu[4];
-	MenuState menuBack;
 };
 
 struct FullState {
 	SynthMode synthMode;
 	int menuSelect;
+    int previousMenuSelect;
 	int presetNumber;
 	int bankNumber;
 	MenuItem* currentMenuItem;
@@ -87,6 +87,36 @@ public:
 		}
 		return 0;
 	}
+
+    static MenuItem* getParentMenuItem(MenuState ms) {
+        MenuItem* item = &allMenus[0];
+        int cpt = 0;
+        while (item->menuState != LAST_MENU) {
+            for (int k=0; k<4; k++) {
+                if (item->subMenu[k] == ms) {
+                    return item;
+                }
+            }
+            cpt ++;
+            item = &allMenus[cpt];
+        }
+        return 0;
+    }
+
+    static int getParentMenuSelect(MenuState ms) {
+        MenuItem* item = &allMenus[0];
+        int cpt = 0;
+        while (item->menuState != LAST_MENU) {
+            for (int k=0; k<4; k++) {
+                if (item->subMenu[k] == ms) {
+                    return k;
+                }
+            }
+            cpt ++;
+            item = &allMenus[cpt];
+        }
+        return 0;
+    }
 };
 
 

@@ -84,6 +84,14 @@ enum Algorithm {
 	ALGO_END
 };
 
+struct ShowUpAlgo {
+    unsigned char osc;
+    unsigned char im;
+    unsigned char mix;
+};
+
+extern struct ShowUpAlgo showUp[5];
+
 enum OscShape {
 	OSC_SHAPE_SIN = 0,
     OSC_SHAPE_SIN2,
@@ -140,7 +148,7 @@ struct Engine2Params {
     uchar modulationIndex1;
     uchar modulationIndex2;
     uchar modulationIndex3;
-    uchar notused;
+    uchar modulationFeedback;
 };
 
 struct Engine3Params {

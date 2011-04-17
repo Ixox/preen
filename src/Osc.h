@@ -139,7 +139,7 @@ void Osc<number>::newNote(struct OscState& oscState, int note) {
 	oscState.index = 1 << number;
 	switch (oscillator->frequencyType) {
 	case OSC_FT_KEYBOARD:
-		oscState.mainFrequency = (frequenciesx8[note] * (oscillator->frequencyMul) >> 4) + oscillator->detune;
+		oscState.mainFrequency = ((frequenciesx8[note] * oscillator->frequencyMul) >> 4) + oscillator->detune;
 		break;
 	case OSC_FT_FIXE:
 		oscState.mainFrequency = (oscillator->frequencyMul << 7) + oscillator->detune;

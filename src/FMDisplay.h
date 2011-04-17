@@ -23,6 +23,9 @@
 #include "LiquidCrystal.h"
 #include "Menu.h"
 
+
+
+
 class FMDisplay : public SynthParamListener, public SynthMenuListener {
 public:
 	FMDisplay();
@@ -32,6 +35,7 @@ public:
 	inline void updateEncoderValue(int row, int encoder, ParameterDisplay* param, int newValue);
 	inline void updateEncoderName(int row, int encoder);
 	inline void printValueWithSpace(int value);
+	inline boolean shouldThisValueShowUp(int row, int encoder);
 
 
 
@@ -80,6 +84,7 @@ private:
 	int displayedRow;
 
 	int menuRow;
+
 };
 
 #endif /* FMDISPLAY_H_ */

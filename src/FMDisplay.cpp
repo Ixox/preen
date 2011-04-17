@@ -18,6 +18,7 @@
 #include "FMDisplay.h"
 
 
+
 FMDisplay::FMDisplay() {
 	refreshStatus = 10;
 }
@@ -46,10 +47,27 @@ void FMDisplay::printValueWithSpace(int value) {
 	}
 }
 
+
+boolean FMDisplay::shouldThisValueShowUp(int row, int encoder) {
+    int algo = synthState.params.engine1.algo;
+    if (row == ROW_ENGINE2 && (encoder+1)> showUp[algo].im && encoder!=3) {
+        return false;
+    }
+    if (row == ROW_ENGINE3 && (encoder+1)> showUp[algo].mix) {
+        return false;
+    }
+
+    return true;
+}
+
 void FMDisplay::updateEncoderValue(int row, int encoder, ParameterDisplay* param, int newValue) {
+    lcd->setCursor(encoder*5, 3);
 
+    if (!shouldThisValueShowUp(row, encoder)) {
+        lcd->print("    ");
+        return;
+    }
 
-	lcd->setCursor(encoder*5, 3);
 
 	switch (param->displayType) {
 	case DISPLAY_TYPE_STRINGS :
@@ -108,7 +126,7 @@ displaySignedChar:
 	case DISPLAY_TYPE_OSC_FREQUENCY:
 	{
 		// Hack... to deal with the special case of the fixe frequency.....
-		int oRow = row -1;
+		int oRow = row - ROW_OSC_FIRST;
 		OscillatorParams* oParam = (OscillatorParams*)&synthState.params.osc1;
 		OscFrequencyType ft = (OscFrequencyType)oParam[oRow].frequencyType;
 
@@ -131,8 +149,12 @@ displaySignedChar:
 }
 
 void FMDisplay::updateEncoderName(int row, int encoder) {
+    lcd->setCursor(encoder*5, 2);
+    if (!shouldThisValueShowUp(row, encoder)) {
+        lcd->print("    ");
+        return;
+    }
 	struct ParameterRowDisplay* paramRow = allParameterRows.row[row];
-	lcd->setCursor(encoder*5, 2);
 	lcd->print(paramRow->paramName[encoder]);
 }
 

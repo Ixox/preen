@@ -46,31 +46,37 @@ public:
 			case ALGO1:
 				/*
 
-				 	 |---|  |---|
-				 	 | 2 |  | 3 |
-				 	 |---|  |---|
-				       |      |
-				       \------/
+				 	 .---.  .---.  ^
+				 	 | 2 |  | 3 |  | Feedback
+				 	 '---'  '---'  v
+				       |IM1   |IM2
+				       '------'
 				           |
-				         |---|
+				         .---.
 				         | 1 |
-				         |---|
+				         '---'
 
 				 */
 				{
+				// FEEDBACK on osciallator 3
+				// >> 3 for the modulationFeedBack and >> 4 to cut -32000/32000 to -2000 / 2000 (may have to be adjusted)
+				oscState3.frequency =  ((synthState.params.engine2.modulationFeedback * this->feedback) >> 7) + oscState3.mainFrequency;
 				osc2->nextSample(oscState2);
 				env2->nextSample(envState2);
 				osc3->nextSample(oscState3);
 				env3->nextSample(envState3);
+
 				int freq = osc2->getSample(oscState2) * env2->getAmp(envState2);
 				freq >>= 19;
-				freq *= oscState2.mainFrequency; // Convertion in Hertz
+				freq *= oscState2.mainFrequency;
 				freq >>= 15;
 				freq *= IM1;
+
 				int freq2 = osc3->getSample(oscState3) * env3->getAmp(envState3);
 				freq2 >>= 19;
 				freq2 *= oscState3.mainFrequency;
 				freq2 >>= 15;
+                this->feedback = freq2;
 				freq2 *= IM2;
 				oscState1.frequency =  freq + freq2 + oscState1.mainFrequency;
 				env1->nextSample(envState1);
@@ -90,16 +96,16 @@ public:
 				}
 			case ALGO2:
 				/*
-				         |---|
+				         .---.
 				         | 3 |
-				         |---|
+				         '---'
 				           |
-				       /------\
-				       |      |
-				 	 |---|  |---|
+				       .------.
+				       |IM1   |IM2
+				 	 .---.  .---.
 				 	 | 1 |  | 2 |
-				 	 |---|  |---|
-
+				 	 '---'  '---'
+                       |Mix1  |Mix2
 				 */
 				{
 				osc3->nextSample(oscState3);
@@ -119,9 +125,13 @@ public:
 				osc1->nextSample(oscState1);
 
 				int currentSample2 = osc2->getSample(oscState2)*env2->getAmp(envState2);
+                currentSample2  >>= 7; //  7 for mixOsc2
+				currentSample2 *= synthState.params.engine3.mixOsc2;
 				currentSample2  >>= 15;
 
 				currentSample = osc1->getSample(oscState1)*env1->getAmp(envState1);
+                currentSample  >>= 7; // 7 for mixOsc1
+				currentSample *= synthState.params.engine3.mixOsc1;
 				currentSample  >>= 15;
 				currentSample += currentSample2;
 
@@ -134,17 +144,17 @@ public:
 				break;
 			case ALGO3:
 				/*
-				         |---|
+				         .---.
 				         | 3 |
-				         |---|
-				           |
-				         |---|
+				         '---'
+				           |IM2
+				         .---.
 				         | 2 |
-				         |---|
-				           |
-				         |---|
+				         '---'
+				           |IM1
+				         .---.
 				         | 1 |
-				         |---|
+				         '---'
 
 				 */
 				{
@@ -177,14 +187,14 @@ public:
 				break;
 			case ALGO4:
 				/*
-				 	 |---|  |---|
+				 	 .---.  .---.
 				 	 | 2 |  | 4 |
-				 	 |---|  |---|
-                       |      |
-				 	 |---|  |---|
+				 	 '---'  '---'
+                       |IM1   |IM2
+				 	 .---.  .---.
 				 	 | 1 |  | 2 |
-				 	 |---|  |---|
-
+				 	 '---'  '---'
+                       |Mix1  |Mix2
 
 				 */
 				{
@@ -213,9 +223,13 @@ public:
 				osc2->nextSample(oscState2);
 
 				int currentSample2 = osc2->getSample(oscState2)*env2->getAmp(envState2);
+                currentSample2  >>= 7; // 7 for mixOsc2
+				currentSample2 *= synthState.params.engine3.mixOsc2;
 				currentSample2  >>= 15;
 
 				currentSample = osc1->getSample(oscState1)*env1->getAmp(envState1);
+                currentSample  >>= 7; // 7 for mixOsc2
+				currentSample *= synthState.params.engine3.mixOsc1;
 				currentSample  >>= 15;
 				currentSample += currentSample2;
 
@@ -230,21 +244,21 @@ public:
 				break;
 			case ALGO5:
 				/*
-				         |---|
+				         .---.
 				         | 4 |
-				         |---|
-				           |
-				         |---|
+				         '---'
+				           |IM3
+				         .---.
 				         | 3 |
-				         |---|
-				           |
-				         |---|
+				         '---'
+				           |IM2
+				         .---.
 				         | 2 |
-				         |---|
-				           |
-				         |---|
+				         '---'
+				           |IM1
+				         .---.
 				         | 1 |
-				         |---|
+				         '---'
 
 				 */
 				{
@@ -334,6 +348,8 @@ private:
 	Matrix* matrix;
 	// optimization
 	static int IM1, IM2, IM3;
+	// feedback is per voice
+	int feedback;
 
 	EnvData envState1;
 	EnvData envState2;

@@ -39,12 +39,12 @@ struct ParameterRowDisplay engine1ParameterRow = {
 
 struct ParameterRowDisplay engine2ParameterRow = {
         "Modulation" ,
-        { "IM1 ", "IM2 ", "IM3 ", "    "},
+        { "IM1 ", "IM2 ", "IM3 ", "Fdbk"},
         {
                 {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames },
                 {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames },
                 {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames },
-                {0, 255, DISPLAY_TYPE_NONE, nullNames }
+                {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames }
         }
 };
 
@@ -59,7 +59,7 @@ struct ParameterRowDisplay engine3ParameterRow = {
         }
 };
 
-const char* oscShapeNames []=  {"sin ", "s^2 ", "1/2s", "spos", "off" } ;
+const char* oscShapeNames []=  {"sin ", "s^2 ", "1/2s", "spos", "off " } ;
 const char* oscTypeNames [] = { "keyb", "fixe"};
 struct ParameterRowDisplay oscParameterRow = {
         "Oscillator",
@@ -138,6 +138,13 @@ struct AllParameterRowsDisplay allParameterRows = {
 };
 
 
+struct ShowUpAlgo showUp[5] = {
+        { 3, 2, 0},
+        { 3, 2, 2},
+        { 3, 2, 0},
+        { 4, 2, 2},
+        { 4, 3, 0}
+};
 
 
 /******************** PRESET **********************/
@@ -147,7 +154,7 @@ struct AllParameterRowsDisplay allParameterRows = {
 const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) = {
         {
                 // Engine
-                { ALGO1, 5, 14, 0},
+                { ALGO1, 4, 14, 0},
                 { 16, 21, 0, 0 },
                 { 128, 128, 128,0 },
 
@@ -180,7 +187,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
         ,
         {
                 // Engine
-                { 1, 5, 14, 0 },
+                { 1, 4, 14, 0 },
                 { 3, 28, 0, 0 },
                 { 128, 128, 128, 0 },
                 // OSC1
@@ -209,7 +216,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
         },
         {
                 // Engine
-                { 0, 5, 0, 0},
+                { 0, 4, 0, 0},
                 { 20, 28, 0, 0 } ,
                 { 128, 128, 128,0 },
                 // OSC1
@@ -238,7 +245,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
         },
         {
                 // Engine
-                { 0, 5, 14, 0} ,
+                { 0, 4, 14, 0} ,
                 { 15, 3 , 0, 0},
                 { 128, 128, 128,0 },
                 // OSC1
@@ -266,7 +273,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 "Old and Sad"
         },
         {
-                { 0, 5, 14, 0},
+                { 0, 4, 14, 0},
                 { 11, 28, 0, 0} ,
                 { 128, 128, 128,0 },
                 { 0, 0, 16, 0} ,
@@ -312,6 +319,30 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 3, 0, 0} ,
                 { 0, 4, 0, 0} ,
                 "Klong"
+        },
+        {
+            { 0, 2, 10, 0} ,
+            { 16, 36, 0, 81} ,
+            { 128, 128, 128, 0} ,
+            { 0, 0, 16, 0} ,
+            { 0, 0, 8, 0} ,
+            { 3, 1, 8, 2} ,
+            { 4, 0, 3, 0} ,
+            { 0, 253, 0, 49} ,
+            { 0, 0, 255, 100} ,
+            { 0, 33, 0, 100} ,
+            { 3, 100, 100, 100} ,
+            { 7, 16, 5, 0} ,
+            { 5, 64, 1, 0} ,
+            { 1, 0, 1, 0} ,
+            { 0, 0, 0, 0} ,
+            { 0, 0, 0, 0} ,
+            { 0, 0, 0, 0} ,
+            { 0, 36, 0, 0} ,
+            { 0, 20, 0, 0} ,
+            { 0, 3, 0, 0} ,
+            { 0, 4, 0, 0} ,
+            "Bass 1"
         },
         {
                 { 1, 3, 28, 7} ,
@@ -470,6 +501,9 @@ void SynthState::buttonPressed(int button) {
                     currentRow = ROW_ENGINE_FIRST;
                 }
             }
+            if (currentRow == ROW_ENGINE3 && showUp[params.engine1.algo].mix == 0) {
+                currentRow = ROW_ENGINE_FIRST;
+            }
             engineRow = currentRow;
             break;
         case BUTTON_OSC:
@@ -477,9 +511,9 @@ void SynthState::buttonPressed(int button) {
                 currentRow = oscRow;
             } else {
                 currentRow ++;
-                if (currentRow>ROW_OSC_LAST) {
-                    currentRow = ROW_OSC_FIRST;
-                }
+            }
+            if (currentRow>= (ROW_OSC_FIRST + showUp[params.engine1.algo].osc)) {
+                currentRow = ROW_OSC_FIRST;
             }
             oscRow = currentRow;
             break;
@@ -488,9 +522,9 @@ void SynthState::buttonPressed(int button) {
                 currentRow = envRow;
             } else {
                 currentRow ++;
-                if (currentRow>ROW_ENV_LAST) {
-                    currentRow = ROW_ENV_FIRST;
-                }
+            }
+            if (currentRow>= (ROW_ENV_FIRST + showUp[params.engine1.algo].osc)) {
+                currentRow = ROW_ENV_FIRST;
             }
             envRow = currentRow;
             break;
@@ -537,7 +571,7 @@ void SynthState::buttonPressed(int button) {
         {
             SerialUSB.println("New Sound....");
             dumpLine(params.engine1.algo, params.engine1.numberOfVoice, params.engine1.velocity, params.engine1.glide );
-            dumpLine(params.engine2.modulationIndex1, params.engine2.modulationIndex2, params.engine2.modulationIndex3, params.engine2.notused );
+            dumpLine(params.engine2.modulationIndex1, params.engine2.modulationIndex2, params.engine2.modulationIndex3, params.engine2.modulationFeedback );
             dumpLine(params.engine3.mixOsc1, params.engine3.mixOsc2, params.engine3.mixOsc3, params.engine3.notused );
             OscillatorParams * o = (OscillatorParams *)(&(params.osc1));
             for (int k=0; k<4; k++) {
@@ -794,6 +828,8 @@ MenuItem* SynthState::afterButtonPressed() {
         break;
     }
 
+    // Save menu select for menuBack Action
+    fullState.previousMenuSelect = fullState.menuSelect;
     fullState.menuSelect = 0;
     return rMenuItem;
 }
@@ -801,7 +837,9 @@ MenuItem* SynthState::afterButtonPressed() {
 
 MenuItem* SynthState::menuBack() {
     MenuItem* rMenuItem = 0;
-    fullState.menuSelect = 0;
+
+    // default menuSelect value
+    fullState.menuSelect = MenuItemUtil::getParentMenuSelect(fullState.currentMenuItem->menuState);
 
     switch (fullState.currentMenuItem->menuState) {
     case MENU_ENTER_NAME:
@@ -822,19 +860,14 @@ MenuItem* SynthState::menuBack() {
         // put back old patch (has been overwritten if a new patch has been loaded)
         break;
     case MENU_FORMAT_BANK:
-        fullState.menuSelect = 3;
-        break;
     case MENU_LOAD_CHOOSE_USER_BANK:
     case MENU_MIDI:
     case MENU_MIDI_PATCH:
-        fullState.menuSelect = 2;
-        break;
     case MENU_SAVE_CHOOSE_USER_BANK:
     case MENU_MIDI_BANK:
-        fullState.menuSelect = 1;
         break;
     }
 
-    rMenuItem = MenuItemUtil::getMenuItem(fullState.currentMenuItem->menuBack);
+    rMenuItem = MenuItemUtil::getParentMenuItem(fullState.currentMenuItem->menuState);
     return rMenuItem;
 }

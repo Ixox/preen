@@ -10,7 +10,7 @@
                                             
 V0.0 pre alpha
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-April 5th 2011
+April 17th 2011
 
 -----------------------------------------
 Frequency modulation synth for the Maple :
@@ -23,26 +23,33 @@ as published by the Free Software Foundation version 3.
 
 Preen Current Features:
 
-. 5 FM voices for 3 ops algo - 4 voices for 4 ops algo
-. Each voice 3/4 FM operators (sin only for the moment) 
-. Each operator has an ADSR envelope
+. 5 FM algo available... using 3 or 4 oscs per voice
+. Up to 5 FM voices 
+. Each oscillator has an ADSR envelope
 . 4 LFO (saw, square, ramp)
 . 6 rows modulation matrix
-. 5 FM algo available... to be explained
 
 . Load and save preset to EEPROM.
 . Read and send midi
 . LCD is updated in realtime showing the parameter you modify.
-. The full synth state (19 * 4 parameters) can be edited with the 4 Encoders throw the 19 rows.
+. The full synth state (19 * 4 parameters) can be edited with the 4 Encoders through the 19 rows.
 . The 5 buttons allow easy navigation into the 19 rows (1 engine, 4 osc, 4 env, 6 matrix rows, 4 lfos)
+. 2 buttons for midi (save/load patch, select midi channel)...
 
 . Sampling rate : 
-  32768 Hz (makes division faster ;-) for audio
-  1024 Hz for LFO and Matrix
+  32768 Hz (makes division faster ;-) for audio. 
+  1024 Hz for LFO and Modulation Matrix.
 
+. 6th order active low pass bessel filter to get rid (as much as possible) of the aliasing
 
 --------------------------------------------
 DONE
+Update April 17th
+. Feedback added (ALGO1 OSC3 for the moment). 
+. Mix added when several last stage osc (ALGO2 and ALGO4)
+. Show only parameter relevant to curent algo
+. Frequency type (fix / Keyboard) dispay bug fix.
+
 Update 	April 5th
 . Add 3 variations around sinusoid for oscillator (many new sounds possible)
 . Add delay during 74hc165 reading to get rid of a HISS noise.
@@ -95,18 +102,16 @@ Update March 5th 2011
 
 To do before v0.1 (in no order) :
 . Add synth param : glide when voice = 1.
-. Ne able to mix final osc
 . Implement all midi events
-. More Algos (4 operators)
-. More presets
-. Documentation
-. Clean hardware design
-. Hide parameters not used by the current ALGO.
 . SYSEX pach/bank receive/dump
 . increase matrix size and add Control Change as source
 
 
 Later V1.0 : 
+. Assembly for osc and env to catch up with the 5 concurent voices.
+. More Algos (4 operators)
+. More presets
+. Documentation
 . a nice PCB and a Box
 
 Later V2.0 : 
@@ -118,9 +123,9 @@ Hardware (to be detailed)
 . LCD LiquidCrystal compatible 4x20 + variable resistance for contrast
 . 2 74HC165 to plug buttons and rotary encoders  (I used the DIN schema from midibox.org).
 . 4 rotary encodeers + 7 buttons
-. 2 condensators and 2 resistor to make the 2nd order Low pass filter.
-. 1 chimical condo to remove the constant voltage bias
-. 1 chip of 2 omp amps (MC32202): impedance adaptation + volume
+. condensators and resistor to make the 2nd order Low pass filter.
+. 2 chimical condo to remove the constant voltage bias in filter chain
+. 1 chip of 4 omp amps (MC32204): 1 for virtual ground + 3 2nd order filter
 . Midi Jack + optocoupler 6N138 + diodes
 . 24lc512 to save the preset
 
