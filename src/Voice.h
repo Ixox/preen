@@ -48,7 +48,7 @@ public:
 
 				 	 .---.  .---.  ^
 				 	 | 2 |  | 3 |  | Feedback
-				 	 '---'  '---'  v
+				 	 '---'  '---'  |
 				       |IM1   |IM2
 				       '------'
 				           |
@@ -96,9 +96,10 @@ public:
 				}
 			case ALGO2:
 				/*
-				         .---.
-				         | 3 |
-				         '---'
+
+                         .---.  ^
+                         | 3 |  | Feedback
+                         '---'  |
 				           |
 				       .------.
 				       |IM1   |IM2
@@ -108,19 +109,24 @@ public:
                        |Mix1  |Mix2
 				 */
 				{
-				osc3->nextSample(oscState3);
+                // FEEDBACK on osciallator 3
+                // >> 3 for the modulationFeedBack and >> 4 to cut -32000/32000 to -2000 / 2000 (may have to be adjusted)
+                oscState3.frequency =  ((synthState.params.engine2.modulationFeedback * this->feedback) >> 7) + oscState3.mainFrequency;
+
+			    osc3->nextSample(oscState3);
 				env3->nextSample(envState3);
 				int freq = osc3->getSample(oscState3) * env3->getAmp(envState3);
 				freq >>= 19;
 				freq *= oscState3.mainFrequency;
 				freq >>= 15;
-				freq *= IM1;
+                this->feedback = freq;
 
-				oscState2.frequency =  freq + oscState2.mainFrequency;
+
+				oscState2.frequency =  freq*IM2 + oscState2.mainFrequency;
 				env2->nextSample(envState2);
 				osc2->nextSample(oscState2);
 
-				oscState1.frequency =  freq + oscState1.mainFrequency;
+				oscState1.frequency =  freq*IM1 + oscState1.mainFrequency;
 				env1->nextSample(envState1);
 				osc1->nextSample(oscState1);
 
@@ -144,9 +150,9 @@ public:
 				break;
 			case ALGO3:
 				/*
-				         .---.
-				         | 3 |
-				         '---'
+                         .---.  ^
+                         | 3 |  | Feedback
+                         '---'  |
 				           |IM2
 				         .---.
 				         | 2 |
@@ -158,12 +164,17 @@ public:
 
 				 */
 				{
-				osc3->nextSample(oscState3);
+                // FEEDBACK on osciallator 3
+                // >> 3 for the modulationFeedBack and >> 4 to cut -32000/32000 to -2000 / 2000 (may have to be adjusted)
+                oscState3.frequency =  ((synthState.params.engine2.modulationFeedback * this->feedback) >> 7) + oscState3.mainFrequency;
+
+                osc3->nextSample(oscState3);
 				env3->nextSample(envState3);
 				int freq = osc3->getSample(oscState3) * env3->getAmp(envState3);
 				freq >>= 19;
 				freq *= oscState3.mainFrequency;
 				freq >>= 15;
+                this->feedback = freq;
 				freq *= IM2;
 				oscState2.frequency =  freq + oscState2.mainFrequency;
 				osc2->nextSample(oscState2);
@@ -187,9 +198,9 @@ public:
 				break;
 			case ALGO4:
 				/*
-				 	 .---.  .---.
-				 	 | 2 |  | 4 |
-				 	 '---'  '---'
+				 	 .---.  .---. ^
+				 	 | 3 |  | 4 | | Feedback
+				 	 '---'  '---' |
                        |IM1   |IM2
 				 	 .---.  .---.
 				 	 | 1 |  | 2 |
@@ -198,7 +209,12 @@ public:
 
 				 */
 				{
-				osc3->nextSample(oscState3);
+
+                // FEEDBACK on oscillator 4
+                // >> 3 for the modulationFeedBack and >> 4 to cut -32000/32000 to -2000 / 2000 (may have to be adjusted)
+                oscState4.frequency =  ((synthState.params.engine2.modulationFeedback * this->feedback) >> 7) + oscState4.mainFrequency;
+
+                osc3->nextSample(oscState3);
 				env3->nextSample(envState3);
 				int freq = osc3->getSample(oscState3) * env3->getAmp(envState3);
 				freq >>= 19;
@@ -216,6 +232,7 @@ public:
 				freq >>= 19;
 				freq *= oscState4.mainFrequency;
 				freq >>= 15;
+                this->feedback = freq;
 				freq *= IM2;
 
 				oscState2.frequency =  freq + oscState2.mainFrequency;
@@ -244,9 +261,9 @@ public:
 				break;
 			case ALGO5:
 				/*
-				         .---.
-				         | 4 |
-				         '---'
+				         .---. ^
+				         | 4 | | Feedback
+				         '---' |
 				           |IM3
 				         .---.
 				         | 3 |
@@ -262,12 +279,17 @@ public:
 
 				 */
 				{
-				osc4->nextSample(oscState4);
+                // FEEDBACK on oscillator 4
+                // >> 3 for the modulationFeedBack and >> 4 to cut -32000/32000 to -2000 / 2000 (may have to be adjusted)
+                oscState4.frequency =  ((synthState.params.engine2.modulationFeedback * this->feedback) >> 7) + oscState4.mainFrequency;
+
+                osc4->nextSample(oscState4);
 				env4->nextSample(envState4);
 				int freq = osc4->getSample(oscState4) * env4->getAmp(envState4);
 				freq >>= 19;
 				freq *= oscState4.mainFrequency;
 				freq >>= 15;
+                this->feedback = freq;
 				freq *= IM3;
 
 				oscState3.frequency =  freq + oscState3.mainFrequency;

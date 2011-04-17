@@ -44,11 +44,15 @@ Preen Current Features:
 
 --------------------------------------------
 DONE
+2nd Update April 17th
+. Feedback added on all ALGOs
+. Fixed bug IM2 on ALGO2
+
 Update April 17th
 . Feedback added (ALGO1 OSC3 for the moment). 
 . Mix added when several last stage osc (ALGO2 and ALGO4)
 . Show only parameter relevant to curent algo
-. Frequency type (fix / Keyboard) dispay bug fix.
+. Frequency type (fix / Keyboard) display bug fix.
 
 Update 	April 5th
 . Add 3 variations around sinusoid for oscillator (many new sounds possible)

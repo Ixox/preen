@@ -297,7 +297,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 "Medieval"
         },
         {
-                { 3, 4, 8, 0} ,
+                { 3, 3, 8, 0} ,
                 { 14, 20, 0, 1} ,
                 { 128, 128, 128, 0} ,
                 { 0, 0, 16, 0} ,
