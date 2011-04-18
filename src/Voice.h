@@ -132,12 +132,12 @@ public:
 
 				int currentSample2 = osc2->getSample(oscState2)*env2->getAmp(envState2);
                 currentSample2  >>= 7; //  7 for mixOsc2
-				currentSample2 *= synthState.params.engine3.mixOsc2;
+				currentSample2 *= MIX2;
 				currentSample2  >>= 15;
 
 				currentSample = osc1->getSample(oscState1)*env1->getAmp(envState1);
                 currentSample  >>= 7; // 7 for mixOsc1
-				currentSample *= synthState.params.engine3.mixOsc1;
+				currentSample *= MIX1;
 				currentSample  >>= 15;
 				currentSample += currentSample2;
 
@@ -241,12 +241,12 @@ public:
 
 				int currentSample2 = osc2->getSample(oscState2)*env2->getAmp(envState2);
                 currentSample2  >>= 7; // 7 for mixOsc2
-				currentSample2 *= synthState.params.engine3.mixOsc2;
+				currentSample2 *= MIX2;
 				currentSample2  >>= 15;
 
 				currentSample = osc1->getSample(oscState1)*env1->getAmp(envState1);
                 currentSample  >>= 7; // 7 for mixOsc2
-				currentSample *= synthState.params.engine3.mixOsc1;
+				currentSample *= MIX1;
 				currentSample  >>= 15;
 				currentSample += currentSample2;
 
@@ -336,6 +336,15 @@ public:
 	void updateModulationIndex3() {
 		IM3 = synthState.params.engine2.modulationIndex3 + (matrix->getDestination(INDEX_MODULATION3)>>4);
 	}
+    void updateMixOsc1() {
+        MIX1 = synthState.params.engine3.mixOsc1 + (matrix->getDestination(MIX_OSC1)>>4);
+    }
+    void updateMixOsc2() {
+        MIX2 = synthState.params.engine3.mixOsc2 + (matrix->getDestination(MIX_OSC2)>>4);
+    }
+    void updateMixOsc3() {
+        MIX3 = synthState.params.engine3.mixOsc3 + (matrix->getDestination(MIX_OSC3)>>4);
+    }
 
 	void endNoteOfBeginNextOne() {
 		if (newNotePending) {
@@ -370,7 +379,9 @@ private:
 	Matrix* matrix;
 	// optimization
 	static int IM1, IM2, IM3;
-	// feedback is per voice
+    static int MIX1, MIX2, MIX3;
+
+    // feedback is per voice
 	int feedback;
 
 	EnvData envState1;

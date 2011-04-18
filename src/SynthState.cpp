@@ -84,8 +84,8 @@ struct ParameterRowDisplay envParameterRow = {
 };
 
 
-const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW"} ;
-const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "IM1 ", "IM2 ", "IM3 "} ;
+const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW", "CC1 ", "CC2 ", "CC3 ", "CC4 "} ;
+const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "IM1 ", "IM2 ", "IM3 ", "Mix1", "Mix2", "Mix3"} ;
 struct ParameterRowDisplay matrixParameterRow = {
         "Matrix",
         { "Srce", "Mult", "Dest", "    " },
@@ -124,6 +124,8 @@ struct AllParameterRowsDisplay allParameterRows = {
                 &envParameterRow,
                 &envParameterRow,
                 &envParameterRow,
+                &matrixParameterRow,
+                &matrixParameterRow,
                 &matrixParameterRow,
                 &matrixParameterRow,
                 &matrixParameterRow,
@@ -178,6 +180,8 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
                 { SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
                 { SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
+                { SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
+                { SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
 
                 // LFOS
                 { LFO_SAW, 36, 0, 0}, {LFO_SAW, 20, 0, 0 },
@@ -188,7 +192,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
         {
                 // Engine
                 { 1, 4, 14, 0 },
-                { 3, 28, 0, 0 },
+                { 3, 2, 0, 0 },
                 { 128, 128, 128, 0 },
                 // OSC1
                 { 0, 0, 16, 0} ,
@@ -204,6 +208,8 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 7, 16, 5, 0} ,
                 { 5, 64, 1, 0} ,
                 { 1, 0, 1, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
@@ -236,6 +242,8 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 7, 6, 6, 0} ,
                 { 2, 11, 6, 0} ,
                 { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
                 // LFOS
                 { 2, 57, 0, 0} ,
                 { 2, 97, 0, 0} ,
@@ -265,7 +273,9 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
-                // LFOS
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+               // LFOS
                 { 0, 23, 0, 0} ,
                 { 0, 20, 0, 0} ,
                 { 0, 3, 0, 0} ,
@@ -287,6 +297,8 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 7, 6, 5, 0} ,
                 { 5, 64, 1, 0} ,
                 { 1, 0, 1, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
@@ -314,6 +326,8 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 5, 40, 2, 0} ,
                 { 5, 6, 4, 0} ,
                 { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
                 { 0, 83, 0, 0} ,
                 { 0, 20, 0, 0} ,
                 { 0, 3, 0, 0} ,
@@ -335,6 +349,8 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
             { 7, 16, 5, 0} ,
             { 5, 64, 1, 0} ,
             { 1, 0, 1, 0} ,
+            { 0, 0, 0, 0} ,
+            { 0, 0, 0, 0} ,
             { 0, 0, 0, 0} ,
             { 0, 0, 0, 0} ,
             { 0, 0, 0, 0} ,
@@ -362,6 +378,8 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
                 { 0, 36, 0, 0} ,
                 { 0, 20, 0, 0} ,
                 { 0, 3, 0, 0} ,
@@ -372,7 +390,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
 
 
 SynthState::SynthState() {
-    engineRow =  ROW_ENGINE1;
+    engineRow =  ROW_ENGINE;
     oscRow    = ROW_OSC1;
     envRow    = ROW_ENV1;
     matrixRow = ROW_MATRIX1;
@@ -405,18 +423,7 @@ void SynthState::encoderTurned(int encoder, int ticks) {
         if ((param->displayType == DISPLAY_TYPE_SIGNED_CHAR) || (param->displayType == DISPLAY_TYPE_OSC_FREQUENCY && param->minValue<0)) {
             char &value = ((char*)&params)[num];
             oldValue = value;
-            value+=ticks;
-            if (ticks>0 && value>param->maxValue) {
-                value = param->maxValue;
-            }
-            if (ticks<0 && value<param->minValue) {
-                value = param->minValue;
-            }
-            newValue = value;
-        } else {
-            unsigned char &value = ((unsigned char*)&params)[num];
-            oldValue = value;
-            // Must use oldValue (int) so that the minValue comparaison works
+            // Must use newValue (int) so that the minValue comparaison works
             newValue = value + ticks;
             if (ticks>0 && newValue>param->maxValue) {
                 newValue = param->maxValue;
@@ -425,6 +432,18 @@ void SynthState::encoderTurned(int encoder, int ticks) {
                 newValue = param->minValue;
             }
             value = (char)newValue;
+        } else {
+            unsigned char &value = ((unsigned char*)&params)[num];
+            oldValue = value;
+            // Must use newValue (int) so that the minValue comparaison works
+            newValue = value + ticks;
+            if (ticks>0 && newValue>param->maxValue) {
+                newValue = param->maxValue;
+            }
+            if (ticks<0 && newValue<param->minValue) {
+                newValue = param->minValue;
+            }
+            value = (unsigned char)newValue;
         }
 
         if (newValue != oldValue) {
@@ -501,7 +520,7 @@ void SynthState::buttonPressed(int button) {
                     currentRow = ROW_ENGINE_FIRST;
                 }
             }
-            if (currentRow == ROW_ENGINE3 && showUp[params.engine1.algo].mix == 0) {
+            if (currentRow == ROW_OSC_MIX && showUp[params.engine1.algo].mix == 0) {
                 currentRow = ROW_ENGINE_FIRST;
             }
             engineRow = currentRow;

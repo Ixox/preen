@@ -128,21 +128,32 @@ void Synth::nextSample() {
 			case 8:
 			case 9:
 			case 10:
+            case 11:
+            case 12:
 				this->matrix.computeFutureDestintation(step32 - 5);
 				break;
-			case 11:
+			case 13:
 				this->matrix.useNewValues();
 				break;
-			case 12:
+			case 14:
 				// Update static members, can be called a ony voice
 				this->voices[0].updateModulationIndex1();
 				break;
-			case 13:
+			case 15:
 				this->voices[0].updateModulationIndex2();
 				break;
-			case 14:
+			case 16:
 				this->voices[0].updateModulationIndex3();
 				break;
+			case 17:
+                this->voices[0].updateMixOsc1();
+                break;
+            case 18:
+                this->voices[0].updateMixOsc2();
+                break;
+            case 19:
+                this->voices[0].updateMixOsc3();
+                break;
 			default:
 				break;
 

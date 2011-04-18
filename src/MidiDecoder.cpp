@@ -16,7 +16,7 @@
  */
 
 #include "MidiDecoder.h"
-
+#include "SynthState.h"
 
 MidiDecoder::MidiDecoder() {
 	newEvent = true;
@@ -106,104 +106,122 @@ void MidiDecoder::sendMidiEvent() {
 			this->synth->getMatrix()->setSource(MODWHEEL, currentEvent[2]);
 			break;
 		case CC_IM1:
-			synthState.setNewValue(0,1, currentEvent[2]*2);
+			synthState.setNewValue(ROW_MODULATION, ENCODER_ENGINE_IM1, currentEvent[2]*2);
 			break;
 		case CC_IM2:
-			synthState.setNewValue(0,2, currentEvent[2]*2);
+            synthState.setNewValue(ROW_MODULATION, ENCODER_ENGINE_IM2, currentEvent[2]*2);
 			break;
 		case CC_IM3:
-			synthState.setNewValue(0,3, currentEvent[2]*2);
+            synthState.setNewValue(ROW_MODULATION, ENCODER_ENGINE_IM3, currentEvent[2]*2);
 			break;
 		case CC_OSC1_FREQ:
-			synthState.setNewValue(1,2, currentEvent[2]*2);
+			synthState.setNewValue(ROW_OSC1, ENCODER_OSC_FREQ, currentEvent[2]*2);
 			break;
 		case CC_OSC2_FREQ:
-			synthState.setNewValue(2,2, currentEvent[2]*2);
+            synthState.setNewValue(ROW_OSC2, ENCODER_OSC_FREQ, currentEvent[2]*2);
 			break;
 		case CC_OSC3_FREQ:
-			synthState.setNewValue(2,2, currentEvent[2]*2);
+            synthState.setNewValue(ROW_OSC3, ENCODER_OSC_FREQ, currentEvent[2]*2);
 			break;
 		case CC_OSC4_FREQ:
-			synthState.setNewValue(2,2, currentEvent[2]*2);
+            synthState.setNewValue(ROW_OSC4, ENCODER_OSC_FREQ, currentEvent[2]*2);
 			break;
 		case CC_OSC1_DETUNE:
-			synthState.setNewValue(1,3, currentEvent[2]*2);
+            synthState.setNewValue(ROW_OSC1, ENCODER_OSC_FTUNE, currentEvent[2]*2);
 			break;
 		case CC_OSC2_DETUNE:
-			synthState.setNewValue(2,3, currentEvent[2]*2);
+            synthState.setNewValue(ROW_OSC2, ENCODER_OSC_FTUNE, currentEvent[2]*2);
 			break;
 		case CC_OSC3_DETUNE:
-			synthState.setNewValue(2,3, currentEvent[2]*2);
+            synthState.setNewValue(ROW_OSC3, ENCODER_OSC_FTUNE, currentEvent[2]*2);
 			break;
 		case CC_OSC4_DETUNE:
-			synthState.setNewValue(2,3, currentEvent[2]*2);
+            synthState.setNewValue(ROW_OSC4, ENCODER_OSC_FTUNE, currentEvent[2]*2);
 			break;
 		case CC_ENV1_ATTACK :
-			synthState.setNewValue(5,0, currentEvent[2]*2);
+			synthState.setNewValue(ROW_ENV1, ENCODER_ENV_A, currentEvent[2]*2);
 			break;
 		case CC_ENV1_SUSTAIN:
-			synthState.setNewValue(5,2, currentEvent[2]*2);
+			synthState.setNewValue(ROW_ENV1, ENCODER_ENV_S, currentEvent[2]*2);
 			break;
 		case CC_ENV1_DECAY:
-			synthState.setNewValue(5,3, currentEvent[2]*2);
+			synthState.setNewValue(ROW_ENV1, ENCODER_ENV_D, currentEvent[2]*2);
 			break;
-		case CC_ENV2_ATTACK :
-			synthState.setNewValue(6,0, currentEvent[2]*2);
-			break;
-		case CC_ENV2_SUSTAIN:
-			synthState.setNewValue(6,2, currentEvent[2]*2);
-			break;
-		case CC_ENV2_DECAY:
-			synthState.setNewValue(6,3, currentEvent[2]*2);
-			break;
-		case CC_ENV3_ATTACK :
-			synthState.setNewValue(7,0, currentEvent[2]*2);
-			break;
-		case CC_ENV3_SUSTAIN:
-			synthState.setNewValue(7,2, currentEvent[2]*2);
-			break;
-		case CC_ENV3_DECAY:
-			synthState.setNewValue(7,3, currentEvent[2]*2);
-			break;
-		case CC_ENV4_ATTACK :
-			synthState.setNewValue(8,0, currentEvent[2]*2);
-			break;
-		case CC_ENV4_SUSTAIN:
-			synthState.setNewValue(8,2, currentEvent[2]*2);
-			break;
-		case CC_ENV4_DECAY:
-			synthState.setNewValue(8,3, currentEvent[2]*2);
-			break;
+        case CC_ENV2_ATTACK :
+            synthState.setNewValue(ROW_ENV2, ENCODER_ENV_A, currentEvent[2]*2);
+            break;
+        case CC_ENV2_SUSTAIN:
+            synthState.setNewValue(ROW_ENV2, ENCODER_ENV_S, currentEvent[2]*2);
+            break;
+        case CC_ENV2_DECAY:
+            synthState.setNewValue(ROW_ENV2, ENCODER_ENV_D, currentEvent[2]*2);
+            break;
+        case CC_ENV3_ATTACK :
+            synthState.setNewValue(ROW_ENV3, ENCODER_ENV_A, currentEvent[2]*2);
+            break;
+        case CC_ENV3_SUSTAIN:
+            synthState.setNewValue(ROW_ENV3, ENCODER_ENV_S, currentEvent[2]*2);
+            break;
+        case CC_ENV3_DECAY:
+            synthState.setNewValue(ROW_ENV3, ENCODER_ENV_D, currentEvent[2]*2);
+            break;
+        case CC_ENV4_ATTACK :
+            synthState.setNewValue(ROW_ENV4, ENCODER_ENV_A, currentEvent[2]*2);
+            break;
+        case CC_ENV4_SUSTAIN:
+            synthState.setNewValue(ROW_ENV4, ENCODER_ENV_S, currentEvent[2]*2);
+            break;
+        case CC_ENV4_DECAY:
+            synthState.setNewValue(ROW_ENV4, ENCODER_ENV_D, currentEvent[2]*2);
+            break;
 		case CC_MATRIXROW1_MUL:
-			synthState.setNewValue(9,1, currentEvent[2]*2 - 128);
+			synthState.setNewValue(ROW_MATRIX1, ENCODER_MATRIX_MUL, currentEvent[2]*2 - 128);
 			break;
 		case CC_MATRIXROW2_MUL:
-			synthState.setNewValue(10,1, currentEvent[2]*2 - 128);
+            synthState.setNewValue(ROW_MATRIX2, ENCODER_MATRIX_MUL, currentEvent[2]*2 - 128);
 			break;
 		case CC_MATRIXROW3_MUL:
-			synthState.setNewValue(11,1, currentEvent[2]*2 - 128);
+            synthState.setNewValue(ROW_MATRIX3, ENCODER_MATRIX_MUL, currentEvent[2]*2 - 128);
 			break;
 		case CC_MATRIXROW4_MUL:
-			synthState.setNewValue(12,1, currentEvent[2]*2 - 128);
+            synthState.setNewValue(ROW_MATRIX4, ENCODER_MATRIX_MUL, currentEvent[2]*2 - 128);
 			break;
 		case CC_MATRIXROW5_MUL:
-			synthState.setNewValue(13,1, currentEvent[2]*2);
+            synthState.setNewValue(ROW_MATRIX5, ENCODER_MATRIX_MUL, currentEvent[2]*2 - 128);
 			break;
 		case CC_MATRIXROW6_MUL:
-			synthState.setNewValue(14,1, currentEvent[2]*2);
+            synthState.setNewValue(ROW_MATRIX6, ENCODER_MATRIX_MUL, currentEvent[2]*2 - 128);
 			break;
+        case CC_MATRIXROW7_MUL:
+            synthState.setNewValue(ROW_MATRIX7, ENCODER_MATRIX_MUL, currentEvent[2]*2 - 128);
+            break;
+        case CC_MATRIXROW8_MUL:
+            synthState.setNewValue(ROW_MATRIX8, ENCODER_MATRIX_MUL, currentEvent[2]*2 - 128);
+            break;
 		case CC_LFO1_FREQ:
-			synthState.setNewValue(15,1, currentEvent[2]*2);
+			synthState.setNewValue(ROW_LFO1, CC_LFO1_FREQ, currentEvent[2]*2);
 			break;
 		case CC_LFO2_FREQ:
-			synthState.setNewValue(16,1, currentEvent[2]*2);
+            synthState.setNewValue(ROW_LFO2, CC_LFO1_FREQ, currentEvent[2]*2);
 			break;
 		case CC_LFO3_FREQ:
-			synthState.setNewValue(17,1, currentEvent[2]*2);
+            synthState.setNewValue(ROW_LFO3, CC_LFO1_FREQ, currentEvent[2]*2);
 			break;
 		case CC_LFO4_FREQ:
-			synthState.setNewValue(18,1, currentEvent[2]*2);
+            synthState.setNewValue(ROW_LFO4, CC_LFO1_FREQ, currentEvent[2]*2);
 			break;
+        case CC_MATRIX_SOURCE1:
+            this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC1, currentEvent[2]);
+            break;
+        case CC_MATRIX_SOURCE2:
+            this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC2, currentEvent[2]);
+            break;
+        case CC_MATRIX_SOURCE3:
+            this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC3, currentEvent[2]);
+            break;
+        case CC_MATRIX_SOURCE4:
+            this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC4, currentEvent[2]);
+            break;
 		}
     case 0xd0:
     	this->synth->getMatrix()->setSource(AFTERTOUCH, currentEvent[1]);

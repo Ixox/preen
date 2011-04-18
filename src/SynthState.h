@@ -43,9 +43,21 @@
 
 enum {
     ENCODER_ENGINE_ALGO = 0,
-    ENCODER_ENGINE_IM1,
+    ENCODER_ENGINE_VOICE,
+    ENCODER_ENGINE_VELOCITY
+};
+
+enum {
+    ENCODER_ENGINE_IM1 = 0,
     ENCODER_ENGINE_IM2,
-    ENCODER_ENGINE_IM3
+    ENCODER_ENGINE_IM3,
+    ENCODER_ENGINE_FDBK
+};
+
+enum {
+    ENCODER_ENGINE_MIX1 = 0,
+    ENCODER_ENGINE_MIX2,
+    ENCODER_ENGINE_MIX3
 };
 
 enum {
@@ -116,6 +128,10 @@ enum SourceEnum {
 	PITCHBEND,
 	AFTERTOUCH,
 	MODWHEEL,
+    MATRIX_SOURCE_CC1,
+    MATRIX_SOURCE_CC2,
+    MATRIX_SOURCE_CC3,
+    MATRIX_SOURCE_CC4,
 	SOURCE_MAX
 };
 
@@ -129,6 +145,9 @@ enum DestinationEnum {
 	INDEX_MODULATION1,
 	INDEX_MODULATION2,
 	INDEX_MODULATION3,
+	MIX_OSC1,
+    MIX_OSC2,
+    MIX_OSC3,
 	DESTINATION_MAX
 };
 
@@ -191,10 +210,10 @@ struct MatrixRowParams {
 
 enum {
     ROW_ENGINE_FIRST = 0,
-    ROW_ENGINE1 = ROW_ENGINE_FIRST,
-    ROW_ENGINE2 ,
-    ROW_ENGINE3 ,
-    ROW_ENGINE_LAST = ROW_ENGINE3
+    ROW_ENGINE = ROW_ENGINE_FIRST,
+    ROW_MODULATION ,
+    ROW_OSC_MIX,
+    ROW_ENGINE_LAST = ROW_OSC_MIX
 };
 
 enum {
@@ -224,7 +243,9 @@ enum {
     ROW_MATRIX4 ,
     ROW_MATRIX5 ,
     ROW_MATRIX6 ,
-    ROW_MATRIX_LAST = ROW_MATRIX6
+    ROW_MATRIX7 ,
+    ROW_MATRIX8 ,
+    ROW_MATRIX_LAST = ROW_MATRIX8
 };
 
 enum {
@@ -257,6 +278,8 @@ struct AllSynthParams {
 	struct MatrixRowParams matrixRowState4;
 	struct MatrixRowParams matrixRowState5;
 	struct MatrixRowParams matrixRowState6;
+    struct MatrixRowParams matrixRowState7;
+    struct MatrixRowParams matrixRowState8;
 	struct LfoParams lfo1;
 	struct LfoParams lfo2;
 	struct LfoParams lfo3;

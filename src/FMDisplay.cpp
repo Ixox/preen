@@ -50,10 +50,10 @@ void FMDisplay::printValueWithSpace(int value) {
 
 boolean FMDisplay::shouldThisValueShowUp(int row, int encoder) {
     int algo = synthState.params.engine1.algo;
-    if (row == ROW_ENGINE2 && (encoder+1)> showUp[algo].im && encoder!=3) {
+    if (row == ROW_MODULATION && (encoder+1)> showUp[algo].im && encoder!=3) {
         return false;
     }
-    if (row == ROW_ENGINE3 && (encoder+1)> showUp[algo].mix) {
+    if (row == ROW_OSC_MIX && (encoder+1)> showUp[algo].mix) {
         return false;
     }
 
@@ -95,8 +95,10 @@ displayFloat44:
 				lcd->print(v);
 			}
 		}
+        lcd->print(" ");
 		break;
 	case DISPLAY_TYPE_FLOAT_5_3:
+displayFloat53:
 		lcd->print(newValue>>3);
 		lcd->print(".");
 		if (newValue < 80) {
@@ -117,6 +119,7 @@ displayFloat44:
 				lcd->print(v);
 			}
 		}
+        lcd->print(" ");
 		break;
 	case DISPLAY_TYPE_SIGNED_CHAR:
 displaySignedChar:
@@ -132,12 +135,17 @@ displaySignedChar:
 
 		if (ft == OSC_FT_FIXE) {
 			lcd->setCursor(10, 3);
-			lcd->print( (oParam[oRow].frequencyMul << 7) + oParam[oRow].detune);
+			newValue = (oParam[oRow].frequencyMul << 7) + oParam[oRow].detune;
+			goto displayFloat53;
+			/*
+			lcd->print( );
 			lcd->print("     ");
+			*/
 		} else {
 			// Freq
 			if (encoder == ENCODER_OSC_FREQ) goto displayFloat44;
 			// Fine tune
+			newValue = (char)newValue;
 			if (encoder == ENCODER_OSC_FTUNE) goto displaySignedChar;
 		}
 		break;

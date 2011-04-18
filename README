@@ -10,7 +10,7 @@
                                             
 V0.0 pre alpha
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-April 17th 2011
+April 18th 2011
 
 -----------------------------------------
 Frequency modulation synth for the Maple :
@@ -27,7 +27,7 @@ Preen Current Features:
 . Up to 5 FM voices 
 . Each oscillator has an ADSR envelope
 . 4 LFO (saw, square, ramp)
-. 6 rows modulation matrix
+. 8 rows modulation matrix
 
 . Load and save preset to EEPROM.
 . Read and send midi
@@ -44,6 +44,14 @@ Preen Current Features:
 
 --------------------------------------------
 DONE
+
+Update April 18th
+. 8 rows in the Matrix
+. 4 midi CC added as matric sources
+. MIX osc 1 to 3 added as matrix destination
+. Frequency display issue fixed
+. MinValue and MaxValue fixed for "char" param type.
+
 2nd Update April 17th
 . Feedback added on all ALGOs
 . Fixed bug IM2 on ALGO2

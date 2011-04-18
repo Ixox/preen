@@ -18,6 +18,7 @@
 #include "Voice.h"
 
 int Voice::IM1, Voice::IM2, Voice::IM3;
+int Voice::MIX1, Voice::MIX2, Voice::MIX3;
 
 int vvcpt=0;
 

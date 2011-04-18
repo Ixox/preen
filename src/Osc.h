@@ -60,12 +60,7 @@ public:
 	        return (s*s) >> 16;
 	    }
         case 2:
-            if (oscState.index<0x1ffff) {
-                return sinTable[oscState.index >> 7]; // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
-            } else {
-                return 0;
-            }
-            break;
+            return sinTable[oscState.index >> 7] * (oscState.index<0x1ffff); // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
         case 3:
             oscState.index &= 0x1ffff;
             return sinTable[oscState.index >> 7];
@@ -105,19 +100,15 @@ Osc<number>::Osc()
 	switch (number-1) {
 	case 0:
 		this->destFreq = OSC1_FREQ;
-//		this->destAmp = OSC1_AMP;
 		break;
 	case 1:
 		this->destFreq = OSC2_FREQ;
-//		this->destAmp = OSC2_AMP;
 		break;
 	case 2:
 		this->destFreq = OSC3_FREQ;
-//		this->destAmp = OSC3_AMP;
 		break;
 	case 3:
 		this->destFreq = OSC4_FREQ;
-//		this->destAmp = OSC4_AMP;
 		break;
 	}
 	OscillatorParams * o = (OscillatorParams *)(&(synthState.params.osc1));
