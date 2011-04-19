@@ -93,6 +93,8 @@ enum Algorithm {
 	ALGO3,
 	ALGO4,
 	ALGO5,
+    ALGO6,
+    ALGO7,
 	ALGO_END
 };
 
@@ -102,7 +104,7 @@ struct ShowUpAlgo {
     unsigned char mix;
 };
 
-extern struct ShowUpAlgo showUp[5];
+extern struct ShowUpAlgo showUp[];
 
 enum OscShape {
 	OSC_SHAPE_SIN = 0,
@@ -222,7 +224,9 @@ enum {
     ROW_OSC2 ,
     ROW_OSC3 ,
     ROW_OSC4 ,
-    ROW_OSC_LAST = ROW_OSC4
+    ROW_OSC5 ,
+    ROW_OSC6 ,
+    ROW_OSC_LAST = ROW_OSC6
 };
 
 
@@ -232,7 +236,9 @@ enum {
     ROW_ENV2 ,
     ROW_ENV3 ,
     ROW_ENV4 ,
-    ROW_ENV_LAST = ROW_ENV4
+    ROW_ENV5 ,
+    ROW_ENV6 ,
+    ROW_ENV_LAST = ROW_ENV6
 };
 
 enum {
@@ -268,10 +274,14 @@ struct AllSynthParams {
 	struct OscillatorParams osc2;
 	struct OscillatorParams osc3;
 	struct OscillatorParams osc4;
+    struct OscillatorParams osc5;
+    struct OscillatorParams osc6;
 	struct EnvelopeParams env1;
 	struct EnvelopeParams env2;
 	struct EnvelopeParams env3;
 	struct EnvelopeParams env4;
+    struct EnvelopeParams env5;
+    struct EnvelopeParams env6;
 	struct MatrixRowParams matrixRowState1;
 	struct MatrixRowParams matrixRowState2;
 	struct MatrixRowParams matrixRowState3;

@@ -28,29 +28,28 @@
 
 #define MAX_NUMBER_OF_VOICES 5
 #define NUMBER_OF_LFOS 4
-#define NUMBER_OF_ENV 4
 
 #define UINT_MAX  4294967295
 
 class Synth : public SynthParamListener
 {
 public:
-	Synth(void);
-	~Synth(void);
-	void noteOn(char note, char velocity);
-	void noteOff(char note);
-	void allNoteOff();
-	bool isPlaying();
-	Matrix* getMatrix() { return &matrix; }
-	int getSample();
-	void nextSample();
+    Synth(void);
+    ~Synth(void);
+    void noteOn(char note, char velocity);
+    void noteOff(char note);
+    void allNoteOff();
+    bool isPlaying();
+    Matrix* getMatrix() { return &matrix; }
+    int getSample();
+    void nextSample();
 
-	void newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
-		newParamValue(type, currentRow, encoder, param, oldValue, newValue);
-	}
+    void newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+        newParamValue(type, currentRow, encoder, param, oldValue, newValue);
+    }
 
-	void newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
-	    if (type == SYNTH_PARAM_TYPE_ENV) {
+    void newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+        if (type == SYNTH_PARAM_TYPE_ENV) {
             switch (currentRow) {
             case ROW_ENV1:
                 env1.loadADSR();
@@ -64,35 +63,45 @@ public:
             case ROW_ENV4:
                 env4.loadADSR();
                 break;
+            case ROW_ENV5:
+                env5.loadADSR();
+                break;
+            case ROW_ENV6:
+                env6.loadADSR();
+                break;
             }
-	    } else if (type == SYNTH_PARAM_TYPE_MATRIX && encoder == ENCODER_MATRIX_DEST) {
-			// Reset all destination
-			matrix.resetAllDestination();
-		}
-	}
+        } else if (type == SYNTH_PARAM_TYPE_MATRIX && encoder == ENCODER_MATRIX_DEST) {
+            // Reset all destination
+            matrix.resetAllDestination();
+        }
+    }
 
     void newcurrentRow(int newcurrentRow)  {
-    	// Nothing to do
+        // Nothing to do
     }
 
 private:
-	Matrix matrix;
-	Voice voices[MAX_NUMBER_OF_VOICES];
-	unsigned int voiceIndex;
-	int cpt;
+    Matrix matrix;
+    Voice voices[MAX_NUMBER_OF_VOICES];
+    unsigned int voiceIndex;
+    int cpt;
 
-	Lfo lfo[NUMBER_OF_LFOS];
+    Lfo lfo[NUMBER_OF_LFOS];
 
-	// 4 oscillators Max
-	Osc<1> osc1;
-	Osc<2> osc2;
-	Osc<3> osc3;
-	Osc<4> osc4;
-	// And their 4 envelopes
-	Env<1> env1;
-	Env<2> env2;
-	Env<3> env3;
-	Env<4> env4;
+    // 4 oscillators Max
+    Osc<1> osc1;
+    Osc<2> osc2;
+    Osc<3> osc3;
+    Osc<4> osc4;
+    Osc<5> osc5;
+    Osc<6> osc6;
+    // And their 4 envelopes
+    Env<1> env1;
+    Env<2> env2;
+    Env<3> env3;
+    Env<4> env4;
+    Env<5> env5;
+    Env<6> env6;
 };
 
 

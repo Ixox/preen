@@ -23,17 +23,21 @@ Synth::Synth(void)
 	osc2.init(&matrix);
 	osc3.init(&matrix);
 	osc4.init(&matrix);
+    osc5.init(&matrix);
+    osc6.init(&matrix);
 
 	env1.loadADSR();
 	env2.loadADSR();
 	env3.loadADSR();
 	env4.loadADSR();
+    env5.loadADSR();
+    env6.loadADSR();
 
 	for (int k=0; k<NUMBER_OF_LFOS; k++) {
 		lfo[k].init(k, &this->matrix, (SourceEnum)(LFO1 + k));
 	}
 	for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
-		voices[k].init(&this->matrix, &this->env1, &this->env2, &this->env3, &this->env4, &this->osc1, &this->osc2, &this->osc3, &this->osc4);
+		voices[k].init(&this->matrix, &this->env1, &this->env2, &this->env3, &this->env4, &this->env5, &this->env6, &this->osc1, &this->osc2, &this->osc3, &this->osc4, &this->osc5, &this->osc6);
 	}
 }
 

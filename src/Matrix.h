@@ -29,60 +29,60 @@
 
 class Matrix  {
 public:
-	Matrix();
-	~Matrix();
-	void reinitUsage();
-	void reinitUsage(int k, int oldValue, int value);
+    Matrix();
+    ~Matrix();
+    void reinitUsage();
+    void reinitUsage(int k, int oldValue, int value);
 
-	void resetAllDestination() {
-		for (int k=0; k< DESTINATION_MAX; k++) {
-			currentDestinations[k] = 0;
-		}
-	}
+    void resetAllDestination() {
+        for (int k=0; k< DESTINATION_MAX; k++) {
+            currentDestinations[k] = 0;
+        }
+    }
 
-	void resetUsedDestination() {
-		for (int k=0; k< MATRIX_SIZE; k++) {
-			currentDestinations[(int)rows[k].destination] = 0;
-		}
-	}
+    void resetUsedDestination() {
+        for (int k=0; k< MATRIX_SIZE; k++) {
+            currentDestinations[(int)rows[k].destination] = 0;
+        }
+    }
 
-	void computeFutureDestintation(int k) {
-		futurDestinations[(int)rows[k].destination] += sources[(int)rows[k].source] * rows[k].mul;
-	}
+    void computeFutureDestintation(int k) {
+        futurDestinations[(int)rows[k].destination] += sources[(int)rows[k].source] * rows[k].mul;
+    }
 
-	void setRowSource(int index, SourceEnum source);
-	void setRowDestination(int index, DestinationEnum destination) ;
-	void setRowMul(int index, short mul);
-	void checkRow(int index);
+    void setRowSource(int index, SourceEnum source);
+    void setRowDestination(int index, DestinationEnum destination) ;
+    void setRowMul(int index, short mul);
+    void checkRow(int index);
 
-	void setSource(SourceEnum source, int value) {
-		this->sources[source] = value;
-	}
-	int getDestination(DestinationEnum destination) {
-		return this->currentDestinations[destination];
-	}
+    void setSource(SourceEnum source, int value) {
+        this->sources[source] = value;
+    }
+    int getDestination(DestinationEnum destination) {
+        return this->currentDestinations[destination];
+    }
 
     void newParamValue(int param, int oldValue, int newValue);;
 
     void useNewValues() {
-    	if (currentDestinations == destinations1) {
-    		currentDestinations = destinations2;
-    		futurDestinations = destinations1;
-    	} else {
-    		currentDestinations = destinations1;
-    		futurDestinations = destinations2;
-    	}
+        if (currentDestinations == destinations1) {
+            currentDestinations = destinations2;
+            futurDestinations = destinations1;
+        } else {
+            currentDestinations = destinations1;
+            futurDestinations = destinations2;
+        }
     }
 
 private:
-	bool sourceUsed[SOURCE_MAX];
-	bool destinationUsed[DESTINATION_MAX];
-	int sources[SOURCE_MAX];
-	int destinations1[DESTINATION_MAX];
-	int destinations2[DESTINATION_MAX];
-	int *currentDestinations;
-	int *futurDestinations;
-	MatrixRowParams* rows;
+    bool sourceUsed[SOURCE_MAX];
+    bool destinationUsed[DESTINATION_MAX];
+    int sources[SOURCE_MAX];
+    int destinations1[DESTINATION_MAX];
+    int destinations2[DESTINATION_MAX];
+    int *currentDestinations;
+    int *futurDestinations;
+    MatrixRowParams* rows;
 };
 
 #endif /* MATRIX_H_ */

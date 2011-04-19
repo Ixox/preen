@@ -41,22 +41,22 @@ uint16 currentSample = 1024;
 /*
 int max = 1024;
 int min = 1024;
-*/
+ */
 
 int bias = 0;
 
 void IRQSendSample() {
     pwmWrite(AUDIO_PIN , currentSample);
     synth.nextSample();
-	currentSample = (uint16)(synth.getSample()>>5) + 1024;
-/*
+    currentSample = (uint16)(synth.getSample()>>5) + 1024;
+    /*
 	if (currentSample > max) {
         max = currentSample ;
     }
     if (currentSample < min) {
         min = currentSample ;
     }
-    */
+     */
 
 }
 
@@ -65,16 +65,16 @@ unsigned int time = 0;
 unsigned int previousTime = 0;
 unsigned int fullDelay;
 
-void setup() 
+void setup()
 {
-//	timer_disable_all();
+    //	timer_disable_all();
 
-	lcd.begin(20, 4);
-	lcd.setCursor(0,0);
+    lcd.begin(20, 4);
+    lcd.setCursor(0,0);
     lcd.print("Preen FM Synth V0.1");
-	lcd.setCursor(0,1);
+    lcd.setCursor(0,1);
     lcd.print("          By Ixox");
-	lcd.setCursor(0,3);
+    lcd.setCursor(0,3);
     lcd.print("Powered by Leaflabs");
 
 
@@ -89,27 +89,27 @@ void setup()
     synthState.insertParamListener(&midiDecoder);
     synthState.insertMenuListener(&fmDisplay);
 
-	midiDecoder.setSynth(&synth);
+    midiDecoder.setSynth(&synth);
     fmDisplay.init(&lcd);
-/*
+    /*
 	int cpt= 0;
 	while (cpt<20) {
 		synth.nextSample();
 		rb.insert((uint16)(synth.getSample()>>5)+1024);
 		cpt++;
 	}
-*/
+     */
 
-	Serial2.begin(31250);
+    Serial2.begin(31250);
 
-	Timer1.setOverflow(2197);
-	Timer1.setPrescaleFactor(1);
+    Timer1.setOverflow(2197);
+    Timer1.setPrescaleFactor(1);
     pwmWrite(AUDIO_PIN , 0);
 
 
-	Timer1.setChannel3Mode(TIMER_PWM);
+    Timer1.setChannel3Mode(TIMER_PWM);
     pwmWrite(AUDIO_PIN , 0);
-	pinMode(AUDIO_PIN, PWM);
+    pinMode(AUDIO_PIN, PWM);
 
     // At 2048 it should be ok to set the new one.
     Timer1.setCompare1(1024);
@@ -127,25 +127,25 @@ void setup()
 
 void loop() {
 
-	mainCpt++;
+    mainCpt++;
 
     while (Serial2.available()) {
         midiDecoder.newByte(Serial2.read());
     }
 
-	if ((mainCpt&0xf) == 1) {
-		midiDecoder.sendOneMidiEvent();
-	}
+    if ((mainCpt&0xf) == 1) {
+        midiDecoder.sendOneMidiEvent();
+    }
 
-	if (fmDisplay.needRefresh() && ((mainCpt & 0x3) == 0)) {
-		fmDisplay.refreshAllScreenByStep();
-	}
+    if (fmDisplay.needRefresh() && ((mainCpt & 0x3) == 0)) {
+        fmDisplay.refreshAllScreenByStep();
+    }
 
-	// 16*25 micros of dealy to remove hissing noise (????).....
+    // 16*25 micros of dealy to remove hissing noise (????).....
     encoders.checkStatus();
 
 
-/*
+    /*
 	if ((mainCpt & 0xff) == 0) {
         lcd.setCursor(0,0);
         lcd.print(max);
@@ -153,13 +153,13 @@ void loop() {
         lcd.print(min);
         lcd.print("  ");
     }
-*/
-//	delayMicroseconds(300);
+     */
+    //	delayMicroseconds(300);
 }
 
 // Force init to be called *first*, i.e. before static object allocation.
 // Otherwise, statically allocated object that need libmaple may fail.
- __attribute__(( constructor )) void premain() {
+__attribute__(( constructor )) void premain() {
     init();
 }
 

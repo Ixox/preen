@@ -22,10 +22,10 @@
 // FLASH :  __attribute__ ((section (".USER_FLASH")))
 // Ex : const char* nullNames [] __attribute__ ((section (".USER_FLASH")))= {};
 // DISPLAY structures
-const char* allChars  = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789";
+const char* allChars  = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 &*$,;:";
 
 const char* nullNames []= {};
-const char* algoNames []= { "alg1", "alg2", "alg3", "alg4", "alg5" };
+const char* algoNames []= { "alg1", "alg2", "alg3", "alg4", "alg5", "alg6", "alg7" };
 struct ParameterRowDisplay engine1ParameterRow = {
         "Engine" ,
         { "Algo", "Voic", "Velo", "    " },
@@ -120,6 +120,10 @@ struct AllParameterRowsDisplay allParameterRows = {
                 &oscParameterRow,
                 &oscParameterRow,
                 &oscParameterRow,
+                &oscParameterRow,
+                &oscParameterRow,
+                &envParameterRow,
+                &envParameterRow,
                 &envParameterRow,
                 &envParameterRow,
                 &envParameterRow,
@@ -140,12 +144,14 @@ struct AllParameterRowsDisplay allParameterRows = {
 };
 
 
-struct ShowUpAlgo showUp[5] = {
+struct ShowUpAlgo showUp[7] = {
         { 3, 2, 0},
         { 3, 2, 2},
         { 3, 2, 0},
         { 4, 2, 2},
-        { 4, 3, 0}
+        { 4, 3, 0},
+        { 4, 1, 3},
+        { 6, 3, 3}
 };
 
 
@@ -164,13 +170,17 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { OSC_SHAPE_SIN, OSC_FT_KEYBOARD, 16,  0 },
                 { OSC_SHAPE_SIN, OSC_FT_KEYBOARD, 8,  0 },
                 { OSC_SHAPE_SIN, OSC_FT_KEYBOARD, 32, 0 },
-                { OSC_SHAPE_OFF, OSC_FT_KEYBOARD, 3,  0 },
+                { OSC_SHAPE_SIN, OSC_FT_KEYBOARD, 8,  0 },
+                { OSC_SHAPE_SIN, OSC_FT_KEYBOARD, 16,  0 },
+                { OSC_SHAPE_SIN, OSC_FT_KEYBOARD, 16,  0 },
 
                 // ENV 1
                 { 0,   150, 160,  60 },
                 { 100, 65,  150, 100 },
                 { 50,  100, 255, 100 },
                 { 3,   100, 100, 100 },
+                { 0,   150, 160,  60 },
+                { 0,   150, 160,  60 },
 
                 // Matrix row
 
@@ -199,11 +209,15 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 8, 0} ,
                 { 0, 0, 32, 0} ,
                 { 1, 0, 3, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
                 // ENV 1
                 { 72, 150, 160, 60} ,
                 { 81, 66, 196, 77} ,
                 { 50, 100, 255, 100} ,
                 { 3, 100, 100, 100} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
                 // Matrix row
                 { 7, 16, 5, 0} ,
                 { 5, 64, 1, 0} ,
@@ -230,11 +244,15 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 8, 0} ,
                 { 0, 0, 32, 0} ,
                 { 1, 0, 3, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
                 // ENV 1
                 { 0, 150, 160, 60} ,
                 { 100, 65, 150, 100} ,
                 { 50, 100, 255, 100} ,
                 { 3, 100, 100, 100} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
                 // Matrix row
                 { 7, 2, 6, 0} ,
                 { 5, 64, 1, 0} ,
@@ -261,11 +279,15 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 32, 0} ,
                 { 0, 0, 1, 0} ,
                 { 0, 0, 3, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
                 // ENV 1
                 { 100, 150, 63, 11} ,
                 { 0, 122, 125, 253} ,
                 { 50, 100, 255, 100} ,
                 { 3, 100, 100, 100} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
                 // Matrix row
                 { 7, 2, 5, 0} ,
                 { 5, 64, 1, 0} ,
@@ -275,7 +297,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
-               // LFOS
+                // LFOS
                 { 0, 23, 0, 0} ,
                 { 0, 20, 0, 0} ,
                 { 0, 3, 0, 0} ,
@@ -290,10 +312,17 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 8, 0} ,
                 { 0, 0, 32, 0} ,
                 { 1, 0, 3, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
+                // ENV 1
+
                 { 0, 150, 160, 236} ,
                 { 0, 66, 196, 77} ,
                 { 50, 100, 255, 210} ,
                 { 3, 100, 100, 100} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                // Matrix row
                 { 7, 6, 5, 0} ,
                 { 5, 64, 1, 0} ,
                 { 1, 0, 1, 0} ,
@@ -302,6 +331,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
+                // LFOS
                 { 0, 36, 0, 0} ,
                 { 0, 20, 0, 0} ,
                 { 0, 3, 0, 0} ,
@@ -316,10 +346,16 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 8, 0} ,
                 { 0, 0, 24, 0} ,
                 { 0, 0, 4, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
+
                 { 0, 120, 0, 120} ,
                 { 0, 136, 0, 130} ,
                 { 0, 120, 0, 100} ,
                 { 0, 88, 0, 81} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+
                 { 7, 8, 5, 0} ,
                 { 7, 24, 6, 0} ,
                 { 1, 9, 1, 0} ,
@@ -328,6 +364,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
+
                 { 0, 83, 0, 0} ,
                 { 0, 20, 0, 0} ,
                 { 0, 3, 0, 0} ,
@@ -335,31 +372,102 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 "Klong"
         },
         {
-            { 0, 2, 10, 0} ,
-            { 16, 36, 0, 81} ,
-            { 128, 128, 128, 0} ,
-            { 0, 0, 16, 0} ,
-            { 0, 0, 8, 0} ,
-            { 3, 1, 8, 2} ,
-            { 4, 0, 3, 0} ,
-            { 0, 253, 0, 49} ,
-            { 0, 0, 255, 100} ,
-            { 0, 33, 0, 100} ,
-            { 3, 100, 100, 100} ,
-            { 7, 16, 5, 0} ,
-            { 5, 64, 1, 0} ,
-            { 1, 0, 1, 0} ,
-            { 0, 0, 0, 0} ,
-            { 0, 0, 0, 0} ,
-            { 0, 0, 0, 0} ,
-            { 0, 0, 0, 0} ,
-            { 0, 0, 0, 0} ,
-            { 0, 36, 0, 0} ,
-            { 0, 20, 0, 0} ,
-            { 0, 3, 0, 0} ,
-            { 0, 4, 0, 0} ,
-            "Bass 1"
+                { 0, 2, 10, 0} ,
+                { 16, 36, 0, 81} ,
+                { 128, 128, 128, 0} ,
+                { 0, 0, 16, 0} ,
+                { 0, 0, 8, 0} ,
+                { 3, 1, 8, 2} ,
+                { 4, 0, 3, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
+                { 0, 253, 0, 49} ,
+                { 0, 0, 255, 100} ,
+                { 0, 33, 0, 100} ,
+                { 3, 100, 100, 100} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+
+                { 7, 16, 5, 0} ,
+                { 5, 64, 1, 0} ,
+                { 1, 0, 1, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+
+                { 0, 36, 0, 0} ,
+                { 0, 20, 0, 0} ,
+                { 0, 3, 0, 0} ,
+                { 0, 4, 0, 0} ,
+                "Bass 1"
         },
+        {
+                { 5, 2, 14, 0} ,
+                { 19, 42, 84, 0} ,
+                { 96, 128, 87, 30} ,
+                // Osc
+                { 1, 0, 64, 0} ,
+                { 0, 0, 8, 0} ,
+                { 0, 0, 32, 0} ,
+                { 0, 0, 24, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                // Env
+                { 0, 150, 0, 60} ,
+                { 0, 0, 255, 48} ,
+                { 121, 204, 125, 100} ,
+                { 100, 100, 100, 92} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                // Matrix
+                { 7, 16, 10, 0} ,
+                { 7, 13, 5, 0} ,
+                { 1, 0, 1, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                // LFO
+                { 0, 36, 0, 0} ,
+                { 0, 20, 0, 0} ,
+                { 0, 3, 0, 0} ,
+                { 0, 4, 0, 0} ,
+                "CrystalnBlow"
+        },
+        {
+                { 6, 1, 14, 0} ,
+                { 21, 73, 125, 0} ,
+                { 128, 114, 72, 0} ,
+                { 1, 0, 41, 0} ,
+                { 0, 0, 8, 0} ,
+                { 3, 0, 32, 0} ,
+                { 0, 0, 8, 0} ,
+                { 0, 0, 16, 0} ,
+                { 0, 0, 16, 0} ,
+                { 0, 150, 160, 60} ,
+                { 100, 65, 150, 100} ,
+                { 0, 100, 162, 100} ,
+                { 79, 100, 171, 100} ,
+                { 0, 150, 160, 60} ,
+                { 122, 150, 160, 60} ,
+                { 7, 16, 5, 0} ,
+                { 5, 64, 1, 0} ,
+                { 1, 0, 1, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 36, 0, 0} ,
+                { 0, 20, 0, 0} ,
+                { 0, 3, 0, 0} ,
+                { 0, 4, 0, 0} ,
+                "6 osc weird"
+        },
+
         {
                 { 1, 3, 28, 7} ,
                 { 5, 14, 0, 0},
@@ -368,10 +476,16 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 8, 0} ,
                 { 0, 0, 32, 0} ,
                 { 1, 0, 3, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
+                { OSC_SHAPE_OFF, 0, 0, 0} ,
+
                 { 72, 150, 160, 60} ,
                 { 81, 66, 196, 77} ,
                 { 50, 100, 255, 100} ,
                 { 3, 100, 100, 100} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+
                 { 7, 16, 9, 0} ,
                 { 5, 64, 1, 0} ,
                 { 1, 0, 1, 0} ,
@@ -380,6 +494,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
+
                 { 0, 36, 0, 0} ,
                 { 0, 20, 0, 0} ,
                 { 0, 3, 0, 0} ,
@@ -593,15 +708,15 @@ void SynthState::buttonPressed(int button) {
             dumpLine(params.engine2.modulationIndex1, params.engine2.modulationIndex2, params.engine2.modulationIndex3, params.engine2.modulationFeedback );
             dumpLine(params.engine3.mixOsc1, params.engine3.mixOsc2, params.engine3.mixOsc3, params.engine3.notused );
             OscillatorParams * o = (OscillatorParams *)(&(params.osc1));
-            for (int k=0; k<4; k++) {
+            for (int k=0; k<6; k++) {
                 dumpLine(o[k].shape, o[k].frequencyType, o[k].frequencyMul, o[k].detune);
             }
             EnvelopeParams * e = (EnvelopeParams*)(&(params.env1));
-            for (int k=0; k<4; k++) {
+            for (int k=0; k<6; k++) {
                 dumpLine(e[k].attack, e[k].decay, e[k].sustain, e[k].release);
             }
             MatrixRowParams* m = (MatrixRowParams*)(&(params.matrixRowState1));
-            for (int k=0; k<6; k++) {
+            for (int k=0; k<8; k++) {
                 dumpLine(m[k].source, m[k].mul, m[k].destination, 0);
             }
             LfoParams* l = (LfoParams*)(&(params.lfo1));
@@ -790,61 +905,61 @@ MenuItem* SynthState::afterButtonPressed() {
             break;
         }
         break;
-    case MENU_MIDI:
-        switch (rMenuItem->menuState) {
-        case MENU_MIDI_CHANNEL:
-            fullState.menuSelect = fullState.midiChannel;
-            // We return now, don't want to set menuSelect to 0
-            return rMenuItem;
-            break;
-        }
-        break;
-    case MENU_MIDI_CHANNEL:
-        fullState.midiChannel = fullState.menuSelect;
-        break;
-    case MENU_SAVE_CHOOSE_USER_BANK:
-        fullState.bankNumber = fullState.menuSelect;
-        break;
-    case MENU_LOAD_CHOOSE_USER_BANK:
-        fullState.bankNumber = fullState.menuSelect;
-        readFromEEPROM(fullState.bankNumber, 0);
-        break;
-    case MENU_LOAD_INTERNAL_BANK:
-        copyPatch((char*)&params, (char*)&backupParams, true);
-        break;
-    case MENU_LOAD_USER_BANK:
-        readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
-        copyPatch((char*)&params, (char*)&backupParams, true);
-        break;
-    case MENU_SAVE_CHOOSE_PRESET:
-        for (int k=0; k<12 && params.presetName[k] != 0; k++) {
-            for (int j=0; j<getLength(allChars); j++) {
-                if (params.presetName[k] == allChars[j]) {
-                    fullState.name[k] = j;
-                }
+        case MENU_MIDI:
+            switch (rMenuItem->menuState) {
+            case MENU_MIDI_CHANNEL:
+                fullState.menuSelect = fullState.midiChannel;
+                // We return now, don't want to set menuSelect to 0
+                return rMenuItem;
+                break;
             }
-        }
-        fullState.presetNumber = fullState.menuSelect;
-        break;
-    case MENU_ENTER_NAME:
-    {
-        int length;
-        for (length=12; fullState.name[length-1] == 0; length--);
-        for (int k=0; k<length; k++) {
-            params.presetName[k] = allChars[(int)fullState.name[k]];
-        }
-        params.presetName[length] = '\0';
-        pruneToEEPROM(fullState.bankNumber, fullState.presetNumber);
-        break;
-    }
-    case MENU_DONE:
-        fullState.synthMode = SYNTH_MODE_EDIT;
-        break;
-    case MENU_FORMAT_BANK:
-        formatEEPROM();
-        break;
-    default:
-        break;
+            break;
+            case MENU_MIDI_CHANNEL:
+                fullState.midiChannel = fullState.menuSelect;
+                break;
+            case MENU_SAVE_CHOOSE_USER_BANK:
+                fullState.bankNumber = fullState.menuSelect;
+                break;
+            case MENU_LOAD_CHOOSE_USER_BANK:
+                fullState.bankNumber = fullState.menuSelect;
+                readFromEEPROM(fullState.bankNumber, 0);
+                break;
+            case MENU_LOAD_INTERNAL_BANK:
+                copyPatch((char*)&params, (char*)&backupParams, true);
+                break;
+            case MENU_LOAD_USER_BANK:
+                readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
+                copyPatch((char*)&params, (char*)&backupParams, true);
+                break;
+            case MENU_SAVE_CHOOSE_PRESET:
+                for (int k=0; k<12 && params.presetName[k] != 0; k++) {
+                    for (int j=0; j<getLength(allChars); j++) {
+                        if (params.presetName[k] == allChars[j]) {
+                            fullState.name[k] = j;
+                        }
+                    }
+                }
+                fullState.presetNumber = fullState.menuSelect;
+                break;
+            case MENU_ENTER_NAME:
+            {
+                int length;
+                for (length=12; fullState.name[length-1] == 0; length--);
+                for (int k=0; k<length; k++) {
+                    params.presetName[k] = allChars[(int)fullState.name[k]];
+                }
+                params.presetName[length] = '\0';
+                pruneToEEPROM(fullState.bankNumber, fullState.presetNumber);
+                break;
+            }
+            case MENU_DONE:
+                fullState.synthMode = SYNTH_MODE_EDIT;
+                break;
+            case MENU_FORMAT_BANK:
+                formatEEPROM();
+                break;
+            default:
+                break;
     }
 
     // Save menu select for menuBack Action
