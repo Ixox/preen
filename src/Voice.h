@@ -60,30 +60,25 @@ public:
             {
                 // FEEDBACK on osciallator 3
                 // >> 3 for the modulationFeedBack and >> 4 to cut -32000/32000 to -2000 / 2000 (may have to be adjusted)
-                oscState3.frequency =  ((synthState.params.engine2.modulationFeedback * this->feedback)>>4) + oscState3.mainFrequency;
-                osc2->nextSample(oscState2);
-                env2->nextSample(envState2);
-                osc3->nextSample(oscState3);
-                env3->nextSample(envState3);
-
-                int freq = osc2->getSample(oscState2) * env2->getAmp(envState2);
+                int freq = osc2->getNextSample(&oscState2);
+                freq *= env2->getNextAmp(&envState2);
                 freq >>= 19;
                 freq *= oscState2.mainFrequency;
                 freq >>= 15;
                 freq *= IM1;
 
-                int freq2 = osc3->getSample(oscState3) * env3->getAmp(envState3);
+                //oscState3.frequency =  ((synthState.params.engine2.modulationFeedback * this->feedback)>>4) + oscState3.mainFrequency;
+                int freq2 = osc3->getNextSample(&oscState3) ;
+                freq2 *= env3->getNextAmp(&envState3);
                 freq2 >>= 19;
                 freq2 *= oscState3.mainFrequency;
                 freq2 >>= 15;
-                this->feedback = freq2;
+                //this->feedback = freq2;
                 freq2 *= IM2;
-                oscState1.frequency =  freq + freq2 + oscState1.mainFrequency;
-                env1->nextSample(envState1);
-                osc1->nextSample(oscState1);
-                currentSample = env1->getAmp(envState1); //*env1->getAmp(envState1);
 
-                currentSample *= osc1->getSample(oscState1);
+                oscState1.frequency =  freq + freq2 + oscState1.mainFrequency;
+                currentSample =  osc1->getNextSample(&oscState1);
+                currentSample *= env1->getNextAmp(&envState1);
                 currentSample  >>= 15;
 
                 currentSample *= velocity;
@@ -111,31 +106,23 @@ public:
             {
                 // FEEDBACK on osciallator 3
                 // >> 3 for the modulationFeedBack and >> 4 to cut -32000/32000 to -2000 / 2000 (may have to be adjusted)
-                oscState3.frequency =  (synthState.params.engine2.modulationFeedback * this->feedback) + oscState3.mainFrequency;
-
-                osc3->nextSample(oscState3);
-                env3->nextSample(envState3);
-                int freq = osc3->getSample(oscState3) * env3->getAmp(envState3);
+                //oscState3.frequency =  (synthState.params.engine2.modulationFeedback * this->feedback) + oscState3.mainFrequency;
+                int freq = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
                 freq >>= 19;
                 freq *= oscState3.mainFrequency;
                 freq >>= 15;
-                this->feedback = freq;
+                //this->feedback = freq;
 
 
                 oscState2.frequency =  freq*IM2 + oscState2.mainFrequency;
-                env2->nextSample(envState2);
-                osc2->nextSample(oscState2);
-
                 oscState1.frequency =  freq*IM1 + oscState1.mainFrequency;
-                env1->nextSample(envState1);
-                osc1->nextSample(oscState1);
 
-                int currentSample2 = osc2->getSample(oscState2)*env2->getAmp(envState2);
+                int currentSample2 = osc2->getNextSample(&oscState2)*env2->getNextAmp(&envState2);
                 currentSample2  >>= 7; //  7 for mixOsc2
                 currentSample2 *= MIX2;
                 currentSample2  >>= 15;
 
-                currentSample = osc1->getSample(oscState1)*env1->getAmp(envState1);
+                currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
                 currentSample  >>= 7; // 7 for mixOsc1
                 currentSample *= MIX1;
                 currentSample  >>= 15;
@@ -167,27 +154,20 @@ public:
                 // FEEDBACK on osciallator 3
                 // >> 3 for the modulationFeedBack and >> 4 to cut -32000/32000 to -2000 / 2000 (may have to be adjusted)
                 oscState3.frequency =  (synthState.params.engine2.modulationFeedback * this->feedback)+ oscState3.mainFrequency;
-
-                osc3->nextSample(oscState3);
-                env3->nextSample(envState3);
-                int freq = osc3->getSample(oscState3) * env3->getAmp(envState3);
+                int freq = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
                 freq >>= 19;
                 freq *= oscState3.mainFrequency;
                 freq >>= 15;
                 this->feedback = freq;
                 freq *= IM2;
                 oscState2.frequency =  freq + oscState2.mainFrequency;
-                osc2->nextSample(oscState2);
-                env2->nextSample(envState2);
-                freq = osc2->getSample(oscState2) * env2->getAmp(envState2);
+                freq = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
                 freq >>= 19;
                 freq *= oscState2.mainFrequency; // Convertion in Hertz
                 freq >>= 15;
                 freq *= IM1;
                 oscState1.frequency =  freq + oscState1.mainFrequency;
-                env1->nextSample(envState1);
-                osc1->nextSample(oscState1);
-                currentSample = osc1->getSample(oscState1)*env1->getAmp(envState1);
+                currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
                 currentSample  >>= 15;
                 currentSample *= velocity;
                 currentSample >>=7;
@@ -209,26 +189,18 @@ public:
 
                  */
             {
-
-
-                osc3->nextSample(oscState3);
-                env3->nextSample(envState3);
-                int freq = osc3->getSample(oscState3) * env3->getAmp(envState3);
+                int freq = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
                 freq >>= 19;
                 freq *= oscState3.mainFrequency;
                 freq >>= 15;
                 freq *= IM1;
 
                 oscState1.frequency =  freq + oscState1.mainFrequency;
-                env1->nextSample(envState1);
-                osc1->nextSample(oscState1);
 
                 // FEEDBACK on oscillator 4
                 // >> 3 for the modulationFeedBack and >> 4 to cut -32000/32000 to -2000 / 2000 (may have to be adjusted)
                 oscState4.frequency =  (synthState.params.engine2.modulationFeedback * this->feedback) + oscState4.mainFrequency;
-                osc4->nextSample(oscState4);
-                env4->nextSample(envState4);
-                freq = osc4->getSample(oscState4) * env4->getAmp(envState4);
+                freq = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
                 freq >>= 19;
                 freq *= oscState4.mainFrequency;
                 freq >>= 15;
@@ -236,15 +208,13 @@ public:
                 freq *= IM2;
 
                 oscState2.frequency =  freq + oscState2.mainFrequency;
-                env2->nextSample(envState2);
-                osc2->nextSample(oscState2);
 
-                int currentSample2 = osc2->getSample(oscState2)*env2->getAmp(envState2);
+                int currentSample2 = osc2->getNextSample(&oscState2)*env2->getNextAmp(&envState2);
                 currentSample2  >>= 7; // 7 for mixOsc2
                 currentSample2 *= MIX2;
                 currentSample2  >>= 15;
 
-                currentSample = osc1->getSample(oscState1)*env1->getAmp(envState1);
+                currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
                 currentSample  >>= 7; // 7 for mixOsc2
                 currentSample *= MIX1;
                 currentSample  >>= 15;
@@ -283,9 +253,7 @@ public:
                 // >> 3 for the modulationFeedBack and >> 4 to cut -32000/32000 to -2000 / 2000 (may have to be adjusted)
                 oscState4.frequency =  (synthState.params.engine2.modulationFeedback * this->feedback) + oscState4.mainFrequency;
 
-                osc4->nextSample(oscState4);
-                env4->nextSample(envState4);
-                int freq = osc4->getSample(oscState4) * env4->getAmp(envState4);
+                int freq = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
                 freq >>= 19;
                 freq *= oscState4.mainFrequency;
                 freq >>= 15;
@@ -293,27 +261,21 @@ public:
                 freq *= IM3;
 
                 oscState3.frequency =  freq + oscState3.mainFrequency;
-                osc3->nextSample(oscState3);
-                env3->nextSample(envState3);
-                freq = osc3->getSample(oscState3) * env3->getAmp(envState3);
+                freq = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
                 freq >>= 19;
                 freq *= oscState3.mainFrequency;
                 freq >>= 15;
                 freq *= IM2;
 
                 oscState2.frequency =  freq + oscState2.mainFrequency;
-                osc2->nextSample(oscState2);
-                env2->nextSample(envState2);
-                freq = osc2->getSample(oscState2) * env2->getAmp(envState2);
+                freq = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
                 freq >>= 19;
                 freq *= oscState2.mainFrequency; // Convertion in Hertz
                 freq >>= 15;
                 freq *= IM1;
 
                 oscState1.frequency =  freq + oscState1.mainFrequency;
-                env1->nextSample(envState1);
-                osc1->nextSample(oscState1);
-                currentSample = osc1->getSample(oscState1)*env1->getAmp(envState1);
+                currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
                 currentSample  >>= 15;
                 currentSample *= velocity;
                 currentSample >>=7;
@@ -339,9 +301,7 @@ public:
                 // FEEDBACK on oscillator 1
                 // >> 3 for the modulationFeedBack and >> 4 to cut -32000/32000 to -2000 / 2000 (may have to be adjusted)
                 oscState1.frequency =  (synthState.params.engine2.modulationFeedback * this->feedback) + oscState1.mainFrequency;
-                osc1->nextSample(oscState1);
-                env1->nextSample(envState1);
-                int currentSample1 = osc1->getSample(oscState1)*env1->getAmp(envState1);
+                int currentSample1 = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
 
                 this->feedback = currentSample1  >> 19;
                 this->feedback *= oscState1.mainFrequency;
@@ -351,25 +311,19 @@ public:
                 currentSample1 *= MIX1;
                 currentSample1  >>= 15;
 
-                osc2->nextSample(oscState2);
-                env2->nextSample(envState2);
-                int currentSample2 = osc2->getSample(oscState2)*env2->getAmp(envState2);
+                int currentSample2 = osc2->getNextSample(&oscState2)*env2->getNextAmp(&envState2);
                 currentSample2  >>= 7; // 7 for mixOsc2
                 currentSample2 *= MIX2;
                 currentSample2  >>= 15;
 
-                osc4->nextSample(oscState4);
-                env4->nextSample(envState4);
-                int freq = osc4->getSample(oscState4) * env4->getAmp(envState4);
+                int freq = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
                 freq >>= 19;
                 freq *= oscState4.mainFrequency;
                 freq >>= 15;
                 freq *= IM1;
 
                 oscState3.frequency =  freq + oscState3.mainFrequency;
-                osc3->nextSample(oscState3);
-                env3->nextSample(envState3);
-                currentSample = osc3->getSample(oscState3)*env3->getAmp(envState3);
+                currentSample = osc3->getNextSample(&oscState3)*env3->getNextAmp(&envState3);
                 currentSample  >>= 7; // 7 for mixOsc2
                 currentSample *= MIX3;
                 currentSample  >>= 15;
@@ -398,54 +352,39 @@ public:
                  */
             {
 
-
-                osc2->nextSample(oscState2);
-                env2->nextSample(envState2);
-                int freq = osc2->getSample(oscState2) * env2->getAmp(envState2);
+                int freq = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
                 freq >>= 19;
                 freq *= oscState2.mainFrequency;
                 freq >>= 15;
                 freq *= IM1;
 
                 oscState1.frequency =  freq + oscState1.mainFrequency;
-                env1->nextSample(envState1);
-                osc1->nextSample(oscState1);
-
-                osc4->nextSample(oscState4);
-                env4->nextSample(envState4);
-                freq = osc4->getSample(oscState4) * env4->getAmp(envState4);
+                freq = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
                 freq >>= 19;
                 freq *= oscState4.mainFrequency;
                 freq >>= 15;
                 freq *= IM2;
 
                 oscState3.frequency =  freq + oscState3.mainFrequency;
-                env3->nextSample(envState3);
-                osc3->nextSample(oscState3);
-
-                osc6->nextSample(oscState6);
-                env6->nextSample(envState6);
-                freq = osc6->getSample(oscState6) * env6->getAmp(envState6);
+                freq = osc6->getNextSample(&oscState6) * env6->getNextAmp(&envState6);
                 freq >>= 19;
                 freq *= oscState6.mainFrequency;
                 freq >>= 15;
                 freq *= IM3;
 
                 oscState5.frequency =  freq + oscState5.mainFrequency;
-                env5->nextSample(envState5);
-                osc5->nextSample(oscState5);
 
-                int currentSample3 = osc5->getSample(oscState5)*env5->getAmp(envState5);
+                int currentSample3 = osc5->getNextSample(&oscState5)*env5->getNextAmp(&envState5);
                 currentSample3  >>= 7; // 7 for mixOsc3
                 currentSample3 *= MIX3;
                 currentSample3  >>= 15;
 
-                int currentSample2 = osc3->getSample(oscState3)*env3->getAmp(envState3);
+                int currentSample2 = osc3->getNextSample(&oscState3)*env3->getNextAmp(&envState3);
                 currentSample2  >>= 7; // 7 for mixOsc2
                 currentSample2 *= MIX2;
                 currentSample2  >>= 15;
 
-                currentSample = osc1->getSample(oscState1)*env1->getAmp(envState1);
+                currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
                 currentSample  >>= 7; // 7 for mixOsc2
                 currentSample *= MIX1;
                 currentSample  >>= 15;
@@ -497,7 +436,6 @@ public:
     void noteOnWithoutPop(short note, char velocity, unsigned int index);
     void noteOn(short note, char velocity, unsigned int index);
     void noteOff();
-    void TESTASM();
 
     bool isReleased() { return this->released; }
     bool isPlaying() { return this->playing; }

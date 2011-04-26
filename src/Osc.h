@@ -24,6 +24,7 @@
 
 extern short sinTable[];
 extern int frequenciesx8[];
+extern int randomOsc;
 
 struct OscState {
     int index;
@@ -50,46 +51,104 @@ public:
 	}
      */
 
-    int getSample(struct OscState &oscState) {
+    int getNextSample(struct OscState *oscState) __attribute__((always_inline)) {
+        int oscValue;
+        oscState->index += (this->matrix->getDestination(destFreq) >> 4) + oscState->frequency;
+        oscState->index &= 0x3ffff;
+
+        /*
         switch(oscillator->shape) {
-        case 0:
-            return sinTable[oscState.index >> 7]; // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
-        case 1:
+        case OSC_SHAPE_SIN:
+            return  sinTable[index >> 7]; // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
+            break;
+        case OSC_SHAPE_SIN2:
         {
-            int s = sinTable[oscState.index >> 7];
-            return (s*s) >> 16;
-        }
-        case 2:
-            return sinTable[oscState.index >> 7] * (oscState.index<0x1ffff); // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
-        case 3:
-            oscState.index &= 0x1ffff;
-            return sinTable[oscState.index >> 7];
+            int s = sinTable[index >> 7];
+            return   (s*s) >> 16;
             break;
         }
-        return 0;
+        case OSC_SHAPE_SIN3:
+            return  sinTable[index >> 7] * (index<0x1ffff); // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
+            break;
+        case OSC_SHAPE_SIN4:
+            index &= 0x1ffff;
+            return  sinTable[index >> 7];
+            break;
+        case OSC_SHAPE_RAND:
+            return  (randomOsc * index) & 0x7fff;
+            break;
+        }
+        return index;
+*/
+        asm volatile(
+                "    tbb [pc, %[shape]]\n\t"
+                "7:\n\t"
+                "    .byte   (1f-7b)/2\n\t"
+                "    .byte   (2f-7b)/2\n\t"
+                "    .byte   (3f-7b)/2\n\t"
+                "    .byte   (4f-7b)/2\n\t"
+                "    .byte   (5f-7b)/2\n\t"
+                "    .align  1\n\t"
+
+                // OSC_SHAPE_SIN
+                "1: \n\t"
+                "    lsr %[index], #7\n\t"
+                "    ldrsh %[value], [ %[sinTable], %[index], lsl #1]\n\t"
+                "    b 6f\n\t"
+                // OSC_SHAPE_SIN2
+                "2:  \n\t"
+                "    lsr %[index], #7\n\t"
+                "    ldrsh %[value], [ %[sinTable], %[index], lsl #1]\n\t"
+                "    mul %[value], %[value]\n\t"
+                "    lsr %[value], #16\n\t"
+                "    b 6f\n\t"
+
+                // OSC_SHAPE_SIN3
+                "3:  \n\t"
+                "    lsr %[index], #7\n\t"
+                "    ldrsh %[value], [ %[sinTable], %[index], lsl #1]\n\t"
+                // if negativ replace by 0
+                "    cmp  %[value], #0\n\t"
+                "    it lt\n\t"
+                "    movlt %[value], #0\n\t"
+                "    b 6f\n\t"
+
+                // OSC_SHAPE_SIN4
+                "4:  \n\t"
+                "    lsr %[index], #7\n\t"
+                "    ldrsh %[value], [ %[sinTable], %[index], lsl #1]\n\t"
+                // if negativ take the oposite
+                "    cmp  %[value], #0\n\t"
+                "    it mi\n\t"
+                "    rsbmi %[value], %[value], #0\n\t"
+                "    b 6f\n\t"
+
+                // OSC_SHAPE_RAND
+                "5:  \n\t"
+                "    mov %[value], %[randomOsc]\n\t"
+
+                // BREAK
+                "6:\n\t"
+                : [value] "=r"(oscValue)
+                : [sinTable]"rV"(sinTable), [shape]"r" (oscillator->shape), [randomOsc]"r"(randomOsc), [index]"r" (oscState->index)
+        );
+
+        return  oscValue;
+
     };
 
-    void nextSample(struct OscState &oscState) {
-        // oscState.index = (oscState.index + (((oscState.frequency + (this->matrix->getDestination(destFreq)>>4)) << 16) / SAMPLE_RATE_x_8 )) & 0xffff;
-        int jmp = this->matrix->getDestination(destFreq);
-        jmp >>= 4;
-        jmp += oscState.frequency;
-        /*
-		jmp <<= 12;
-		jmp /= SAMPLE_RATE_x_8;
-		jmp <<= 4;
-  	        Every thing canceled if we go 4 times further
-         */
-        oscState.index += jmp;
-        oscState.index &= 0x3ffff;
-    }
 
+    static void updateRandomNumber() __attribute__((always_inline)) {
+        randomOsc = random(65535) - 32768;
+    }
+    OscillatorParams* oscillator;
 
 private:
     DestinationEnum destFreq;
     DestinationEnum destAmp;
     Matrix* matrix;
-    OscillatorParams* oscillator;
+
+    // Random number
 };
 
 

@@ -93,6 +93,7 @@ void MidiDecoder::sendMidiEvent() {
         break;
     case 0x90:
         this->synth->noteOn(currentEvent[1], currentEvent[2]);
+        this->synth->getMatrix()->setSource(VELOCITY, currentEvent[2]);
         break;
     case 0xb0:
         /*

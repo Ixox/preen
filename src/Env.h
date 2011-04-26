@@ -21,21 +21,25 @@
 
 
 enum EnvState {
-	ENV_STATE_ON_A = 0,
-	ENV_STATE_ON_D,
-	ENV_STATE_ON_S,
-	ENV_STATE_ON_R,
-	ENV_STATE_QUICK_OFF,
-	ENV_STATE_DEAD
+    ENV_STATE_ON_A = 0,
+    ENV_STATE_ON_D,
+    ENV_STATE_ON_S,
+    ENV_STATE_ON_R,
+    ENV_STATE_QUICK_OFF,
+    ENV_STATE_DEAD
 };
 
 struct EnvData {
-	// life cycle of the env
-	unsigned int index;
-	// Higher sample before release
-	int releaseSample;
-	// State of the env
-	EnvState envState;
+    // life cycle of the env
+    unsigned int index;
+    // Current sample
+    unsigned int currentAmp;
+    // State of the env
+    unsigned int envState;
+    // Release speed and acceleration (dependent on the voice when RELEASE)
+    unsigned int currentAmpSpeed;
+
+    unsigned int currentAmpAcc;
 };
 
 
@@ -43,110 +47,156 @@ template <int number>
 class Env
 {
 public:
-	Env() {
-	}
-	~Env(void) {
-	}
+    Env() {
+    }
+    ~Env(void) {
+    }
 
-	void loadADSR() {
-		EnvelopeParams * e = (EnvelopeParams *)&(synthState.params.env1);
-		EnvelopeParams* envState = &e[number-1];
+    void loadADSR() {
+        EnvelopeParams * e = (EnvelopeParams *)&(synthState.params.env1);
+        EnvelopeParams* envState = &e[number-1];
 
-		attack = envState->attack * envState->attack;
-		decay = envState->decay * envState->decay;
-		sustain = envState->sustain << 7;
-		release = envState->release * envState->release;
-	}
+        adsr[0] = envState->attack * envState->attack +1;
+        adsr[1] = envState->decay * envState->decay+1;
+        adsr[2] = envState->sustain << 7;
+        adsr[3] = envState->release * envState->release+1;
 
-	int getAmp(struct EnvData& env) {
-	    int rAmp = 0;
-		switch (env.envState) {
-		case ENV_STATE_DEAD:
-			return 0;
-			break;
-		case ENV_STATE_QUICK_OFF:
-			if (env.index < 32) {
-				return env.releaseSample - ((env.index * env.releaseSample) >> 5);
-			} else {
-				env.envState = ENV_STATE_DEAD;
-				return 0;
-			}
-			break;
-		case ENV_STATE_ON_A:
-			if (env.index<attack) {
-				return (env.index << 15) / attack;
-			}
-			env.index = 0;
-			env.envState = ENV_STATE_ON_D;
-			// No break go to next state
-		case ENV_STATE_ON_D:
-			if (env.index <  decay) {
-				return (((decay - env.index) << 15) +  env.index * sustain ) / decay;
-			}
-			// No break go to next state
-			env.envState = ENV_STATE_ON_S;
-		case ENV_STATE_ON_S:
-			return sustain;
-		case ENV_STATE_ON_R:
-/*
-            int tmp;
-		    asm volatile("  cmp %4, %3\n\t"
-		        "   beq 1\n\t"
-		        "   mov %4, %2\n\t"
-		        "   mul %4, %4, %2\n\t"
-		        "   sdiv %4, %4, %3\n\t"
-                "   mov %0, %2\n\t"
-		        "   sub %0, %0, %4\n\t"
-		        "   b 2\n\t"
-		        "1:\n\t"
-		        "   mov %1, #4\n\t"
-		        "2:\n\t"
-                "nop\n\t"
-		            : "=r" (rAmp), "=r "(env.envState)
-		            : "r" (&env), "r" (release), "r" (tmp));
-*/
+        /*
+        if (adsr[0]>=640000) {
+            incA = (32767<<15) / adsr[0];
+            incIncA = incA / ((adsr[0]+1)/2);
+            incA = incA + ((adsr[0]+1)/2)*incIncA;
+        } else {
+        */
+            incA = (32767<<15) / adsr[0];
+            incIncA = 0;
+//        }
+
+            /*
+        if (adsr[1]>=640000) {
+            incD = ((32768 - adsr[2]) << 15) / adsr[1];
+            incIncD = incD / ((adsr[1]+1)/2);
+            incD = incD + ((adsr[1]+1)/2)*incIncD;
+        } else {
+        */
+            incD = ((32767 - adsr[2]) << 15) / adsr[1];
+            incIncD = 0;
+//        }
+    }
 
 
-            if (env.index< release) {
-				return env.releaseSample - env.index * env.releaseSample / release;
-			}
-			env.envState = ENV_STATE_DEAD;
-		    break;
-		}
-//		asm volatile("mov %0, %0, ror #1" : "=r" (rAmp) );
-		return rAmp;
-	}
 
-	void noteOn(struct EnvData& env) {
-		env.envState = ENV_STATE_ON_A;
-		env.index = 0;
-	}
+    void noteOn(struct EnvData& env) {
+        env.currentAmp= 0;
+        env.currentAmpSpeed = incA;
+        env.currentAmpAcc = incIncA;
+        env.index = adsr[0] + 1;
+        env.envState = ENV_STATE_ON_A;
+    }
 
-	void noteOffQuick(struct EnvData& env) {
-		env.releaseSample = this->getAmp(env);
-		env.envState = ENV_STATE_QUICK_OFF;
-		env.index = 0;
-	}
+    void noteOffQuick(struct EnvData* env) {
+        // No need for exponential ramp... linear is OK.
+        env->currentAmpSpeed = (env->currentAmp) / 32;
+        env->currentAmpAcc  = 0;
+        env->envState = ENV_STATE_QUICK_OFF;
+        env->index = 33;
+}
 
 
-	void noteOff(struct EnvData& env) {
-		env.releaseSample = this->getAmp(env);
-		env.envState = ENV_STATE_ON_R;
-		env.index = 0;
-	}
+    void noteOff(struct EnvData* env) {
+        /*
+        // Prepare exp ramp
+        if (adsr[3]>640000) {
+            env->currentAmpSpeed = (env->currentAmp) / adsr[3];
+            env->currentAmpAcc = env->currentAmpSpeed / ((adsr[3]+1)/2);
+            env->currentAmpSpeed = env->currentAmpSpeed + ((adsr[3]+1)/2)* env->currentAmpAcc;
+        } else {
+        */
+        env->currentAmpSpeed = (env->currentAmp) / adsr[3];
+        env->currentAmpAcc = 0;
+//        }
+        env->envState = ENV_STATE_ON_R;
+        env->index = adsr[3] +1;
+    }
 
-	static void nextSample(struct EnvData& env) {
-		env.index++;
-	}
-	static bool isDead(struct EnvData& env) {
-		return env.envState == ENV_STATE_DEAD;
-	}
+    inline int getNextAmp(struct EnvData* env)  __attribute__((always_inline))  {
+
+        asm volatile(
+                 // r5 : index, r6 : currentAmp, r7 : envState, r8 : currentAmpSpeed
+                 "    ldm %[env], {r5-r8}\n\t"
+                 // index --
+                 "    sub r5, #1\n\t"
+                 // switch
+                 "    tbb [pc, r7]\n\t"
+                 "7:\n\t"
+                 "    .byte   (1f-7b)/2\n\t"
+                 "    .byte   (2f-7b)/2\n\t"
+                 "    .byte   (3f-7b)/2\n\t"
+                 "    .byte   (4f-7b)/2\n\t"
+                 "    .byte   (5f-7b)/2\n\t"
+                 "    .byte   (6f-7b)/2\n\t"
+                 "    .align  1\n\t"
+
+                 // attack
+                 "1:  cbz r5, 11f\n\t"
+                 "    add R6, r8\n\t"
+                 // store index and currentAmp
+                 "    stm %[env], {r5, r6}\n\t"
+                 "    b 6f\n\t"
+
+                 "11: ldr r5, [%[adsr], #4]\n\t"
+                 "    mov r7, #1\n\t"
+                 "    mov r8, %[incD]\n\t"
+                 // store index, currentAmp
+                 "    stm %[env], {r5-r8}\n\t"
+
+                 // decay
+                 "2:  cbz r5, 21f\n\t"
+                 "    sub r6, r8\n\t"
+                 // store index and currentAmp
+                 "    stm %[env], {r5,r6}\n\t"
+                 "    b 6f\n\t"
+                 "21: mov r7, #2\n\t"
+                 "    str r7, [%[env], #8]\n\t"
+
+                 // sustain
+                 "3:  ldr r6, [%[adsr], #8]\n\t"
+                 "    lsl r6, #15\n\t"
+                 "    str r6, [%[env], #4]\n\t"
+                 "    b 6f\n\t"
+
+                 // release & Quick Off
+                 "4: \n\t"
+                 "5: \n\t"
+                 "    cbz r5, 41f\n\t"
+                 "    sub r6, r8\n\t"
+                 // store index and currentAmp
+                 "    stm %[env], {r5,r6}\n\t"
+                 "    b 6f\n\t"
+                 "41: mov r7, #5\n\t"
+                 "    mov r6, #0\n\t"
+                 "    str r7, [%[env], #8]\n\t"
+                 "    str r6, [%[env], #4]\n\t"
+                 "    b 6f\n\t"
+
+                // env.envState = ENV_STATE_DEAD;
+                 "6:\n\t"
+                 : [env]"+rV" (env)
+                 : [adsr]"rV" (adsr), [incD]"r"(incD)
+                 : "r5", "r6", "r7", "r8", "cc");
+
+        return env->currentAmp>>15;
+    }
+
+    bool isDead(struct EnvData& env)  __attribute__((always_inline))  {
+        return env.envState == ENV_STATE_DEAD;
+    }
 
 private:
-	// ADSR
-	unsigned int attack;
-	unsigned int decay;
-	unsigned int sustain;
-	unsigned int release;
+    // ADSR
+    unsigned int adsr[4];
+    // Ramp speed and acceleration if attack and Decay
+    unsigned int incA, incD, incIncA, incIncD;
+
 };
 

@@ -33,7 +33,8 @@ void FMDisplay::init(LiquidCrystal* lcd) {
 }
 
 void FMDisplay::printValueWithSpace(int value) {
-	lcd->print(value);
+    lcd->print(value);
+
 	if (value>99) {
 		lcd->print(" ");
 	} else if (value>9) {

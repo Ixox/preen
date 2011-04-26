@@ -59,13 +59,13 @@ void Voice::noteOnWithoutPop(short note, char velocity, unsigned int index) {
 
     this->newNotePending = true;
 
-    env1->noteOffQuick(envState1);
-    env2->noteOffQuick(envState2);
-    env3->noteOffQuick(envState3);
-    env4->noteOffQuick(envState4);
+    env1->noteOffQuick(&envState1);
+    env2->noteOffQuick(&envState2);
+    env3->noteOffQuick(&envState3);
+    env4->noteOffQuick(&envState4);
     if (showUp[synthState.params.engine1.algo].osc>4) {
-        env5->noteOffQuick(envState5);
-        env6->noteOffQuick(envState6);
+        env5->noteOffQuick(&envState5);
+        env6->noteOffQuick(&envState6);
     }
 }
 
@@ -95,17 +95,14 @@ void Voice::noteOn(short note, char velocity, unsigned int index) {
 
 void Voice::noteOff() {
     this->released = true;
-    env1->noteOff(envState1);
-    env2->noteOff(envState2);
-    env3->noteOff(envState3);
-    env4->noteOff(envState4);
-    env6->noteOff(envState5);
-    env5->noteOff(envState6);
+    env1->noteOff(&envState1);
+    env2->noteOff(&envState2);
+    env3->noteOff(&envState3);
+    env4->noteOff(&envState4);
+    env5->noteOff(&envState5);
+    env6->noteOff(&envState6);
 }
 
-void Voice::TESTASM() {
-    osc3->nextSample(oscState3);
-}
 
 
 

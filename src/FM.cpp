@@ -30,7 +30,7 @@ SynthState		   synthState;
 Synth              synth;
 MidiDecoder        midiDecoder;
 Encoders		   encoders;
-// RingBuffer<uint16, 64> rb;
+//RingBuffer<uint16, 32> rb;
 FMDisplay          fmDisplay;
 LiquidCrystal      lcd(23,24, 25,26,27,28,29,30,31,32);
 
@@ -43,12 +43,23 @@ int max = 1024;
 int min = 1024;
  */
 
-int bias = 0;
+//int glitches = 0;
 
+int cpt;
 void IRQSendSample() {
+/*
+    if (rb.getCount()>0) {
+        pwmWrite(AUDIO_PIN , rb.remove());
+    } else {
+        glitches++;
+    }
+    */
+
     pwmWrite(AUDIO_PIN , currentSample);
     synth.nextSample();
     currentSample = (uint16)(synth.getSample()>>5) + 1024;
+
+
     /*
 	if (currentSample > max) {
         max = currentSample ;
@@ -60,6 +71,10 @@ void IRQSendSample() {
 
 }
 
+void IRQEncoders() {
+    // 16*25 micros of dealy to remove hissing noise (????).....
+    encoders.checkStatus();
+}
 
 unsigned int time = 0;
 unsigned int previousTime = 0;
@@ -68,6 +83,7 @@ unsigned int fullDelay;
 void setup()
 {
     //	timer_disable_all();
+
 
     lcd.begin(20, 4);
     lcd.setCursor(0,0);
@@ -102,6 +118,9 @@ void setup()
 
     Serial2.begin(31250);
 
+
+
+
     Timer1.setOverflow(2197);
     Timer1.setPrescaleFactor(1);
     pwmWrite(AUDIO_PIN , 0);
@@ -116,12 +135,19 @@ void setup()
     Timer1.setChannel1Mode(TIMER_OUTPUTCOMPARE);
     Timer1.attachCompare1Interrupt(IRQSendSample);
 
-    for (int k=0; k<12; k++) {
+    for (int k=0; k<2; k++) {
         synth.noteOn(60+k,100);
         delay(50);
         synth.noteOff(60+k);
         delay(5);
     }
+/*
+    Timer2.setOverflow(1000);
+    Timer2.setPrescaleFactor(16);
+    Timer2.setCompare1(500);
+    Timer2.setChannel1Mode(TIMER_OUTPUTCOMPARE);
+    Timer2.attachCompare1Interrupt(IRQEncoders);
+*/
 }
 
 
@@ -141,10 +167,8 @@ void loop() {
         fmDisplay.refreshAllScreenByStep();
     }
 
-    // 16*25 micros of dealy to remove hissing noise (????).....
+
     encoders.checkStatus();
-
-
     /*
 	if ((mainCpt & 0xff) == 0) {
         lcd.setCursor(0,0);
@@ -154,7 +178,7 @@ void loop() {
         lcd.print("  ");
     }
      */
-    //	delayMicroseconds(300);
+//    delayMicroseconds(300);
 }
 
 // Force init to be called *first*, i.e. before static object allocation.

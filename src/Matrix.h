@@ -46,7 +46,7 @@ public:
         }
     }
 
-    void computeFutureDestintation(int k) {
+    inline void computeFutureDestintation(int k) {
         futurDestinations[(int)rows[k].destination] += sources[(int)rows[k].source] * rows[k].mul;
     }
 
@@ -58,7 +58,7 @@ public:
     void setSource(SourceEnum source, int value) {
         this->sources[source] = value;
     }
-    int getDestination(DestinationEnum destination) {
+    int getDestination(DestinationEnum destination)   __attribute__((always_inline))  {
         return this->currentDestinations[destination];
     }
 

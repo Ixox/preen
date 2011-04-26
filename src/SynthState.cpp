@@ -59,7 +59,7 @@ struct ParameterRowDisplay engine3ParameterRow = {
         }
 };
 
-const char* oscShapeNames []=  {"sin ", "s^2 ", "1/2s", "spos", "off " } ;
+const char* oscShapeNames []=  {"sin ", "s^2 ", "1/2s", "spos", "rand", "off " } ;
 const char* oscTypeNames [] = { "keyb", "fixe"};
 struct ParameterRowDisplay oscParameterRow = {
         "Oscillator",
@@ -84,7 +84,7 @@ struct ParameterRowDisplay envParameterRow = {
 };
 
 
-const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW", "CC1 ", "CC2 ", "CC3 ", "CC4 "} ;
+const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW", "Velo", "CC1 ", "CC2 ", "CC3 ", "CC4 "} ;
 const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "IM1 ", "IM2 ", "IM3 ", "Mix1", "Mix2", "Mix3"} ;
 struct ParameterRowDisplay matrixParameterRow = {
         "Matrix",
@@ -467,7 +467,36 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 4, 0, 0} ,
                 "6 osc weird"
         },
-
+        {
+                { 0, 3, 14, 0} ,
+                { 0, 36, 0, 0} ,
+                { 128, 128, 128, 0} ,
+                { 2, 0, 16, 0} ,
+                { 4, 0, 8, 0} ,
+                { 0, 0, 4, 0} ,
+                { 0, 0, 8, 0} ,
+                { 0, 0, 16, 0} ,
+                { 0, 0, 16, 0} ,
+                { 0, 255, 0, 138} ,
+                { 12, 70, 0, 52} ,
+                { 0, 100, 129, 255} ,
+                { 3, 100, 100, 100} ,
+                { 0, 150, 160, 60} ,
+                { 0, 150, 160, 60} ,
+                { 8, 8, 5, 0} ,
+                { 8, 10, 1, 0} ,
+                { 1, 6, 1, 0} ,
+                { 7, 9, 6, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 36, 0, 0} ,
+                { 0, 20, 0, 0} ,
+                { 0, 3, 0, 0} ,
+                { 0, 4, 0, 0},
+                "Old String"
+        },
         {
                 { 1, 3, 28, 7} ,
                 { 5, 14, 0, 0},
