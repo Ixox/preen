@@ -36,7 +36,7 @@ public:
 	inline void updateEncoderName(int row, int encoder);
 	inline void printValueWithSpace(int value);
 	inline boolean shouldThisValueShowUp(int row, int encoder);
-
+	inline void updateEncoderValue(int refreshStatus);
 
 
 	int getLength(const char *str) {

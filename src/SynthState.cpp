@@ -28,18 +28,18 @@ const char* nullNames []= {};
 const char* algoNames []= { "alg1", "alg2", "alg3", "alg4", "alg5", "alg6", "alg7" };
 struct ParameterRowDisplay engine1ParameterRow = {
         "Engine" ,
-        { "Algo", "Voic", "Velo", "    " },
+        { "Algo", "Velo", "Voic", "Glid" },
         {
                 {ALGO1, ALGO_END-1, DISPLAY_TYPE_STRINGS, algoNames},
-                {1, 5, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
                 {0, 16, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                {0, 255, DISPLAY_TYPE_NONE, nullNames }
+                {1, 4, DISPLAY_TYPE_VOICES, nullNames },
+                {0, 10, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames }
         }
 };
 
 struct ParameterRowDisplay engine2ParameterRow = {
         "Modulation" ,
-        { "IM1 ", "IM2 ", "IM3 ", "Fdbk"},
+        { "IM1 ", "IM2 ", "IM3 ", "IM4 "},
         {
                 {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames },
                 {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames },
@@ -50,12 +50,12 @@ struct ParameterRowDisplay engine2ParameterRow = {
 
 struct ParameterRowDisplay engine3ParameterRow = {
         "Mixer" ,
-        { "Mix1", "Mix2", "Mix3", "    " },
+        { "Mix1", "Mix2", "Mix3", "Mix4" },
         {
                 {1, 128, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
                 {1, 128, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
                 {1, 128, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                {0, 255, DISPLAY_TYPE_NONE, nullNames }
+                {1, 128, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames }
         }
 };
 
@@ -85,7 +85,7 @@ struct ParameterRowDisplay envParameterRow = {
 
 
 const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW", "Velo", "CC1 ", "CC2 ", "CC3 ", "CC4 "} ;
-const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "IM1 ", "IM2 ", "IM3 ", "Mix1", "Mix2", "Mix3"} ;
+const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "IM1 ", "IM2 ", "IM3 ", "IM4 ", "Mix1", "Mix2", "Mix3", "Mix4"} ;
 struct ParameterRowDisplay matrixParameterRow = {
         "Matrix",
         { "Srce", "Mult", "Dest", "    " },
@@ -145,13 +145,13 @@ struct AllParameterRowsDisplay allParameterRows = {
 
 
 struct ShowUpAlgo showUp[7] = {
-        { 3, 2, 0},
-        { 3, 2, 2},
-        { 3, 2, 0},
-        { 4, 2, 2},
-        { 4, 3, 0},
-        { 4, 1, 3},
-        { 6, 3, 3}
+        { 3, 3, 0}, // ALGO1
+        { 3, 2, 2}, // ALGO2
+        { 3, 2, 0}, // ALGO3
+        { 4, 4, 2}, // ALGO4
+        { 4, 3, 0}, // ALGO5
+        { 4, 3, 3}, // ALGO6
+        { 6, 3, 3}  // ALGO7
 };
 
 
@@ -162,7 +162,7 @@ struct ShowUpAlgo showUp[7] = {
 const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) = {
         {
                 // Engine
-                { ALGO1, 4, 14, 0},
+                { ALGO1, 14, 4, 6},
                 { 16, 21, 0, 0 },
                 { 128, 128, 128,0 },
 
@@ -201,7 +201,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
         ,
         {
                 // Engine
-                { 1, 4, 14, 0 },
+                { 1, 14, 4, 0 },
                 { 3, 2, 0, 0 },
                 { 128, 128, 128, 0 },
                 // OSC1
@@ -236,7 +236,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
         },
         {
                 // Engine
-                { 0, 4, 0, 0},
+                { 0, 0, 4, 0},
                 { 20, 28, 0, 0 } ,
                 { 128, 128, 128,0 },
                 // OSC1
@@ -271,7 +271,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
         },
         {
                 // Engine
-                { 0, 4, 14, 0} ,
+                { 0, 14, 4, 0} ,
                 { 15, 3 , 0, 0},
                 { 128, 128, 128,0 },
                 // OSC1
@@ -305,7 +305,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 "Old and Sad"
         },
         {
-                { 0, 4, 14, 0},
+                { 0, 14, 4, 0},
                 { 11, 28, 0, 0} ,
                 { 128, 128, 128,0 },
                 { 0, 0, 16, 0} ,
@@ -339,7 +339,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 "Medieval"
         },
         {
-                { 3, 3, 8, 0} ,
+                { 3, 8, 3, 0} ,
                 { 14, 20, 0, 1} ,
                 { 128, 128, 128, 0} ,
                 { 0, 0, 16, 0} ,
@@ -372,7 +372,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 "Klong"
         },
         {
-                { 0, 2, 10, 0} ,
+                { 0, 10, 2, 0} ,
                 { 16, 36, 0, 81} ,
                 { 128, 128, 128, 0} ,
                 { 0, 0, 16, 0} ,
@@ -404,7 +404,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 "Bass 1"
         },
         {
-                { 5, 2, 14, 0} ,
+                { 5, 14, 2, 0} ,
                 { 19, 42, 84, 0} ,
                 { 96, 128, 87, 30} ,
                 // Osc
@@ -438,7 +438,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 "CrystalnBlow"
         },
         {
-                { 6, 1, 14, 0} ,
+                { 6, 14, 1, 0} ,
                 { 21, 73, 125, 0} ,
                 { 128, 114, 72, 0} ,
                 { 1, 0, 41, 0} ,
@@ -468,7 +468,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 "6 osc weird"
         },
         {
-                { 0, 3, 14, 0} ,
+                { 0, 14, 4, 0} ,
                 { 0, 36, 0, 0} ,
                 { 128, 128, 128, 0} ,
                 { 2, 0, 16, 0} ,
@@ -498,7 +498,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 "Old String"
         },
         {
-                { 1, 3, 28, 7} ,
+                { 0,0,0,0} ,
                 { 5, 14, 0, 0},
                 { 128, 128, 128,0 },
                 { 0, 0, 16, 0} ,
@@ -734,8 +734,8 @@ void SynthState::buttonPressed(int button) {
         {
             SerialUSB.println("New Sound....");
             dumpLine(params.engine1.algo, params.engine1.numberOfVoice, params.engine1.velocity, params.engine1.glide );
-            dumpLine(params.engine2.modulationIndex1, params.engine2.modulationIndex2, params.engine2.modulationIndex3, params.engine2.modulationFeedback );
-            dumpLine(params.engine3.mixOsc1, params.engine3.mixOsc2, params.engine3.mixOsc3, params.engine3.notused );
+            dumpLine(params.engine2.modulationIndex1, params.engine2.modulationIndex2, params.engine2.modulationIndex3, params.engine2.modulationIndex4 );
+            dumpLine(params.engine3.mixOsc1, params.engine3.mixOsc2, params.engine3.mixOsc3, params.engine3.mixOsc4 );
             OscillatorParams * o = (OscillatorParams *)(&(params.osc1));
             for (int k=0; k<6; k++) {
                 dumpLine(o[k].shape, o[k].frequencyType, o[k].frequencyMul, o[k].detune);

@@ -43,21 +43,23 @@
 
 enum {
     ENCODER_ENGINE_ALGO = 0,
+    ENCODER_ENGINE_VELOCITY,
     ENCODER_ENGINE_VOICE,
-    ENCODER_ENGINE_VELOCITY
+    ENCODER_ENGINE_GLIDE
 };
 
 enum {
     ENCODER_ENGINE_IM1 = 0,
     ENCODER_ENGINE_IM2,
     ENCODER_ENGINE_IM3,
-    ENCODER_ENGINE_FDBK
+    ENCODER_ENGINE_IM4
 };
 
 enum {
     ENCODER_ENGINE_MIX1 = 0,
     ENCODER_ENGINE_MIX2,
-    ENCODER_ENGINE_MIX3
+    ENCODER_ENGINE_MIX3,
+    ENCODER_ENGINE_MIX4
 };
 
 enum {
@@ -149,9 +151,11 @@ enum DestinationEnum {
 	INDEX_MODULATION1,
 	INDEX_MODULATION2,
 	INDEX_MODULATION3,
+    INDEX_MODULATION4,
 	MIX_OSC1,
     MIX_OSC2,
     MIX_OSC3,
+    MIX_OSC4,
 	DESTINATION_MAX
 };
 
@@ -162,8 +166,8 @@ enum OscFrequencyType {
 
 struct Engine1Params {
     uchar algo;
-    uchar numberOfVoice;
     uchar velocity;
+    uchar numberOfVoice;
     uchar glide;
 };
 
@@ -171,14 +175,14 @@ struct Engine2Params {
     uchar modulationIndex1;
     uchar modulationIndex2;
     uchar modulationIndex3;
-    uchar modulationFeedback;
+    uchar modulationIndex4;
 };
 
 struct Engine3Params {
     uchar mixOsc1;
     uchar mixOsc2;
     uchar mixOsc3;
-    uchar notused;
+    uchar mixOsc4;
 };
 
 struct OscillatorParams {

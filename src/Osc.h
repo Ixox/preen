@@ -30,6 +30,8 @@ struct OscState {
     int index;
     int frequency;
     int mainFrequency;
+    int fromFrequency;
+    int nextFrequency;
 };
 
 template <int number>
@@ -41,6 +43,8 @@ public:
     void init(Matrix* matrix);
 
     void newNote(struct OscState& oscState, int note);
+    void glideToNote(struct OscState& oscState, int note);
+    void glideStep(struct OscState& oscState, int step);
 
     /*
 	int getSample(struct OscState &oscState) {
@@ -186,14 +190,39 @@ void Osc<number>::init(Matrix* matrix) {
 
 template <int number>
 void Osc<number>::newNote(struct OscState& oscState, int note) {
-    oscState.index = 1 << number;
+    oscState.index = 1; // << number;
     switch (oscillator->frequencyType) {
     case OSC_FT_KEYBOARD:
         oscState.mainFrequency = ((frequenciesx8[note] * oscillator->frequencyMul) >> 4) + oscillator->detune;
         break;
     case OSC_FT_FIXE:
-        oscState.mainFrequency = (oscillator->frequencyMul << 7) + oscillator->detune;
+        oscState.mainFrequency = ((oscillator->frequencyMul << 7) + oscillator->detune)<<2;
         break;
     }
     oscState.frequency = oscState.mainFrequency;
 }
+
+
+template <int number>
+void Osc<number>::glideToNote(struct OscState& oscState, int note) {
+    switch (oscillator->frequencyType) {
+    case OSC_FT_KEYBOARD:
+        oscState.nextFrequency = ((frequenciesx8[note] * oscillator->frequencyMul) >> 4) + oscillator->detune;
+        break;
+    case OSC_FT_FIXE:
+        oscState.nextFrequency = ((oscillator->frequencyMul << 7) + oscillator->detune)<<2;
+        break;
+    }
+    oscState.fromFrequency = oscState.mainFrequency;
+}
+
+
+template <int number>
+void Osc<number>::glideStep(struct OscState& oscState, int step) {
+    oscState.mainFrequency = ((oscState.fromFrequency * ((1<<synthState.params.engine1.glide) - step)) + oscState.nextFrequency * step) >> synthState.params.engine1.glide;
+    oscState.frequency = oscState.mainFrequency;
+}
+
+
+
+

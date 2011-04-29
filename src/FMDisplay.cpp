@@ -51,10 +51,13 @@ void FMDisplay::printValueWithSpace(int value) {
 
 boolean FMDisplay::shouldThisValueShowUp(int row, int encoder) {
     int algo = synthState.params.engine1.algo;
-    if (row == ROW_MODULATION && (encoder+1)> showUp[algo].im && encoder!=3) {
+    if (row == ROW_MODULATION && (encoder+1)> showUp[algo].im) {
         return false;
     }
     if (row == ROW_OSC_MIX && (encoder+1)> showUp[algo].mix) {
+        return false;
+    }
+    if (row == ROW_ENGINE && encoder == ENCODER_ENGINE_GLIDE && synthState.params.engine1.numberOfVoice >1) {
         return false;
     }
 
@@ -69,8 +72,7 @@ void FMDisplay::updateEncoderValue(int row, int encoder, ParameterDisplay* param
         return;
     }
 
-
-	switch (param->displayType) {
+    switch (param->displayType) {
 	case DISPLAY_TYPE_STRINGS :
 		lcd->print(param->valueName[newValue]);
 		break;
@@ -138,10 +140,6 @@ displaySignedChar:
 			lcd->setCursor(10, 3);
 			newValue = (oParam[oRow].frequencyMul << 7) + oParam[oRow].detune;
 			goto displayFloat53;
-			/*
-			lcd->print( );
-			lcd->print("     ");
-			*/
 		} else {
 			// Freq
 			if (encoder == ENCODER_OSC_FREQ) goto displayFloat44;
@@ -154,6 +152,14 @@ displaySignedChar:
 	case DISPLAY_TYPE_NONE:
 		lcd->print("    ");
 		break;
+    case DISPLAY_TYPE_VOICES:
+        printValueWithSpace(newValue);
+        if (newValue <= 2) {
+            // if voices = 1 or 0 let's refresh the glide info
+            updateEncoderValue(ENCODER_ENGINE_GLIDE+1);
+            updateEncoderName(row, ENCODER_ENGINE_GLIDE);
+        }
+        break;
 	}
 }
 
@@ -182,17 +188,21 @@ void FMDisplay::refreshAllScreenByStep() {
 	} else if (refreshStatus>4) {
 		updateEncoderName(synthState.getCurrentRow(), refreshStatus -5);
 	} else {
-		int row = synthState.getCurrentRow();
-		struct ParameterDisplay param = allParameterRows.row[row]->params[refreshStatus -1];
-		int newValue;
-		if (param.displayType == DISPLAY_TYPE_SIGNED_CHAR) {
-			newValue = ((char*)&synthState.params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
-		} else {
-			newValue = ((unsigned char*)&synthState.params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
-		}
-		updateEncoderValue(synthState.getCurrentRow(), refreshStatus -1, &param, newValue);
+	    updateEncoderValue(refreshStatus);
 	}
-	refreshStatus --;
+    refreshStatus --;
+}
+
+ void FMDisplay::updateEncoderValue(int refreshStatus) {
+    int row = synthState.getCurrentRow();
+    struct ParameterDisplay param = allParameterRows.row[row]->params[refreshStatus -1];
+    int newValue;
+    if (param.displayType == DISPLAY_TYPE_SIGNED_CHAR) {
+        newValue = ((char*)&synthState.params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
+    } else {
+        newValue = ((unsigned char*)&synthState.params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
+    }
+    updateEncoderValue(synthState.getCurrentRow(), refreshStatus -1, &param, newValue);
 }
 
 
@@ -219,7 +229,7 @@ void FMDisplay::newParamValue(SynthParamType type, int currentRow, int encoder, 
 		}
 		// If we change frequency type of OScillator rows, it's a bit special....
 		if (SynthState::getListenerType(currentRow)==SYNTH_PARAM_TYPE_OSC && encoder == ENCODER_OSC_FTYPE) {
-			refreshStatus = 10;
+			refreshStatus = 4;
 			return;
 		}
 

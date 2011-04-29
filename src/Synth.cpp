@@ -107,7 +107,6 @@ int Synth::getSample() {
     sample += voices[1].getSample();
     sample += voices[2].getSample();
     sample += voices[3].getSample();
-    sample += voices[4].getSample();
     return sample / synthState.params.engine1.numberOfVoice;
     // 4 voices :
     //return sample >> 2;
@@ -155,14 +154,25 @@ void Synth::nextSample() {
         this->voices[0].updateModulationIndex3();
         break;
     case 17:
-        this->voices[0].updateMixOsc1();
+        this->voices[0].updateModulationIndex4();
         break;
     case 18:
-        this->voices[0].updateMixOsc2();
+        this->voices[0].updateMixOsc1();
         break;
     case 19:
+        this->voices[0].updateMixOsc2();
+        break;
+    case 20:
         this->voices[0].updateMixOsc3();
         break;
+    case 21:
+        this->voices[0].updateMixOsc4();
+        break;
+    case 22:
+    case 23:
+    case 24:
+    case 25:
+        this->voices[step32-22].glide();
     default:
         break;
 
@@ -173,7 +183,6 @@ void Synth::nextSample() {
     this->voices[1].nextSample();
     this->voices[2].nextSample();
     this->voices[3].nextSample();
-    this->voices[4].nextSample();
     cpt++;
 }
 

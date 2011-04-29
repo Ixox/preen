@@ -17,8 +17,8 @@
 
 #include "Voice.h"
 
-int Voice::IM1, Voice::IM2, Voice::IM3;
-int Voice::MIX1, Voice::MIX2, Voice::MIX3;
+int Voice::IM1, Voice::IM2, Voice::IM3, Voice::IM4;
+int Voice::MIX1, Voice::MIX2, Voice::MIX3, Voice::MIX4;
 
 int vvcpt=0;
 
@@ -52,20 +52,56 @@ void Voice::init(Matrix* matrix, Env<1>*env1, Env<2>*env2, Env<3>*env3, Env<4>*e
 
 
 void Voice::noteOnWithoutPop(short note, char velocity, unsigned int index) {
-    this->nextNote = note;
-    this->nextVelocity = velocity;
-    // Update index : so that few change to be choosen again during the quick dying
+    // update note now so that the noteOff is triggered by the new note
+    this->note = note;
+
+    // Update index : so that few chance to be choosen again during the quick dying
     this->index = index;
+    if (!this->released && synthState.params.engine1.numberOfVoice == 1 && synthState.params.engine1.glide>0) {
+        this->gliding = true;
+        this->glideStep = 0;
+        this->nextNote = note;
+        osc1->glideToNote(oscState1, note);
+        osc2->glideToNote(oscState2, note);
+        osc3->glideToNote(oscState3, note);
+        osc4->glideToNote(oscState4, note);
+        if (showUp[synthState.params.engine1.algo].osc>4) {
+            osc5->glideToNote(oscState5, note);
+            osc6->glideToNote(oscState6, note);
+        }
+    } else {
+        this->newNotePending = true;
+        this->nextVelocity = velocity;
+        this->nextNote = note;
 
-    this->newNotePending = true;
+        env1->noteOffQuick(&envState1);
+        env2->noteOffQuick(&envState2);
+        env3->noteOffQuick(&envState3);
+        env4->noteOffQuick(&envState4);
+        if (showUp[synthState.params.engine1.algo].osc>4) {
+            env5->noteOffQuick(&envState5);
+            env6->noteOffQuick(&envState6);
+        }
+    }
+}
 
-    env1->noteOffQuick(&envState1);
-    env2->noteOffQuick(&envState2);
-    env3->noteOffQuick(&envState3);
-    env4->noteOffQuick(&envState4);
-    if (showUp[synthState.params.engine1.algo].osc>4) {
-        env5->noteOffQuick(&envState5);
-        env6->noteOffQuick(&envState6);
+void Voice::glide() {
+    if (!this->gliding) {
+        return;
+    }
+    this->glideStep++;
+    if (glideStep<=(1<<synthState.params.engine1.glide)) {
+        osc1->glideStep(oscState1, this->glideStep);
+        osc2->glideStep(oscState2, this->glideStep);
+        osc3->glideStep(oscState3, this->glideStep);
+        osc4->glideStep(oscState4, this->glideStep);
+        if (showUp[synthState.params.engine1.algo].osc>4) {
+            osc5->glideStep(oscState5, this->glideStep);
+            osc6->glideStep(oscState6, this->glideStep);
+        }
+    } else {
+        this->gliding = false;
+        this->note = this->nextNote;
     }
 }
 

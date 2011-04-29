@@ -26,7 +26,7 @@
 #include "wirish.h"
 #include "LiquidCrystal.h"
 
-#define MAX_NUMBER_OF_VOICES 5
+#define MAX_NUMBER_OF_VOICES 4
 #define NUMBER_OF_LFOS 4
 
 #define UINT_MAX  4294967295
