@@ -80,8 +80,20 @@ void Synth::noteOn(char note, char velocity) {
 
 void Synth::noteOff(char note) {
     for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
-        if (voices[k].getNote() == note) {
-            voices[k].noteOff();
+        if (voices[k].getNextNote()==0) {
+            if (voices[k].getNote() == note) {
+                voices[k].noteOff();
+            }
+        } else {
+            // if gliding and releasing first note
+            if (voices[k].getNote() == note) {
+                voices[k].glideNoteOff();
+            }
+            // if gliding and releasing next note
+            if (voices[k].getNextNote() == note) {
+                voices[k].glideToNote(voices[k].getNote());
+                voices[k].glideNoteOff();
+            }
         }
     }
 }
@@ -169,10 +181,8 @@ void Synth::nextSample() {
         this->voices[0].updateMixOsc4();
         break;
     case 22:
-    case 23:
-    case 24:
-    case 25:
-        this->voices[step32-22].glide();
+        // glide can happens only on Voice 0
+        this->voices[0].glide();
     default:
         break;
 

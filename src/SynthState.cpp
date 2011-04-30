@@ -52,10 +52,10 @@ struct ParameterRowDisplay engine3ParameterRow = {
         "Mixer" ,
         { "Mix1", "Mix2", "Mix3", "Mix4" },
         {
-                {1, 128, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                {1, 128, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                {1, 128, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                {1, 128, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames }
+                {1, 128, DISPLAY_TYPE_FLOAT_1_7, nullNames },
+                {1, 128, DISPLAY_TYPE_FLOAT_1_7, nullNames },
+                {1, 128, DISPLAY_TYPE_FLOAT_1_7, nullNames },
+                {1, 128, DISPLAY_TYPE_FLOAT_1_7, nullNames }
         }
 };
 

@@ -10,7 +10,7 @@
                                             
 V0.0 pre alpha
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-April 29th 2011
+April 30th 2011
 
 -----------------------------------------
 Frequency modulation synth for the Maple :
@@ -43,6 +43,10 @@ Preen Current Features:
 . 6th order active low pass bessel filter to get rid (as much as possible) of the aliasing
 
 --------------------------------------------
+Update April 30th
+. Gliding enhancement
+. Mix display from 0.00 to 1.00.
+
 Update April 29th
 . Gliding added in engine + display (available when number of voice = 1)
 

@@ -222,7 +222,3 @@ void Osc<number>::glideStep(struct OscState& oscState, int step) {
     oscState.mainFrequency = ((oscState.fromFrequency * ((1<<synthState.params.engine1.glide) - step)) + oscState.nextFrequency * step) >> synthState.params.engine1.glide;
     oscState.frequency = oscState.mainFrequency;
 }
-
-
-
-

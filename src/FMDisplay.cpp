@@ -124,6 +124,20 @@ displayFloat53:
 		}
         lcd->print(" ");
 		break;
+    case DISPLAY_TYPE_FLOAT_1_7:
+    {
+        lcd->print(newValue>>7);
+        lcd->print(".");
+        int v = ((newValue & 0x7f) *100) >>7;
+        if (v >= 10) {
+            lcd->print(v);
+        } else {
+            lcd->print("0");
+            lcd->print(v);
+        }
+        lcd->print(" ");
+        break;
+    }
 	case DISPLAY_TYPE_SIGNED_CHAR:
 displaySignedChar:
 	case DISPLAY_TYPE_UNSIGNED_CHAR:

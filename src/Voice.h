@@ -421,7 +421,9 @@ public:
 
     void noteOnWithoutPop(short note, char velocity, unsigned int index);
     void noteOn(short note, char velocity, unsigned int index);
+    void glideToNote(short newNote);
     void noteOff();
+    void glideNoteOff();
     void glide();
 
     bool isReleased() { return this->released; }
@@ -429,6 +431,7 @@ public:
     bool isGliding() { return this->gliding; }
     unsigned int getIndex() { return this->index; }
     char getNote() { return this->note; }
+    char getNextNote() { return this->nextNote; }
 
 private:
     // voice status
