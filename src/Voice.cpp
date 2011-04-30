@@ -130,6 +130,7 @@ void Voice::noteOn(short newNote, char velocity, unsigned int index) {
     this->released = false;
     this->playing = true;
     this->note = newNote;
+    this->nextNote = 0;
     this->index = index;
     this->velocity = velocity;
 }
