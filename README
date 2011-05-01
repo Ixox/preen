@@ -10,7 +10,7 @@
                                             
 V0.0 pre alpha
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-April 30th 2011
+May 1st 2011
 
 -----------------------------------------
 Frequency modulation synth for the Maple :
@@ -25,6 +25,7 @@ Preen Current Features:
 
 . 7 FM algo available... using 3, 4 or 6 oscs per voice
 . Up to 4 FM voices 
+. Glide available when voice set to 1
 . Each oscillator has an ADSR envelope
 . 4 LFO (saw, square, ramp)
 . 8 rows modulation matrix
@@ -35,6 +36,7 @@ Preen Current Features:
 . The full synth state (23 * 4 parameters) can be edited with the 4 Encoders through the 19 rows.
 . The 5 buttons allow easy navigation into the 19 rows (1 engine, 4 osc, 4 env, 6 matrix rows, 4 lfos)
 . 2 buttons for midi (save/load patch, select midi channel)...
+. 44 parameters read and send CC
 
 . Sampling rate : 
   32768 Hz (makes division faster ;-) for audio. 
@@ -43,6 +45,10 @@ Preen Current Features:
 . 6th order active low pass bessel filter to get rid (as much as possible) of the aliasing
 
 --------------------------------------------
+Update May 1st:
+. Midi Control changes are back (44 parameters read and sent).
+. 2 functions turned to assembly to prevent interuption (audio click)
+
 Update April 30th
 . Gliding enhancement
 . Mix display from 0.00 to 1.00.
