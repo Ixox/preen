@@ -152,7 +152,7 @@ displaySignedChar:
 
 		if (ft == OSC_FT_FIXE) {
 			lcd->setCursor(10, 3);
-			newValue = (oParam[oRow].frequencyMul << 7) + oParam[oRow].detune;
+			newValue = ((oParam[oRow].frequencyMul << 7) + oParam[oRow].detune)<<2;
 			goto displayFloat53;
 		} else {
 			// Freq

@@ -67,21 +67,21 @@ public:
             incIncA = incA / ((adsr[0]+1)/2);
             incA = incA + ((adsr[0]+1)/2)*incIncA;
         } else {
-        */
-            incA = (32767<<15) / adsr[0];
-            incIncA = 0;
-//        }
+         */
+        incA = (32767<<15) / adsr[0];
+        incIncA = 0;
+        //        }
 
-            /*
+        /*
         if (adsr[1]>=640000) {
             incD = ((32768 - adsr[2]) << 15) / adsr[1];
             incIncD = incD / ((adsr[1]+1)/2);
             incD = incD + ((adsr[1]+1)/2)*incIncD;
         } else {
-        */
-            incD = ((32767 - adsr[2]) << 15) / adsr[1];
-            incIncD = 0;
-//        }
+         */
+        incD = ((32767 - adsr[2]) << 15) / adsr[1];
+        incIncD = 0;
+        //        }
     }
 
 
@@ -95,95 +95,110 @@ public:
     }
 
     void noteOffQuick(struct EnvData* env) {
-        // No need for exponential ramp... linear is OK.
-        env->currentAmpSpeed = (env->currentAmp) / 32;
-        env->currentAmpAcc  = 0;
-        env->envState = ENV_STATE_QUICK_OFF;
-        env->index = 33;
-}
+        // assembly to update all env value at the same time...
+        // Because it happens outside of main synth thread
+        asm volatile(
+                // r5 : index, r6 : currentAmp, r7 : envState, r8 : currentAmpSpeed
+                "    ldm %[env], {r5-r8}\n\t"
+                // env->index = 65;
+                "    mov r5, #65\n\t"
+                // env->envState = ENV_STATE_QUICK_OFF;
+                "    mov r7, #4\n\t"
+                // env->currentAmpSpeed = env->currentAmp >> 6;
+                "    mov r8, r6, lsr #6\n\t"
+                // Store all values
+                "    stm %[env], {r5-r8}\n\t"
+                : [env]"+rV" (env)
+                  :
+                  : "r5", "r6", "r7", "r8", "cc");
+    }
 
 
     void noteOff(struct EnvData* env) {
-        /*
-        // Prepare exp ramp
-        if (adsr[3]>640000) {
-            env->currentAmpSpeed = (env->currentAmp) / adsr[3];
-            env->currentAmpAcc = env->currentAmpSpeed / ((adsr[3]+1)/2);
-            env->currentAmpSpeed = env->currentAmpSpeed + ((adsr[3]+1)/2)* env->currentAmpAcc;
-        } else {
-        */
-        env->currentAmpSpeed = (env->currentAmp) / adsr[3];
-        env->currentAmpAcc = 0;
-//        }
-        env->envState = ENV_STATE_ON_R;
-        env->index = adsr[3] +1;
+        // assembly to update all env value at the same time...
+        // Because it happens outside of main synth thread
+        asm volatile(
+                // r5 : index, r6 : currentAmp, r7 : envState, r8 : currentAmpSpeed
+                "    ldm %[env], {r5-r8}\n\t"
+                // env->index = adsr[3] +1;
+                "    add r5, %[release], #1\n\t"
+                // env->envState = ENV_STATE_ON_R;
+                "    mov r7, #3\n\t"
+                // env->currentAmpSpeed = (env->currentAmp) / adsr[3];
+                "    udiv r8, r6, %[release]\n\t"
+                // Store all values
+                "    stm %[env], {r5-r8}\n\t"
+                : [env]"+rV" (env)
+                  : [release]"r"(adsr[3])
+                    : "r5", "r6", "r7", "r8", "cc");
+
     }
 
     inline int getNextAmp(struct EnvData* env)  __attribute__((always_inline))  {
 
         asm volatile(
-                 // r5 : index, r6 : currentAmp, r7 : envState, r8 : currentAmpSpeed
-                 "    ldm %[env], {r5-r8}\n\t"
-                 // index --
-                 "    sub r5, #1\n\t"
-                 // switch
-                 "    tbb [pc, r7]\n\t"
-                 "7:\n\t"
-                 "    .byte   (1f-7b)/2\n\t"
-                 "    .byte   (2f-7b)/2\n\t"
-                 "    .byte   (3f-7b)/2\n\t"
-                 "    .byte   (4f-7b)/2\n\t"
-                 "    .byte   (5f-7b)/2\n\t"
-                 "    .byte   (6f-7b)/2\n\t"
-                 "    .align  1\n\t"
+                // r5 : index, r6 : currentAmp, r7 : envState, r8 : currentAmpSpeed
+                "    ldm %[env], {r5-r8}\n\t"
+                // index --
+                "    sub r5, #1\n\t"
+                // switch
+                "    tbb [pc, r7]\n\t"
+                "7:\n\t"
+                "    .byte   (1f-7b)/2\n\t"
+                "    .byte   (2f-7b)/2\n\t"
+                "    .byte   (3f-7b)/2\n\t"
+                "    .byte   (4f-7b)/2\n\t"
+                "    .byte   (5f-7b)/2\n\t"
+                "    .byte   (6f-7b)/2\n\t"
+                "    .align  1\n\t"
 
-                 // attack
-                 "1:  cbz r5, 11f\n\t"
-                 "    add R6, r8\n\t"
-                 // store index and currentAmp
-                 "    stm %[env], {r5, r6}\n\t"
-                 "    b 6f\n\t"
+                // attack
+                "1:  cbz r5, 11f\n\t"
+                "    add R6, r8\n\t"
+                // store index and currentAmp
+                "    stm %[env], {r5, r6}\n\t"
+                "    b 6f\n\t"
 
-                 "11: ldr r5, [%[adsr], #4]\n\t"
-                 "    mov r7, #1\n\t"
-                 "    mov r8, %[incD]\n\t"
-                 // store index, currentAmp
-                 "    stm %[env], {r5-r8}\n\t"
+                "11: ldr r5, [%[adsr], #4]\n\t"
+                "    mov r7, #1\n\t"
+                "    mov r8, %[incD]\n\t"
+                // store index, currentAmp
+                "    stm %[env], {r5-r8}\n\t"
 
-                 // decay
-                 "2:  cbz r5, 21f\n\t"
-                 "    sub r6, r8\n\t"
-                 // store index and currentAmp
-                 "    stm %[env], {r5,r6}\n\t"
-                 "    b 6f\n\t"
-                 "21: mov r7, #2\n\t"
-                 "    str r7, [%[env], #8]\n\t"
+                // decay
+                "2:  cbz r5, 21f\n\t"
+                "    sub r6, r8\n\t"
+                // store index and currentAmp
+                "    stm %[env], {r5,r6}\n\t"
+                "    b 6f\n\t"
+                "21: mov r7, #2\n\t"
+                "    str r7, [%[env], #8]\n\t"
 
-                 // sustain
-                 "3:  ldr r6, [%[adsr], #8]\n\t"
-                 "    lsl r6, #15\n\t"
-                 "    str r6, [%[env], #4]\n\t"
-                 "    b 6f\n\t"
+                // sustain
+                "3:  ldr r6, [%[adsr], #8]\n\t"
+                "    lsl r6, #15\n\t"
+                "    str r6, [%[env], #4]\n\t"
+                "    b 6f\n\t"
 
-                 // release & Quick Off
-                 "4: \n\t"
-                 "5: \n\t"
-                 "    cbz r5, 41f\n\t"
-                 "    sub r6, r8\n\t"
-                 // store index and currentAmp
-                 "    stm %[env], {r5,r6}\n\t"
-                 "    b 6f\n\t"
-                 "41: mov r7, #5\n\t"
-                 "    mov r6, #0\n\t"
-                 "    str r7, [%[env], #8]\n\t"
-                 "    str r6, [%[env], #4]\n\t"
-                 "    b 6f\n\t"
+                // release & Quick Off
+                "4: \n\t"
+                "5: \n\t"
+                "    cbz r5, 41f\n\t"
+                "    sub r6, r8\n\t"
+                // store index and currentAmp
+                "    stm %[env], {r5,r6}\n\t"
+                "    b 6f\n\t"
+                "41: mov r7, #5\n\t"
+                "    mov r6, #0\n\t"
+                "    str r7, [%[env], #8]\n\t"
+                "    str r6, [%[env], #4]\n\t"
+                "    b 6f\n\t"
 
                 // env.envState = ENV_STATE_DEAD;
-                 "6:\n\t"
-                 : [env]"+rV" (env)
-                 : [adsr]"rV" (adsr), [incD]"r"(incD)
-                 : "r5", "r6", "r7", "r8", "cc");
+                "6:\n\t"
+                : [env]"+rV" (env)
+                  : [adsr]"rV" (adsr), [incD]"r"(incD)
+                    : "r5", "r6", "r7", "r8", "cc");
 
         return env->currentAmp>>15;
     }

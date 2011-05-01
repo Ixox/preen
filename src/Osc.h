@@ -46,15 +46,6 @@ public:
     void glideToNote(struct OscState& oscState, int note);
     void glideStep(struct OscState& oscState, int step);
 
-    /*
-	int getSample(struct OscState &oscState) {
-		int rest = oscState.index & 0x7f;
-		int div128 = oscState.index >> 7;
-		int div128plus1 = (div128 + 1) & 0x7ff;
-		return (sinTable[div128]* (128-rest) + sinTable[div128plus1]*rest) >> 8;
-	}
-     */
-
     int getNextSample(struct OscState *oscState) __attribute__((always_inline)) {
         int oscValue;
         oscState->index += (this->matrix->getDestination(destFreq) >> 4) + oscState->frequency;
