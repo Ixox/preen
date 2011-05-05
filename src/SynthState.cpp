@@ -173,7 +173,6 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { OSC_SHAPE_SIN, OSC_FT_KEYBOARD, 8,  0 },
                 { OSC_SHAPE_SIN, OSC_FT_KEYBOARD, 16,  0 },
                 { OSC_SHAPE_SIN, OSC_FT_KEYBOARD, 16,  0 },
-
                 // ENV 1
                 { 0,   150, 160,  60 },
                 { 100, 65,  150, 100 },
@@ -555,8 +554,6 @@ SynthState::SynthState() {
     }
     // enable the i2c bus
     i2c_master_enable(I2C1, 0);
-
-
 }
 
 void SynthState::encoderTurned(int encoder, int ticks) {
@@ -635,6 +632,8 @@ void SynthState::encoderTurned(int encoder, int ticks) {
 
 
 void SynthState::copyPatch(char* source, char* dest, bool propagate) {
+    propagateBeforeNewParamsLoad();
+
     for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
         int currentRow = k / NUMBER_OF_ENCODERS;
         char oldValue = dest[k];
@@ -817,6 +816,7 @@ void SynthState::pruneToEEPROM(int bankNumber, int preset) {
 }
 
 void SynthState::formatEEPROM() {
+    propagateBeforeNewParamsLoad();
 
     uint8 deviceaddress = 0b1010000;
     for (int bankNumber=0; bankNumber<3; bankNumber++) {
@@ -860,6 +860,7 @@ void SynthState::formatEEPROM() {
 
 
 void SynthState::readFromEEPROM(int bankNumber, int preset) {
+
     uint8 deviceaddress = 0b1010000;
     int address = preset*128 +  bankNumber * 128*128;
     uint8 bufReadAddress[2];

@@ -48,6 +48,7 @@ void MidiDecoder::newByte(unsigned char byte) {
             index ++;
             break;
         case 0xd0:
+        case 0xc0:
             currentEvent[0] = hi;
             newEvent = false;
             index = 0;
@@ -103,8 +104,19 @@ void MidiDecoder::sendMidiEvent() {
     	SerialUSB.println((short) currentEvent[2]);
          */
         switch (currentEvent[1]) {
+        case CC_BANK_SELECT:
+            if (currentEvent[2]>=1 and currentEvent[2]<=3) {
+                synthState.fullState.bankNumber = currentEvent[2];
+            }
+            break;
         case CC_MODWHEEL:
             this->synth->getMatrix()->setSource(MODWHEEL, currentEvent[2]);
+            break;
+        case CC_VOICE:
+            synthState.setNewValue(ROW_ENGINE, ENCODER_ENGINE_VOICE, currentEvent[2]);
+            break;
+        case CC_GLIDE:
+            synthState.setNewValue(ROW_ENGINE, ENCODER_ENGINE_GLIDE, currentEvent[2]);
             break;
         case CC_IM1:
             synthState.setNewValue(ROW_MODULATION, ENCODER_ENGINE_IM1, currentEvent[2]*2);
@@ -238,12 +250,24 @@ void MidiDecoder::sendMidiEvent() {
         case CC_LFO4_FREQ:
             synthState.setNewValue(ROW_LFO4, CC_LFO1_FREQ, currentEvent[2]*2);
             break;
+        case CC_ALL_NOTES_OFF:
+            this->synth->allNoteOff();
+            break;
+        case CC_ALL_SOUND_OFF:
+            this->synth->allSoundOff();
+            break;
         }
         case 0xd0:
             this->synth->getMatrix()->setSource(AFTERTOUCH, currentEvent[1]);
             break;
         case 0xe0:
             this->synth->getMatrix()->setSource(PITCHBEND, (int)    ((((int)currentEvent[2] << 7) + (int)currentEvent[1] -8192) >>6)) ;
+            break;
+        case 0xc0:
+            // Programm change
+            this->synth->allSoundOff();
+            // load curentEvent[1]
+            synthState.readFromEEPROM(synthState.fullState.bankNumber, currentEvent[1]);
             break;
     }
 }
@@ -259,6 +283,15 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow, int encoder
     cc.value = 0;
 
     switch (currentrow) {
+    case ROW_ENGINE:
+        if (encoder == ENCODER_ENGINE_VOICE) {
+            cc.control = CC_VOICE;
+            cc.value =  newValue;
+        } else if (encoder == ENCODER_ENGINE_GLIDE) {
+            cc.control = CC_GLIDE;
+            cc.value =  newValue;
+        }
+        break;
     case ROW_MODULATION:
         cc.control = CC_IM1 + encoder;
         cc.value =  newValue>>1;
@@ -268,35 +301,35 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow, int encoder
         cc.value =  newValue;
         break;
     case ROW_OSC_FIRST...ROW_OSC_LAST:
-        if (encoder == ENCODER_OSC_FREQ) {
-            cc.control = CC_OSC1_FREQ + (currentrow - ROW_OSC_FIRST);
-            cc.value = newValue>>1;
-        } else if (encoder == ENCODER_OSC_FTUNE) {
-            cc.control = CC_OSC1_DETUNE + (currentrow - ROW_OSC_FIRST);
-            cc.value = newValue>>1;
-        }
-        break;
+    if (encoder == ENCODER_OSC_FREQ) {
+        cc.control = CC_OSC1_FREQ + (currentrow - ROW_OSC_FIRST);
+        cc.value = newValue>>1;
+    } else if (encoder == ENCODER_OSC_FTUNE) {
+        cc.control = CC_OSC1_DETUNE + (currentrow - ROW_OSC_FIRST);
+        cc.value = newValue>>1;
+    }
+    break;
     case ROW_ENV_FIRST...ROW_ENV_LAST:
-        if (encoder == ENCODER_ENV_A) {
-            cc.control = CC_ENV1_ATTACK + (currentrow - ROW_ENV_FIRST);
-            cc.value = newValue>>1;
-        } else if (encoder==ENCODER_ENV_D) {
-            cc.control = CC_ENV1_DECAY + (currentrow - ROW_ENV_FIRST);
-            cc.value = newValue>>1;
-        }
-        break;
+    if (encoder == ENCODER_ENV_A) {
+        cc.control = CC_ENV1_ATTACK + (currentrow - ROW_ENV_FIRST);
+        cc.value = newValue>>1;
+    } else if (encoder==ENCODER_ENV_D) {
+        cc.control = CC_ENV1_DECAY + (currentrow - ROW_ENV_FIRST);
+        cc.value = newValue>>1;
+    }
+    break;
     case ROW_MATRIX_FIRST...ROW_MATRIX_LAST:
-        if (encoder==ENCODER_MATRIX_MUL) {
-            cc.control = CC_MATRIXROW1_MUL + currentrow - ROW_MATRIX_FIRST;
-            cc.value = (newValue>>1)+64;
-        }
-        break;
+    if (encoder==ENCODER_MATRIX_MUL) {
+        cc.control = CC_MATRIXROW1_MUL + currentrow - ROW_MATRIX_FIRST;
+        cc.value = (newValue>>1)+64;
+    }
+    break;
     case ROW_LFO_FIRST...ROW_LFO_LAST:
-        if (encoder==ENCODER_LFO_FREQ) {
-            cc.control = CC_MATRIXROW1_MUL + currentrow - ROW_LFO_FIRST;
-            cc.value = (newValue>>1);
-        }
-        break;
+    if (encoder==ENCODER_LFO_FREQ) {
+        cc.control = CC_MATRIXROW1_MUL + currentrow - ROW_LFO_FIRST;
+        cc.value = (newValue>>1);
+    }
+    break;
     }
 
     if (cc.control!=0) {

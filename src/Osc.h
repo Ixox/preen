@@ -48,8 +48,6 @@ public:
 
     int getNextSample(struct OscState *oscState) __attribute__((always_inline)) {
         int oscValue;
-        oscState->index += (this->matrix->getDestination(destFreq) >> 4) + oscState->frequency;
-        oscState->index &= 0x3ffff;
 
         /*
         switch(oscillator->shape) {
@@ -75,7 +73,22 @@ public:
         }
         return index;
 */
+
+        oscState->index += (this->matrix->getDestination(destFreq) >> 4) + oscState->frequency;
+        oscState->index &= 0x3ffff;
+
+
         asm volatile(
+                /*
+                "    add %[index], %[index], %[dest], lsr #4\n\t"
+                "    add %[index], %[index], %[freq]\n\t"
+                "    mvn r8, #0\n\t"
+                "    lsr r8, #14\n\t"
+                "    and %[index], %[index], r8\n\t"
+                 */
+
+
+                // Switch
                 "    tbb [pc, %[shape]]\n\t"
                 "7:\n\t"
                 "    .byte   (1f-7b)/2\n\t"
@@ -126,6 +139,7 @@ public:
                 "6:\n\t"
                 : [value] "=r"(oscValue)
                 : [sinTable]"rV"(sinTable), [shape]"r" (oscillator->shape), [randomOsc]"r"(randomOsc), [index]"r" (oscState->index)
+                : "cc", "r8"
         );
 
         return  oscValue;

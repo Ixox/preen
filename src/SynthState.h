@@ -414,9 +414,17 @@ public:
 		}
 	}
 
-	SynthMode getSynthMode() {
+    void propagateBeforeNewParamsLoad() {
+        for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
+            listener->beforeNewParamsLoad();
+        }
+    }
+
+    SynthMode getSynthMode() {
 		return fullState.synthMode;
 	}
+
+	void readFromEEPROM(int bankNumber, int preset);
 
 	struct AllSynthParams params;
 	struct FullState fullState;
@@ -432,7 +440,6 @@ private:
 
     void copyPatch(char* source, char* dest, bool propagate);
     void pruneToEEPROM(int bankNumber, int preset);
-    void readFromEEPROM(int bankNumber, int preset);
     void formatEEPROM();
     void dumpLine(int a, int b, int c, int d) {
         SerialUSB.print("{ ");

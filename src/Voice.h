@@ -422,6 +422,7 @@ public:
     void noteOnWithoutPop(short note, char velocity, unsigned int index);
     void noteOn(short note, char velocity, unsigned int index);
     void glideToNote(short newNote);
+    void killNow();
     void noteOff();
     void glideNoteOff();
     void glide();

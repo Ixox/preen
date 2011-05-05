@@ -10,7 +10,7 @@
                                             
 V0.0 pre alpha
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-May 1st 2011
+May 5st 2011
 
 -----------------------------------------
 Frequency modulation synth for the Maple :
@@ -45,6 +45,11 @@ Preen Current Features:
 . 6th order active low pass bessel filter to get rid (as much as possible) of the aliasing
 
 --------------------------------------------
+Udpdate May 5th:
+. New CC + better numbers 
+. Stop playing before loading new patch
+. Deal with new midi events
+
 Update May 1st:
 . Midi Control changes are back (44 parameters read and sent).
 . 2 functions turned to assembly to prevent interuption (audio click)

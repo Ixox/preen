@@ -75,7 +75,7 @@ public:
     void newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newcurrentRow(int newcurrentRow);
-
+    void beforeNewParamsLoad() {};
 
 
 private:

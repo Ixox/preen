@@ -104,6 +104,13 @@ void Synth::allNoteOff() {
     }
 }
 
+void Synth::allSoundOff() {
+    for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
+        voices[k].killNow();
+    }
+}
+
+
 bool Synth::isPlaying() {
     for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
         if (voices[k].isPlaying()) {

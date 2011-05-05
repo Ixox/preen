@@ -54,6 +54,8 @@ public:
     virtual void newParamValueFromExternal(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) = 0;
     virtual void newcurrentRow(int newcurrentRow) = 0;
 
+    virtual void beforeNewParamsLoad() = 0;
+
     SynthParamListener* nextListener;
 };
 

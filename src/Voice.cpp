@@ -153,6 +153,9 @@ void Voice::noteOff() {
     env6->noteOff(&envState6);
 }
 
+void Voice::killNow() {
+    this->playing = false;
+}
 
 
 

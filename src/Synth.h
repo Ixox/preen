@@ -39,6 +39,7 @@ public:
     void noteOn(char note, char velocity);
     void noteOff(char note);
     void allNoteOff();
+    void allSoundOff();
     bool isPlaying();
     Matrix* getMatrix() { return &matrix; }
     int getSample();
@@ -79,6 +80,11 @@ public:
     void newcurrentRow(int newcurrentRow)  {
         // Nothing to do
     }
+    void beforeNewParamsLoad() {
+        // Stop all voices
+        allSoundOff();
+    };
+
 
 private:
     Matrix matrix;
