@@ -18,6 +18,9 @@
 #include "MidiDecoder.h"
 #include "SynthState.h"
 
+
+
+
 MidiDecoder::MidiDecoder() {
     newEvent = true;
     index=0;
@@ -32,11 +35,92 @@ void MidiDecoder::setSynth(Synth* synth) {
     this->synth = synth;
 }
 
+
+
+
+void MidiDecoder::readSysex() {
+    unsigned int HEADER_SIZE = 2;
+    // 0x7d : non commercial
+    // 01 : Device ID
+    // 01 : model ID... Version
+    // 12 : Information sent
+    // 0x000000 : load patch....
+    // .. The patch
+
+    /*
+    SerialUSB.println("readSysex....");
+    SerialUSB.print("index up to  :");
+    SerialUSB.println(sizeof(struct AllSynthParams)+7);
+    */
+    static int newPatch[] = {0x7d, 0x01};
+
+    unsigned int index = 0;
+    uint8 value = 0;
+    int checksum = 0, sentChecksum = 0;
+
+    while (true) {
+        int timeout = 0;
+        while (!Serial2.available() && timeout<5000) {
+            timeout ++;
+        }
+        if (timeout>=5000) {
+            break;
+        }
+
+        uint8 byte = Serial2.read();
+        if (byte == 0xF7) {
+            break;
+        }
+        if (index < HEADER_SIZE) {
+            if (byte == newPatch[index]) {
+                index ++;
+            }
+        } else if (index < sizeof(struct AllSynthParams)+HEADER_SIZE) {
+            value+= byte;
+
+            if (byte<127) {
+                ((uint8*) &synthState.backupParams)[index-HEADER_SIZE] = value;
+                index++;
+                checksum += value;
+                value = 0;
+            }
+        } else {
+            sentChecksum = byte;
+            checksum = checksum % 128;
+        }
+    }
+
+    /*
+    SerialUSB.print("Received checksum : ");
+    SerialUSB.println(sentChecksum);
+
+    SerialUSB.print("Computed checksum : ");
+    SerialUSB.println(checksum);
+
+    for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
+        SerialUSB.print(k);
+        SerialUSB.print(" : ");
+        SerialUSB.print((int)((uint8*) &synthState.backupParams)[k]);
+        SerialUSB.print(" /  ");
+    }
+    SerialUSB.println();
+    */
+
+    if (checksum == sentChecksum) {
+        synthState.copyPatch((char*)&synthState.backupParams, (char*)&synthState.params, true);
+        synthState.resetDisplay();
+    }
+
+}
+
+
 void MidiDecoder::newByte(unsigned char byte) {
     bool eventComplete = false;
     if (newEvent) {
         unsigned char hi = byte & 0xf0;
         channel = byte & 0x0f;
+//        SerialUSB.print("hi : ");
+//        SerialUSB.println((int)hi);
         switch (hi) {
         case 0x80:
         case 0x90:
@@ -61,6 +145,9 @@ void MidiDecoder::newByte(unsigned char byte) {
             index = 0;
             numberOfBytes = 3;
             index ++;
+            break;
+        case 0xf0:
+            readSysex();
             break;
         }
     } else {

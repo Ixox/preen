@@ -648,6 +648,14 @@ void SynthState::copyPatch(char* source, char* dest, bool propagate) {
 }
 
 
+void SynthState::resetDisplay() {
+    fullState.synthMode = SYNTH_MODE_EDIT;
+    currentRow = 0;
+    propagateNewSynthMode();
+}
+
+
+
 void SynthState::buttonPressed(int button) {
     SynthMode oldSynthMode = fullState.synthMode;
     int oldCurrentRow = currentRow;
@@ -733,27 +741,7 @@ void SynthState::buttonPressed(int button) {
             break;
         case BUTTON_DUMP:
         {
-            SerialUSB.println("New Sound....");
-            dumpLine(params.engine1.algo, params.engine1.numberOfVoice, params.engine1.velocity, params.engine1.glide );
-            dumpLine(params.engine2.modulationIndex1, params.engine2.modulationIndex2, params.engine2.modulationIndex3, params.engine2.modulationIndex4 );
-            dumpLine(params.engine3.mixOsc1, params.engine3.mixOsc2, params.engine3.mixOsc3, params.engine3.mixOsc4 );
-            OscillatorParams * o = (OscillatorParams *)(&(params.osc1));
-            for (int k=0; k<6; k++) {
-                dumpLine(o[k].shape, o[k].frequencyType, o[k].frequencyMul, o[k].detune);
-            }
-            EnvelopeParams * e = (EnvelopeParams*)(&(params.env1));
-            for (int k=0; k<6; k++) {
-                dumpLine(e[k].attack, e[k].decay, e[k].sustain, e[k].release);
-            }
-            MatrixRowParams* m = (MatrixRowParams*)(&(params.matrixRowState1));
-            for (int k=0; k<8; k++) {
-                dumpLine(m[k].source, m[k].mul, m[k].destination, 0);
-            }
-            LfoParams* l = (LfoParams*)(&(params.lfo1));
-            for (int k=0; k<4; k++) {
-                dumpLine(l[k].shape, l[k].freq, 0, 0);
-            }
-            SerialUSB.println(params.presetName);
+            dumpPatch();
             break;
         }
 
@@ -815,9 +803,32 @@ void SynthState::pruneToEEPROM(int bankNumber, int preset) {
 
 }
 
-void SynthState::formatEEPROM() {
-    propagateBeforeNewParamsLoad();
 
+void SynthState::midiPatchDump() {
+    uint8 newPatch[] = {0xf0, 0x7d, 0x01};
+
+    for (int k=0; k<=2; k++) {
+        Serial2.print(newPatch[k]);
+    }
+
+    int checksum = 0;
+    int total = sizeof(struct AllSynthParams);
+
+    for (int k=0; k<total; k++) {
+        uint8 byte = ((unsigned char*)&params)[k];
+        checksum+= byte;
+        while (byte >= 127) {
+            Serial2.print((uint8)127);
+            byte -= 127;
+        }
+        Serial2.print(byte);
+    }
+
+    Serial2.print((uint8)(checksum % 128));
+    Serial2.print((uint8)0xf7);
+}
+
+void SynthState::formatEEPROM() {
     uint8 deviceaddress = 0b1010000;
     for (int bankNumber=0; bankNumber<3; bankNumber++) {
         for (int preset =0; preset<128; preset++) {
@@ -860,6 +871,7 @@ void SynthState::formatEEPROM() {
 
 
 void SynthState::readFromEEPROM(int bankNumber, int preset) {
+    propagateBeforeNewParamsLoad();
 
     uint8 deviceaddress = 0b1010000;
     int address = preset*128 +  bankNumber * 128*128;
@@ -928,6 +940,53 @@ MenuItem* SynthState::afterButtonPressed() {
     switch (fullState.currentMenuItem->menuState) {
     case MAIN_MENU:
         break;
+    case MENU_MIDI_CHANNEL:
+        fullState.midiChannel = fullState.menuSelect;
+        break;
+    case MENU_SAVE_CHOOSE_USER_BANK:
+        fullState.bankNumber = fullState.menuSelect;
+        break;
+    case MENU_LOAD_CHOOSE_USER_BANK:
+        fullState.bankNumber = fullState.menuSelect;
+        readFromEEPROM(fullState.bankNumber, 0);
+        break;
+    case MENU_LOAD_INTERNAL_BANK:
+        copyPatch((char*)&params, (char*)&backupParams, true);
+        break;
+    case MENU_LOAD_USER_BANK:
+        readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
+        copyPatch((char*)&params, (char*)&backupParams, true);
+        break;
+    case MENU_SAVE_CHOOSE_PRESET:
+        for (int k=0; k<12 && params.presetName[k] != 0; k++) {
+            for (int j=0; j<getLength(allChars); j++) {
+                if (params.presetName[k] == allChars[j]) {
+                    fullState.name[k] = j;
+                }
+            }
+        }
+        fullState.presetNumber = fullState.menuSelect;
+        break;
+    case MENU_ENTER_NAME:
+    {
+        int length;
+        for (length=12; fullState.name[length-1] == 0; length--);
+        for (int k=0; k<length; k++) {
+            params.presetName[k] = allChars[(int)fullState.name[k]];
+        }
+        params.presetName[length] = '\0';
+        pruneToEEPROM(fullState.bankNumber, fullState.presetNumber);
+        break;
+    }
+    case MENU_MIDI_PATCH_DUMP:
+        midiPatchDump();
+        break;
+    case MENU_DONE:
+        fullState.synthMode = SYNTH_MODE_EDIT;
+        break;
+    case MENU_FORMAT_BANK:
+        formatEEPROM();
+        break;
     case MENU_LOAD:
         switch (rMenuItem->menuState) {
         case MENU_LOAD_INTERNAL_BANK:
@@ -937,59 +996,15 @@ MenuItem* SynthState::afterButtonPressed() {
             break;
         }
         break;
-        case MENU_MIDI:
-            switch (rMenuItem->menuState) {
-            case MENU_MIDI_CHANNEL:
-                fullState.menuSelect = fullState.midiChannel;
-                // We return now, don't want to set menuSelect to 0
-                return rMenuItem;
-                break;
-            }
+    case MENU_MIDI:
+        switch (rMenuItem->menuState) {
+        case MENU_MIDI_CHANNEL:
+            fullState.menuSelect = fullState.midiChannel;
+            // We return now, don't want to set menuSelect to 0
+            return rMenuItem;
             break;
-            case MENU_MIDI_CHANNEL:
-                fullState.midiChannel = fullState.menuSelect;
-                break;
-            case MENU_SAVE_CHOOSE_USER_BANK:
-                fullState.bankNumber = fullState.menuSelect;
-                break;
-            case MENU_LOAD_CHOOSE_USER_BANK:
-                fullState.bankNumber = fullState.menuSelect;
-                readFromEEPROM(fullState.bankNumber, 0);
-                break;
-            case MENU_LOAD_INTERNAL_BANK:
-                copyPatch((char*)&params, (char*)&backupParams, true);
-                break;
-            case MENU_LOAD_USER_BANK:
-                readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
-                copyPatch((char*)&params, (char*)&backupParams, true);
-                break;
-            case MENU_SAVE_CHOOSE_PRESET:
-                for (int k=0; k<12 && params.presetName[k] != 0; k++) {
-                    for (int j=0; j<getLength(allChars); j++) {
-                        if (params.presetName[k] == allChars[j]) {
-                            fullState.name[k] = j;
-                        }
-                    }
-                }
-                fullState.presetNumber = fullState.menuSelect;
-                break;
-            case MENU_ENTER_NAME:
-            {
-                int length;
-                for (length=12; fullState.name[length-1] == 0; length--);
-                for (int k=0; k<length; k++) {
-                    params.presetName[k] = allChars[(int)fullState.name[k]];
-                }
-                params.presetName[length] = '\0';
-                pruneToEEPROM(fullState.bankNumber, fullState.presetNumber);
-                break;
-            }
-            case MENU_DONE:
-                fullState.synthMode = SYNTH_MODE_EDIT;
-                break;
-            case MENU_FORMAT_BANK:
-                formatEEPROM();
-                break;
+        }
+        break;
             default:
                 break;
     }
@@ -1037,3 +1052,29 @@ MenuItem* SynthState::menuBack() {
     rMenuItem = MenuItemUtil::getParentMenuItem(fullState.currentMenuItem->menuState);
     return rMenuItem;
 }
+
+
+
+void SynthState::dumpPatch() {
+       SerialUSB.println("New Sound....");
+       dumpLine(params.engine1.algo, params.engine1.numberOfVoice, params.engine1.velocity, params.engine1.glide );
+       dumpLine(params.engine2.modulationIndex1, params.engine2.modulationIndex2, params.engine2.modulationIndex3, params.engine2.modulationIndex4 );
+       dumpLine(params.engine3.mixOsc1, params.engine3.mixOsc2, params.engine3.mixOsc3, params.engine3.mixOsc4 );
+       OscillatorParams * o = (OscillatorParams *)(&(params.osc1));
+       for (int k=0; k<6; k++) {
+           dumpLine(o[k].shape, o[k].frequencyType, o[k].frequencyMul, o[k].detune);
+       }
+       EnvelopeParams * e = (EnvelopeParams*)(&(params.env1));
+       for (int k=0; k<6; k++) {
+           dumpLine(e[k].attack, e[k].decay, e[k].sustain, e[k].release);
+       }
+       MatrixRowParams* m = (MatrixRowParams*)(&(params.matrixRowState1));
+       for (int k=0; k<8; k++) {
+           dumpLine(m[k].source, m[k].mul, m[k].destination, 0);
+       }
+       LfoParams* l = (LfoParams*)(&(params.lfo1));
+       for (int k=0; k<4; k++) {
+           dumpLine(l[k].shape, l[k].freq, 0, 0);
+       }
+       SerialUSB.println(params.presetName);
+   }

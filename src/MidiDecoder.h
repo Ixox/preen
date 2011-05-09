@@ -94,6 +94,7 @@ public:
     void newcurrentRow(int newcurrentRow) {}
     void beforeNewParamsLoad() {};
     void sendOneMidiEvent();
+    void readSysex();
 
 private:
     unsigned char currentEvent[3];

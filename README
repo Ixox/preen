@@ -10,7 +10,7 @@
                                             
 V0.0 pre alpha
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-May 5st 2011
+May 9st 2011
 
 -----------------------------------------
 Frequency modulation synth for the Maple :
@@ -31,7 +31,7 @@ Preen Current Features:
 . 8 rows modulation matrix
 
 . Load and save preset to EEPROM.
-. Read and send midi
+. Read and send midi.
 . LCD is updated in realtime showing the parameter you modify.
 . The full synth state (23 * 4 parameters) can be edited with the 4 Encoders through the 19 rows.
 . The 5 buttons allow easy navigation into the 19 rows (1 engine, 4 osc, 4 env, 6 matrix rows, 4 lfos)
@@ -45,7 +45,10 @@ Preen Current Features:
 . 6th order active low pass bessel filter to get rid (as much as possible) of the aliasing
 
 --------------------------------------------
-Udpdate May 5th:
+Udpdate May 9th:
+. Sysex : dump patch and receive
+
+Uddate May 5th:
 . New CC + better numbers 
 . Stop playing before loading new patch
 . Deal with new midi events

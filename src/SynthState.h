@@ -425,8 +425,12 @@ public:
 	}
 
 	void readFromEEPROM(int bankNumber, int preset);
+    void dumpPatch();
 
+    void copyPatch(char* source, char* dest, bool propagate);
+    void resetDisplay();
 	struct AllSynthParams params;
+    struct AllSynthParams backupParams;
 	struct FullState fullState;
 
 private:
@@ -436,11 +440,10 @@ private:
 
 	SynthParamListener* firstParamListener;
 	SynthMenuListener* firstMenuListener;
-	struct AllSynthParams backupParams;
 
-    void copyPatch(char* source, char* dest, bool propagate);
     void pruneToEEPROM(int bankNumber, int preset);
     void formatEEPROM();
+    void midiPatchDump();
     void dumpLine(int a, int b, int c, int d) {
         SerialUSB.print("{ ");
         SerialUSB.print(a);
