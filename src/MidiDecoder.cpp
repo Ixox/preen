@@ -119,8 +119,10 @@ void MidiDecoder::newByte(unsigned char byte) {
     if (newEvent) {
         unsigned char hi = byte & 0xf0;
         channel = byte & 0x0f;
-//        SerialUSB.print("hi : ");
-//        SerialUSB.println((int)hi);
+/*
+        SerialUSB.print("hi : ");
+        SerialUSB.println((int)hi);
+        */
         switch (hi) {
         case 0x80:
         case 0x90:
@@ -218,16 +220,16 @@ void MidiDecoder::sendMidiEvent() {
             synthState.setNewValue(ROW_MODULATION, ENCODER_ENGINE_IM4, currentEvent[2]*2);
             break;
         case CC_MIX1:
-            synthState.setNewValue(ROW_MODULATION, ENCODER_ENGINE_MIX1, currentEvent[2]);
+            synthState.setNewValue(ROW_OSC_MIX, ENCODER_ENGINE_MIX1, currentEvent[2]);
             break;
         case CC_MIX2:
-            synthState.setNewValue(ROW_MODULATION, ENCODER_ENGINE_MIX2, currentEvent[2]);
+            synthState.setNewValue(ROW_OSC_MIX, ENCODER_ENGINE_MIX2, currentEvent[2]);
             break;
         case CC_MIX3:
-            synthState.setNewValue(ROW_MODULATION, ENCODER_ENGINE_MIX3, currentEvent[2]);
+            synthState.setNewValue(ROW_OSC_MIX, ENCODER_ENGINE_MIX3, currentEvent[2]);
             break;
         case CC_MIX4:
-            synthState.setNewValue(ROW_MODULATION, ENCODER_ENGINE_MIX4, currentEvent[2]);
+            synthState.setNewValue(ROW_OSC_MIX, ENCODER_ENGINE_MIX4, currentEvent[2]);
             break;
         case CC_OSC1_FREQ:
             synthState.setNewValue(ROW_OSC1, ENCODER_OSC_FREQ, currentEvent[2]*2);

@@ -135,7 +135,7 @@ void setup()
     Timer1.setChannel1Mode(TIMER_OUTPUTCOMPARE);
     Timer1.attachCompare1Interrupt(IRQSendSample);
 
-    for (int k=0; k<2; k++) {
+    for (int k=0; k<13; k++) {
         synth.noteOn(60+k,100);
         delay(50);
         synth.noteOff(60+k);
