@@ -129,8 +129,8 @@ public:
                 // Store all values
                 "    stm %[env], {r5-r8}\n\t"
                 : [env]"+rV" (env)
-                  : [release]"r"(adsr[3])
-                    : "r5", "r6", "r7", "r8", "cc");
+                : [release]"r"(adsr[3])
+                : "r5", "r6", "r7", "r8", "cc");
 
     }
 
@@ -197,8 +197,8 @@ public:
                 // env.envState = ENV_STATE_DEAD;
                 "6:\n\t"
                 : [env]"+rV" (env)
-                  : [adsr]"rV" (adsr), [incD]"r"(incD)
-                    : "r5", "r6", "r7", "r8", "cc");
+                : [adsr]"rV" (adsr), [incD]"r"(incD)
+                : "r5", "r6", "r7", "r8", "cc");
 
         return env->currentAmp>>15;
     }

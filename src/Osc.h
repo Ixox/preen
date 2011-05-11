@@ -74,19 +74,20 @@ public:
         return index;
 */
 
-        oscState->index += (this->matrix->getDestination(destFreq) >> 4) + oscState->frequency;
-        oscState->index &= 0x3ffff;
-
 
         asm volatile(
-                /*
-                "    add %[index], %[index], %[dest], lsr #4\n\t"
-                "    add %[index], %[index], %[freq]\n\t"
-                "    mvn r8, #0\n\t"
-                "    lsr r8, #14\n\t"
-                "    and %[index], %[index], r8\n\t"
-                 */
 
+                // oscState->index += (this->matrix->getDestination(destFreq) >> 4) + oscState->frequency;
+                // oscState->index &= 0x3ffff;
+
+                // r5 : index, r6 : frequency
+                "    ldm %[osc], {r5-r6}\n\t"
+                "    add r5, r5, %[dest], lsr #4\n\t"
+                "    add r5, r5, r6\n\t"
+                "    mvn r6, #0\n\t"
+                "    lsr r6, r6, #14\n\t"
+                "    and r5, r5, r6\n\t"
+                "    str r5, [%[osc], #0]\n\t"
 
                 // Switch
                 "    tbb [pc, %[shape]]\n\t"
@@ -100,21 +101,21 @@ public:
 
                 // OSC_SHAPE_SIN
                 "1: \n\t"
-                "    lsr %[index], #7\n\t"
-                "    ldrsh %[value], [ %[sinTable], %[index], lsl #1]\n\t"
+                "    lsr r5, r5, #7\n\t"
+                "    ldrsh %[value], [ %[sinTable], r5, lsl #1]\n\t"
                 "    b 6f\n\t"
                 // OSC_SHAPE_SIN2
                 "2:  \n\t"
-                "    lsr %[index], #7\n\t"
-                "    ldrsh %[value], [ %[sinTable], %[index], lsl #1]\n\t"
+                "    lsr r5, r5, #7\n\t"
+                "    ldrsh %[value], [ %[sinTable], r5, lsl #1]\n\t"
                 "    mul %[value], %[value]\n\t"
                 "    lsr %[value], #16\n\t"
                 "    b 6f\n\t"
 
                 // OSC_SHAPE_SIN3
                 "3:  \n\t"
-                "    lsr %[index], #7\n\t"
-                "    ldrsh %[value], [ %[sinTable], %[index], lsl #1]\n\t"
+                "    lsr r5, r5, #7\n\t"
+                "    ldrsh %[value], [ %[sinTable], r5, lsl #1]\n\t"
                 // if negativ replace by 0
                 "    cmp  %[value], #0\n\t"
                 "    it lt\n\t"
@@ -123,8 +124,8 @@ public:
 
                 // OSC_SHAPE_SIN4
                 "4:  \n\t"
-                "    lsr %[index], #7\n\t"
-                "    ldrsh %[value], [ %[sinTable], %[index], lsl #1]\n\t"
+                "    lsr r5, r5, #7\n\t"
+                "    ldrsh %[value], [ %[sinTable], r5, lsl #1]\n\t"
                 // if negativ take the oposite
                 "    cmp  %[value], #0\n\t"
                 "    it mi\n\t"
@@ -137,9 +138,9 @@ public:
 
                 // BREAK
                 "6:\n\t"
-                : [value] "=r"(oscValue)
-                : [sinTable]"rV"(sinTable), [shape]"r" (oscillator->shape), [randomOsc]"r"(randomOsc), [index]"r" (oscState->index)
-                : "cc", "r8"
+                : [value] "=r"(oscValue), [osc]"+rV" (oscState)
+                : [sinTable]"rV"(sinTable), [shape]"r" (oscillator->shape), [randomOsc]"r"(randomOsc), [dest]"r"(this->matrix->getDestination(destFreq))
+                : "cc", "r5", "r6"
         );
 
         return  oscValue;
