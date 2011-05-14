@@ -83,6 +83,8 @@ public:
         if (ramp > 0) {
             index = 0;
             rampIndex = 0;
+        } else {
+            rampIndex = 1; // greater than 0
         }
 	}
 

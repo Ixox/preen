@@ -32,6 +32,7 @@ void Lfo::init(int number, Matrix *matrix, SourceEnum source) {
 	LfoParams* lfoTmp = (LfoParams *)&synthState.params.lfo1;
 	this->lfo = &lfoTmp[number];
 	this->index = 0;
-    this->rampIndex =  lfo->keybRamp * lfo->keybRamp;
+    this->rampIndex =  0;
+    this->ramp = lfo->keybRamp << 4;
 
 }
