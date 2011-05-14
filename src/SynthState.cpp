@@ -25,7 +25,7 @@
 const char* allChars  = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 &*$,;:";
 
 const char* nullNames []= {};
-const char* algoNames []= { "alg1", "alg2", "alg3", "alg4", "alg5", "alg6", "alg7" };
+const char* algoNames []= { "alg1", "alg2", "alg3", "alg4", "alg5", "alg6", "alg7", "alg8" };
 struct ParameterRowDisplay engine1ParameterRow = {
         "Engine" ,
         { "Algo", "Velo", "Voic", "Glid" },
@@ -101,12 +101,12 @@ struct ParameterRowDisplay matrixParameterRow = {
 const char* lfoShapeNames [] =  { "Saw ", "Ramp", "Squa"} ;
 struct ParameterRowDisplay lfoParameterRow = {
         "LFO",
-        { "Shap", "Freq", "    ", "    " },
+        { "Shap", "Freq", "Bias", "KSyn" },
         {
                 { LFO_SAW, LFO_TYPE_MAX-1, DISPLAY_TYPE_STRINGS,  lfoShapeNames},
                 { 0, 255, DISPLAY_TYPE_FLOAT_4_4, nullNames },
-                { 0, 0, DISPLAY_TYPE_NONE, nullNames },
-                { 0, 0, DISPLAY_TYPE_NONE, nullNames }
+                { (char)-127, 127, DISPLAY_TYPE_SIGNED_CHAR, nullNames },
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
         }
 };
 
@@ -144,14 +144,15 @@ struct AllParameterRowsDisplay allParameterRows = {
 };
 
 
-struct ShowUpAlgo showUp[7] = {
+struct ShowUpAlgo showUp[8] = {
         { 3, 3, 0}, // ALGO1
         { 3, 2, 2}, // ALGO2
         { 3, 2, 0}, // ALGO3
         { 4, 4, 2}, // ALGO4
         { 4, 3, 0}, // ALGO5
         { 4, 3, 3}, // ALGO6
-        { 6, 3, 3}  // ALGO7
+        { 6, 3, 3},  // ALGO7
+        { 6, 4, 4}  // ALGO8
 };
 
 
@@ -609,7 +610,8 @@ void SynthState::encoderTurned(int encoder, int ticks) {
                     char* preset = (char*)&(presets[fullState.menuSelect].engine1);
                     copyPatch(preset, (char*)&params, true);
                 } else if (fullState.currentMenuItem->menuState == MENU_LOAD_USER_BANK) {
-                    readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
+                    propagateBeforeNewParamsLoad();
+                    PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
                 }
 
                 propagateNewMenuSelect();
@@ -741,7 +743,7 @@ void SynthState::buttonPressed(int button) {
             break;
         case BUTTON_DUMP:
         {
-            dumpPatch();
+            PresetUtil::dumpPatch();
             break;
         }
 
@@ -766,154 +768,6 @@ void SynthState::buttonPressed(int button) {
 }
 
 
-void SynthState::pruneToEEPROM(int bankNumber, int preset) {
-    uint8 deviceaddress = 0b1010000;
-    i2c_msg msgWrite1, msgWrite2;
-    int block1Size = 64;
-    int address = preset*128 +  bankNumber * 128*128;
-    uint8 bufWrite1[block1Size + 2];
-
-    bufWrite1[0] = (uint8)((int)address >> 8);
-    bufWrite1[1] = (uint8)((int)address & 0xff);
-    for (int k=0; k<block1Size; k++) {
-        bufWrite1[k+2] = ((uint8*)&params)[k];
-    }
-    /* Write test pattern  */
-    msgWrite1.addr = deviceaddress;
-    msgWrite1.flags = 0;
-    msgWrite1.length = block1Size +2;
-    msgWrite1.data = bufWrite1;
-    i2c_master_xfer(I2C1, &msgWrite1, 1);
-    delay(5);
-
-    int block2Size = sizeof(struct AllSynthParams) - block1Size;
-    uint8 bufWrite2[block2Size + 2];
-    address = address + block1Size;
-    bufWrite2[0] = (uint8)((int)address >> 8);
-    bufWrite2[1] = (uint8)((int)address & 0xff);
-    for (int k=0; k<block2Size; k++) {
-        bufWrite2[k+2] = ((uint8*)&params)[k+block1Size];
-    }
-    msgWrite2.addr = deviceaddress;
-    msgWrite2.flags = 0;
-    msgWrite2.length = block2Size + 2;
-    msgWrite2.data = bufWrite2;
-    i2c_master_xfer(I2C1, &msgWrite2, 1);
-    delay(5);
-
-}
-
-
-void SynthState::midiPatchDump() {
-    uint8 newPatch[] = {0xf0, 0x7d, 0x01};
-
-    for (int k=0; k<=2; k++) {
-        Serial2.print(newPatch[k]);
-    }
-
-    int checksum = 0;
-    int total = sizeof(struct AllSynthParams);
-
-    for (int k=0; k<total; k++) {
-        uint8 byte = ((unsigned char*)&params)[k];
-        checksum+= byte;
-        while (byte >= 127) {
-            Serial2.print((uint8)127);
-            byte -= 127;
-        }
-        Serial2.print(byte);
-    }
-
-    Serial2.print((uint8)(checksum % 128));
-    Serial2.print((uint8)0xf7);
-}
-
-void SynthState::formatEEPROM() {
-    uint8 deviceaddress = 0b1010000;
-    for (int bankNumber=0; bankNumber<3; bankNumber++) {
-        for (int preset =0; preset<128; preset++) {
-
-            i2c_msg msgWrite1, msgWrite2;
-            int block1Size = 64;
-            int address = preset*128 +  bankNumber * 128*128;
-            uint8 bufWrite1[block1Size + 2];
-
-            bufWrite1[0] = (uint8)((int)address >> 8);
-            bufWrite1[1] = (uint8)((int)address & 0xff);
-            for (int k=0; k<block1Size; k++) {
-                bufWrite1[k+2] = ((uint8*)&presets[bankNumber])[k];
-            }
-            /* Write test pattern  */
-            msgWrite1.addr = deviceaddress;
-            msgWrite1.flags = 0;
-            msgWrite1.length = block1Size +2;
-            msgWrite1.data = bufWrite1;
-            i2c_master_xfer(I2C1, &msgWrite1, 1);
-            delay(5);
-
-            int block2Size = sizeof(struct AllSynthParams) - block1Size;
-            uint8 bufWrite2[block2Size + 2];
-            address = address + block1Size;
-            bufWrite2[0] = (uint8)((int)address >> 8);
-            bufWrite2[1] = (uint8)((int)address & 0xff);
-            for (int k=0; k<block2Size; k++) {
-                bufWrite2[k+2] = ((uint8*)&presets[bankNumber])[k+block1Size];
-            }
-            msgWrite2.addr = deviceaddress;
-            msgWrite2.flags = 0;
-            msgWrite2.length = block2Size + 2;
-            msgWrite2.data = bufWrite2;
-            i2c_master_xfer(I2C1, &msgWrite2, 1);
-            delay(5);
-        }
-    }
-}
-
-
-void SynthState::readFromEEPROM(int bankNumber, int preset) {
-    propagateBeforeNewParamsLoad();
-
-    uint8 deviceaddress = 0b1010000;
-    int address = preset*128 +  bankNumber * 128*128;
-    uint8 bufReadAddress[2];
-    i2c_msg msgsRead[2];
-    int block1Size = 64;
-
-    bufReadAddress[0] = (uint8)((int)address >> 8);
-    bufReadAddress[1] = (uint8)((int)address & 0xff);
-
-    msgsRead[0].addr = deviceaddress;
-    msgsRead[0].flags = 0;
-    msgsRead[0].length = 2;
-    msgsRead[0].data = bufReadAddress;
-
-    msgsRead[1].addr = deviceaddress;
-    msgsRead[1].flags = I2C_MSG_READ;
-    msgsRead[1].length = block1Size;
-    msgsRead[1].data = (uint8*)&params;
-
-    i2c_master_xfer(I2C1, msgsRead, 2);
-    delay(5);
-
-    int block2Size = sizeof(struct AllSynthParams) - block1Size;
-
-    address = address + block1Size;
-    bufReadAddress[0] = (uint8)((int)address >> 8);
-    bufReadAddress[1] = (uint8)((int)address & 0xff);
-
-    msgsRead[0].addr = deviceaddress;
-    msgsRead[0].flags = 0;
-    msgsRead[0].length = 2;
-    msgsRead[0].data = bufReadAddress;
-
-    msgsRead[1].addr = deviceaddress;
-    msgsRead[1].flags = I2C_MSG_READ;
-    msgsRead[1].length = block2Size;
-    msgsRead[1].data = &((uint8*)&params)[block1Size];
-    i2c_master_xfer(I2C1, msgsRead, 2);
-
-    delay(5);
-}
 
 
 void SynthState::setNewValue(int row, int number, int newValue) {
@@ -948,13 +802,15 @@ MenuItem* SynthState::afterButtonPressed() {
         break;
     case MENU_LOAD_CHOOSE_USER_BANK:
         fullState.bankNumber = fullState.menuSelect;
-        readFromEEPROM(fullState.bankNumber, 0);
+        propagateBeforeNewParamsLoad();
+        PresetUtil::readFromEEPROM(fullState.bankNumber, 0);
         break;
     case MENU_LOAD_INTERNAL_BANK:
         copyPatch((char*)&params, (char*)&backupParams, true);
         break;
     case MENU_LOAD_USER_BANK:
-        readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
+        propagateBeforeNewParamsLoad();
+        PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
         copyPatch((char*)&params, (char*)&backupParams, true);
         break;
     case MENU_SAVE_CHOOSE_PRESET:
@@ -975,17 +831,17 @@ MenuItem* SynthState::afterButtonPressed() {
             params.presetName[k] = allChars[(int)fullState.name[k]];
         }
         params.presetName[length] = '\0';
-        pruneToEEPROM(fullState.bankNumber, fullState.presetNumber);
+        PresetUtil::pruneToEEPROM(fullState.bankNumber, fullState.presetNumber);
         break;
     }
     case MENU_MIDI_PATCH_DUMP:
-        midiPatchDump();
+        PresetUtil::midiPatchDump();
         break;
     case MENU_DONE:
         fullState.synthMode = SYNTH_MODE_EDIT;
         break;
     case MENU_FORMAT_BANK:
-        formatEEPROM();
+        PresetUtil::formatEEPROM();
         break;
     case MENU_LOAD:
         switch (rMenuItem->menuState) {
@@ -1053,28 +909,3 @@ MenuItem* SynthState::menuBack() {
     return rMenuItem;
 }
 
-
-
-void SynthState::dumpPatch() {
-       SerialUSB.println("New Sound....");
-       dumpLine(params.engine1.algo, params.engine1.numberOfVoice, params.engine1.velocity, params.engine1.glide );
-       dumpLine(params.engine2.modulationIndex1, params.engine2.modulationIndex2, params.engine2.modulationIndex3, params.engine2.modulationIndex4 );
-       dumpLine(params.engine3.mixOsc1, params.engine3.mixOsc2, params.engine3.mixOsc3, params.engine3.mixOsc4 );
-       OscillatorParams * o = (OscillatorParams *)(&(params.osc1));
-       for (int k=0; k<6; k++) {
-           dumpLine(o[k].shape, o[k].frequencyType, o[k].frequencyMul, o[k].detune);
-       }
-       EnvelopeParams * e = (EnvelopeParams*)(&(params.env1));
-       for (int k=0; k<6; k++) {
-           dumpLine(e[k].attack, e[k].decay, e[k].sustain, e[k].release);
-       }
-       MatrixRowParams* m = (MatrixRowParams*)(&(params.matrixRowState1));
-       for (int k=0; k<8; k++) {
-           dumpLine(m[k].source, m[k].mul, m[k].destination, 0);
-       }
-       LfoParams* l = (LfoParams*)(&(params.lfo1));
-       for (int k=0; k<4; k++) {
-           dumpLine(l[k].shape, l[k].freq, 0, 0);
-       }
-       SerialUSB.println(params.presetName);
-   }

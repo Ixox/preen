@@ -1,16 +1,21 @@
                
- _______  _______  _______  _______  _       
-(  ____ )(  ____ )(  ____ \(  ____ \( (    /|
-| (    )|| (    )|| (    \/| (    \/|  \  ( |
-| (____)|| (____)|| (__    | (__    |   \ | |
-|  _____)|     __)|  __)   |  __)   | (\ \) |
-| (      | (\ (   | (      | (      | | \   |
-| )      | ) \ \__| (____/\| (____/\| )  \  |
-|/       |/   \__/(_______/(_______/|/    )_)
-                                            
-V0.0 pre alpha
+
+ _______  _______  _______  _______  _        _______  _______ 
+(  ____ )(  ____ )(  ____ \(  ____ \( (    /|(  ____ \(       )
+| (    )|| (    )|| (    \/| (    \/|  \  ( || (    \/| () () |
+| (____)|| (____)|| (__    | (__    |   \ | || (__    | || || |
+|  _____)|     __)|  __)   |  __)   | (\ \) ||  __)   | |(_)| |
+| (      | (\ (   | (      | (      | | \   || (      | |   | |
+| )      | ) \ \__| (____/\| (____/\| )  \  || )      | )   ( |
+|/       |/   \__/(_______/(_______/|/    )_)|/       |/     \|
+
+-----------------------------------------                                            
+V0.0.11
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-May 9st 2011
+May 14th 2011
+
+
+http://www.preenfm.net
 
 -----------------------------------------
 Frequency modulation synth for the Maple :
@@ -23,28 +28,45 @@ as published by the Free Software Foundation version 3.
 
 Preen Current Features:
 
-. 7 FM algo available... using 3, 4 or 6 oscs per voice
-. Up to 4 FM voices 
+. 8 FM algorithms available
+. Polyphonic (12 operators in realtime) up to 4 voices (when 3 ops per voice)
+. 1 operator  = 1 oscillator  + 1 enveloppe
+. 4 LFOs 
+. 8 rows moldulation matrix
 . Glide available when voice set to 1
-. Each oscillator has an ADSR envelope
-. 4 LFO (saw, square, ramp)
-. 8 rows modulation matrix
 
 . Load and save preset to EEPROM.
-. Read and send midi.
-. LCD is updated in realtime showing the parameter you modify.
-. The full synth state (23 * 4 parameters) can be edited with the 4 Encoders through the 19 rows.
-. The 5 buttons allow easy navigation into the 19 rows (1 engine, 4 osc, 4 env, 6 matrix rows, 4 lfos)
-. 2 buttons for midi (save/load patch, select midi channel)...
-. 44 parameters read and send CC
+  . 3 banks of 128 user preset
+
+. Midi
+  . Control change : 44 CC linked to parameters.
+  . sysex : Patch dump and read 
+  . 4 CC + modwheel + after touch + velocity assignable as source in the modulation matrix.
+  . Midi channel selectable. Midi for other channels are forwarded.
+
+. LCD 4x20 
+  . updated in realtime showing the parameter you modify.
+  . Consistency display of each parameters.
+
+. Surface Control
+  . 4 encoders + 7 buttons
+  . The full synth state is easily updated
+  . Synth Mode + menu Mode 
 
 . Sampling rate : 
-  32768 Hz (makes division faster ;-) for audio. 
+  32768 Hz (makes division faster ;-) for audio. Pseudo 11 bits.
   1024 Hz for LFO and Modulation Matrix.
 
-. 6th order active low pass bessel filter to get rid (as much as possible) of the aliasing
+. Analog filter
+  . 6th order active low pass bessel filter to get rid (as much as possible) of the aliasing
+  . Volume pot
+
 
 --------------------------------------------
+Udpdate May 14th:
+. new LFO new features :  bias + keyboard sync + ramp up
+. refactoring : new PresetUtil class.
+
 Udpdate May 9th:
 . Sysex : dump patch and receive
 

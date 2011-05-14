@@ -25,14 +25,21 @@
 // SAMPLE_RATE_x_8 / 32 =
 #define LFO_SAMPLE_RATE_x_8 8192
 
+#define NUMBER_OF_LFOS 4
+
+
 class Lfo {
 public:
 	Lfo();
 	~Lfo();
 	void init(int number, Matrix* matrix, SourceEnum source);
 
+	void reloadRamp() {
+	    ramp = lfo->keybRamp << 4; // * 16
+	}
 
 	void nextValue() {
+	     int lfoValue;
 
 		// then new value
 		//	index = (index +  ((lfo->freq << 16) / LFO_SAMPLE_RATE_x_8 ))  & 0xffff;
@@ -41,37 +48,50 @@ public:
 
 		switch (lfo->shape) {
 		case LFO_RAMP:
-			matrix->setSource(source, (index>>8)-128);
+			lfoValue = (index>>8)-128;
 			break;
 		case LFO_SAW:
 		{
 			if (index < 32768) {
-				matrix->setSource(source, (index>>7) - 128);
+			    lfoValue = (index>>7) - 128;
 			} else {
-				matrix->setSource(source, 383 - (index>>7));
+			    lfoValue = 383 - (index>>7);
 			}
 			break;
 		}
 		case LFO_SQUARE:
 			if ((index) < 32768) {
-				matrix->setSource(source, -128);
+			    lfoValue = -128;
 			} else {
-				matrix->setSource(source, 127);
+                lfoValue = 127;
 			}
 			break;
 		case LFO_TYPE_MAX:
 			break;
 		}
+		lfoValue += lfo->bias;
+
+		if (rampIndex < ramp) {
+		    lfoValue = lfoValue * rampIndex  / ramp ;
+            rampIndex ++;
+		}
+
+		matrix->setSource(source, lfoValue);
 	}
+
+	void resetRamp() {
+        if (ramp > 0) {
+            index = 0;
+            rampIndex = 0;
+        }
+	}
+
 private:
-	int number;
 	Matrix *matrix;
 	SourceEnum source;
-	unsigned int index;
 	LfoType type;
 	LfoParams* lfo ;
-	int frequency;
-	int jump;
+    int index, rampIndex, ramp;
 };
 
 #endif /* LFO_H_ */

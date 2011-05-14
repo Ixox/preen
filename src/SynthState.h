@@ -24,6 +24,7 @@
 #include "EncodersListener.h"
 #include "SynthParamListener.h"
 #include "SynthMenuListener.h"
+#include "PresetUtil.h"
 #include "Menu.h"
 
 #define BUTTON_SYNTH  0
@@ -84,7 +85,9 @@ enum {
 
 enum {
     ENCODER_LFO_SHAPE = 0,
-    ENCODER_LFO_FREQ
+    ENCODER_LFO_FREQ,
+    ENCODER_LFO_BIAS,
+    ENCODER_LFO_KSYNC
 };
 
 typedef unsigned char uchar;
@@ -97,6 +100,7 @@ enum Algorithm {
 	ALGO5,
     ALGO6,
     ALGO7,
+    ALGO8,
 	ALGO_END
 };
 
@@ -202,8 +206,8 @@ struct EnvelopeParams {
 struct LfoParams {
 	uchar shape; // LFO_SHAPE_*
 	uchar freq;  // lfoFreq[]*
-	char notused1;
-	char notused2;
+    char bias;
+	uchar keybRamp;
 };
 
 struct MatrixRowParams {
@@ -424,8 +428,6 @@ public:
 		return fullState.synthMode;
 	}
 
-	void readFromEEPROM(int bankNumber, int preset);
-    void dumpPatch();
 
     void copyPatch(char* source, char* dest, bool propagate);
     void resetDisplay();
@@ -440,22 +442,6 @@ private:
 
 	SynthParamListener* firstParamListener;
 	SynthMenuListener* firstMenuListener;
-
-    void pruneToEEPROM(int bankNumber, int preset);
-    void formatEEPROM();
-    void midiPatchDump();
-    void dumpLine(int a, int b, int c, int d) {
-        SerialUSB.print("{ ");
-        SerialUSB.print(a);
-        SerialUSB.print(", ");
-        SerialUSB.print(b);
-        SerialUSB.print(", ");
-        SerialUSB.print(c);
-        SerialUSB.print(", ");
-        SerialUSB.print(d);
-        SerialUSB.print("} ");
-        SerialUSB.println(", ");
-    }
 
     int getLength(const char *str) {
         int length = 0;

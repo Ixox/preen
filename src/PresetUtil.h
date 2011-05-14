@@ -15,23 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Lfo.h"
+#ifndef PRESETUTIL_H_
+#define PRESETUTIL_H_
 
-Lfo::Lfo() {
-	type = LFO_RAMP;
-}
+#include "SynthState.h"
 
-Lfo::~Lfo() {
-}
+class PresetUtil {
+public:
+    PresetUtil();
+    virtual ~PresetUtil();
 
-void Lfo::init(int number, Matrix *matrix, SourceEnum source) {
-	this->matrix = matrix;
-	this->source = source;
-    this->ramp = 0;
-    this->rampIndex = 0;
-	LfoParams* lfoTmp = (LfoParams *)&synthState.params.lfo1;
-	this->lfo = &lfoTmp[number];
-	this->index = 0;
-    this->rampIndex =  lfo->keybRamp * lfo->keybRamp;
+    static void dumpPatch();
+    static void dumpLine(int a, int b, int c, int d);
 
-}
+    static void readFromEEPROM(int bankNumber, int preset);
+    static void pruneToEEPROM(int bankNumber, int preset);
+    static void formatEEPROM();
+
+    static void midiPatchDump();
+
+
+
+};
+
+#endif /* PRESETUTIL_H_ */

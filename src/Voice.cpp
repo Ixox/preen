@@ -31,7 +31,7 @@ Voice::~Voice(void)
 {
 }
 
-void Voice::init(Matrix* matrix, Env<1>*env1, Env<2>*env2, Env<3>*env3, Env<4>*env4, Env<5>*env5, Env<6>*env6, Osc<1>*osc1, Osc<2>*osc2, Osc<3>*osc3, Osc<4>*osc4, Osc<5>*osc5, Osc<6>*osc6 ) {
+void Voice::init(Matrix* matrix,  Lfo* lfo, Env<1>*env1, Env<2>*env2, Env<3>*env3, Env<4>*env4, Env<5>*env5, Env<6>*env6, Osc<1>*osc1, Osc<2>*osc2, Osc<3>*osc3, Osc<4>*osc4, Osc<5>*osc5, Osc<6>*osc6 ) {
     this->env1 = env1;
     this->env2 = env2;
     this->env3 = env3;
@@ -46,8 +46,8 @@ void Voice::init(Matrix* matrix, Env<1>*env1, Env<2>*env2, Env<3>*env3, Env<4>*e
     this->osc6 = osc6;
     this->matrix = matrix;
     this->playing = false;
-
     this->newNotePending = false;
+    this->lfo = lfo;
 }
 
 
@@ -115,6 +115,7 @@ void Voice::noteOn(short newNote, char velocity, unsigned int index) {
     osc2->newNote(oscState2, newNote);
     osc3->newNote(oscState3, newNote);
     osc4->newNote(oscState4, newNote);
+
     env1->noteOn(envState1);
     env2->noteOn(envState2);
     env3->noteOn(envState3);
@@ -133,6 +134,11 @@ void Voice::noteOn(short newNote, char velocity, unsigned int index) {
     this->nextNote = 0;
     this->index = index;
     this->velocity = velocity;
+
+    for (int k=0; k<NUMBER_OF_LFOS; k++) {
+        lfo[k].resetRamp();
+    }
+
 }
 
 void Voice::glideNoteOff() {

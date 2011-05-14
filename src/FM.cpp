@@ -131,7 +131,7 @@ void setup()
     pinMode(AUDIO_PIN, PWM);
 
     // At 2048 it should be ok to set the new one.
-    Timer1.setCompare1(1024);
+    Timer1.setCompare1(1);
     Timer1.setChannel1Mode(TIMER_OUTPUTCOMPARE);
     Timer1.attachCompare1Interrupt(IRQSendSample);
 

@@ -50,6 +50,9 @@ public:
         int oscValue;
 
         /*
+        oscState->index += (this->matrix->getDestination(destFreq) >> 4) + oscState->frequency;
+        oscState->index &= 0x3ffff;
+
         switch(oscillator->shape) {
         case OSC_SHAPE_SIN:
             return  sinTable[index >> 7]; // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
@@ -97,6 +100,7 @@ public:
                 "    .byte   (3f-7b)/2\n\t"
                 "    .byte   (4f-7b)/2\n\t"
                 "    .byte   (5f-7b)/2\n\t"
+                "    .byte   (8f-7b)/2\n\t"
                 "    .align  1\n\t"
 
                 // OSC_SHAPE_SIN
@@ -130,6 +134,11 @@ public:
                 "    cmp  %[value], #0\n\t"
                 "    it mi\n\t"
                 "    rsbmi %[value], %[value], #0\n\t"
+                "    b 6f\n\t"
+
+                // OSC_SHAPE_RAND
+                "8:  \n\t"
+                "    mov %[value], #0\n\t"
                 "    b 6f\n\t"
 
                 // OSC_SHAPE_RAND

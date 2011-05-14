@@ -27,7 +27,6 @@
 #include "LiquidCrystal.h"
 
 #define MAX_NUMBER_OF_VOICES 4
-#define NUMBER_OF_LFOS 4
 
 #define UINT_MAX  4294967295
 
@@ -53,27 +52,29 @@ public:
         if (type == SYNTH_PARAM_TYPE_ENV) {
             switch (currentRow) {
             case ROW_ENV1:
-                env1.loadADSR();
+                env1.reloadADSR();
                 break;
             case ROW_ENV2:
-                env2.loadADSR();
+                env2.reloadADSR();
                 break;
             case ROW_ENV3:
-                env3.loadADSR();
+                env3.reloadADSR();
                 break;
             case ROW_ENV4:
-                env4.loadADSR();
+                env4.reloadADSR();
                 break;
             case ROW_ENV5:
-                env5.loadADSR();
+                env5.reloadADSR();
                 break;
             case ROW_ENV6:
-                env6.loadADSR();
+                env6.reloadADSR();
                 break;
             }
         } else if (type == SYNTH_PARAM_TYPE_MATRIX && encoder == ENCODER_MATRIX_DEST) {
             // Reset all destination
             matrix.resetAllDestination();
+        } else if (type == SYNTH_PARAM_TYPE_LFO && encoder == ENCODER_LFO_KSYNC) {
+            lfo[currentRow - ROW_LFO1].reloadRamp();
         }
     }
 

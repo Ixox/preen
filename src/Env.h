@@ -52,7 +52,7 @@ public:
     ~Env(void) {
     }
 
-    void loadADSR() {
+    void reloadADSR() {
         EnvelopeParams * e = (EnvelopeParams *)&(synthState.params.env1);
         EnvelopeParams* envState = &e[number-1];
 

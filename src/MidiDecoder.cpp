@@ -36,8 +36,6 @@ void MidiDecoder::setSynth(Synth* synth) {
 }
 
 
-
-
 void MidiDecoder::readSysex() {
     unsigned int HEADER_SIZE = 2;
     // 0x7d : non commercial
@@ -356,7 +354,7 @@ void MidiDecoder::sendMidiEvent() {
             // Programm change
             this->synth->allSoundOff();
             // load curentEvent[1]
-            synthState.readFromEEPROM(synthState.fullState.bankNumber, currentEvent[1]);
+            PresetUtil::readFromEEPROM(synthState.fullState.bankNumber, currentEvent[1]);
             break;
     }
 }
