@@ -48,12 +48,12 @@ enum AllControlChange {
     CC_ENV4_ATTACK,
     CC_ENV5_ATTACK,
     CC_ENV6_ATTACK,
-    CC_ENV1_DECAY = 52,
-    CC_ENV2_DECAY,
-    CC_ENV3_DECAY,
-    CC_ENV4_DECAY,
-    CC_ENV5_DECAY,
-    CC_ENV6_DECAY,
+    CC_ENV1_RELEASE = 52,
+    CC_ENV2_RELEASE,
+    CC_ENV3_RELEASE,
+    CC_ENV4_RELEASE,
+    CC_ENV5_RELEASE,
+    CC_ENV6_RELEASE,
     CC_OSC1_FREQ = 58,
     CC_OSC2_FREQ,
     CC_OSC3_FREQ,
@@ -95,6 +95,9 @@ public:
     void beforeNewParamsLoad() {};
     void sendOneMidiEvent();
     void readSysex();
+    boolean hasMidiToSend() {
+        return (midiToSend.getCount()>0);
+    }
 
 private:
     unsigned char currentEvent[3];

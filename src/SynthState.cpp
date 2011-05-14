@@ -74,7 +74,7 @@ struct ParameterRowDisplay oscParameterRow = {
 
 struct ParameterRowDisplay envParameterRow = {
         "Enveloppe",
-        { "Attk", "Rele", "Sust", "Deca" },
+        { "Attk", "Deca", "Sust", "Rele" },
         {
                 { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
                 { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },

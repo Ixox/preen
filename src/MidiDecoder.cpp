@@ -268,38 +268,38 @@ void MidiDecoder::sendMidiEvent() {
         case CC_ENV1_ATTACK :
             synthState.setNewValue(ROW_ENV1, ENCODER_ENV_A, currentEvent[2]*2);
             break;
-        case CC_ENV1_DECAY:
-            synthState.setNewValue(ROW_ENV1, ENCODER_ENV_D, currentEvent[2]*2);
+        case CC_ENV1_RELEASE:
+            synthState.setNewValue(ROW_ENV1, ENCODER_ENV_R, currentEvent[2]*2);
             break;
         case CC_ENV2_ATTACK :
             synthState.setNewValue(ROW_ENV2, ENCODER_ENV_A, currentEvent[2]*2);
             break;
-        case CC_ENV2_DECAY:
-            synthState.setNewValue(ROW_ENV2, ENCODER_ENV_D, currentEvent[2]*2);
+        case CC_ENV2_RELEASE:
+            synthState.setNewValue(ROW_ENV2, ENCODER_ENV_R, currentEvent[2]*2);
             break;
         case CC_ENV3_ATTACK :
             synthState.setNewValue(ROW_ENV3, ENCODER_ENV_A, currentEvent[2]*2);
             break;
-        case CC_ENV3_DECAY:
-            synthState.setNewValue(ROW_ENV3, ENCODER_ENV_D, currentEvent[2]*2);
+        case CC_ENV3_RELEASE:
+            synthState.setNewValue(ROW_ENV3, ENCODER_ENV_R, currentEvent[2]*2);
             break;
         case CC_ENV4_ATTACK :
             synthState.setNewValue(ROW_ENV4, ENCODER_ENV_A, currentEvent[2]*2);
             break;
-        case CC_ENV4_DECAY:
-            synthState.setNewValue(ROW_ENV4, ENCODER_ENV_D, currentEvent[2]*2);
+        case CC_ENV4_RELEASE:
+            synthState.setNewValue(ROW_ENV4, ENCODER_ENV_R, currentEvent[2]*2);
             break;
         case CC_ENV5_ATTACK :
             synthState.setNewValue(ROW_ENV5, ENCODER_ENV_A, currentEvent[2]*2);
             break;
-        case CC_ENV5_DECAY:
-            synthState.setNewValue(ROW_ENV5, ENCODER_ENV_D, currentEvent[2]*2);
+        case CC_ENV5_RELEASE:
+            synthState.setNewValue(ROW_ENV5, ENCODER_ENV_R, currentEvent[2]*2);
             break;
         case CC_ENV6_ATTACK :
             synthState.setNewValue(ROW_ENV6, ENCODER_ENV_A, currentEvent[2]*2);
             break;
-        case CC_ENV6_DECAY:
-            synthState.setNewValue(ROW_ENV6, ENCODER_ENV_D, currentEvent[2]*2);
+        case CC_ENV6_RELEASE:
+            synthState.setNewValue(ROW_ENV6, ENCODER_ENV_R, currentEvent[2]*2);
             break;
         case CC_MATRIXROW1_MUL:
             synthState.setNewValue(ROW_MATRIX1, ENCODER_MATRIX_MUL, currentEvent[2]*2 - 128);
@@ -400,8 +400,8 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow, int encoder
     if (encoder == ENCODER_ENV_A) {
         cc.control = CC_ENV1_ATTACK + (currentrow - ROW_ENV_FIRST);
         cc.value = newValue>>1;
-    } else if (encoder==ENCODER_ENV_D) {
-        cc.control = CC_ENV1_DECAY + (currentrow - ROW_ENV_FIRST);
+    } else if (encoder==ENCODER_ENV_R) {
+        cc.control = CC_ENV1_RELEASE + (currentrow - ROW_ENV_FIRST);
         cc.value = newValue>>1;
     }
     break;

@@ -83,6 +83,25 @@ unsigned int fullDelay;
 void setup()
 {
     //	timer_disable_all();
+    byte midiIn[8] = {
+      B01110,
+      B10001,
+      B01110,
+      B00000,
+      B00000,
+      B00000,
+      B00000,
+    };
+
+    byte midiOut[8] = {
+      B01110,
+      B10101,
+      B01110,
+      B00000,
+      B00000,
+      B00000,
+      B00000,
+    };
 
 
     lcd.begin(20, 4);
@@ -92,6 +111,12 @@ void setup()
     lcd.print("          By Ixox");
     lcd.setCursor(0,3);
     lcd.print("Powered by Leaflabs");
+
+
+
+     lcd.createChar(0, midiIn);
+     lcd.createChar(1, midiOut);
+
 
 
     // Dependencies injection
@@ -151,16 +176,51 @@ void setup()
 }
 
 
+unsigned short midiReceive = 0;
+unsigned short midiSent = 0;
+
 void loop() {
 
     mainCpt++;
 
     while (Serial2.available()) {
         midiDecoder.newByte(Serial2.read());
+
+        if (midiReceive == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
+            midiReceive = 300;
+            lcd.setCursor(0,0);
+            lcd.print((char)0);
+        }
+
+    }
+
+    if (midiDecoder.hasMidiToSend()) {
+        if (midiSent == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
+            midiSent = 300;
+            lcd.setCursor(1,0);
+            lcd.print((char)1);
+        }
     }
 
     if ((mainCpt&0xf) == 1) {
         midiDecoder.sendOneMidiEvent();
+
+    }
+
+    if (midiSent>0) {
+        if (midiSent == 1) {
+            lcd.setCursor(1,0);
+            lcd.print(' ');
+        }
+        midiSent--;
+    }
+
+    if (midiReceive>0) {
+        if (midiReceive == 1) {
+            lcd.setCursor(0,0);
+            lcd.print(' ');
+        }
+        midiReceive--;
     }
 
     if (fmDisplay.needRefresh() && ((mainCpt & 0x3) == 0)) {
