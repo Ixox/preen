@@ -25,7 +25,7 @@
 const char* allChars  = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 &*$,;:";
 
 const char* nullNames []= {};
-const char* algoNames []= { "alg1", "alg2", "alg3", "alg4", "alg5", "alg6", "alg7", "alg8" };
+const char* algoNames []= { "alg1", "alg2", "alg3", "alg4", "alg5", "alg6", "alg7", "alg8", "alg9" };
 struct ParameterRowDisplay engine1ParameterRow = {
         "Engine" ,
         { "Algo", "Velo", "Voic", "Glid" },
@@ -144,15 +144,16 @@ struct AllParameterRowsDisplay allParameterRows = {
 };
 
 
-struct ShowUpAlgo showUp[8] = {
+struct ShowUpAlgo showUp[9] = {
         { 3, 3, 0}, // ALGO1
         { 3, 2, 2}, // ALGO2
-        { 3, 2, 0}, // ALGO3
+        { 4, 3, 0}, // ALGO3
         { 4, 4, 2}, // ALGO4
         { 4, 3, 0}, // ALGO5
         { 4, 3, 3}, // ALGO6
         { 6, 3, 3},  // ALGO7
-        { 6, 4, 4}  // ALGO8
+        { 6, 4, 2},  // ALGO8
+        { 6, 4, 2}   // ALGO9
 };
 
 
@@ -529,7 +530,36 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 16, 0, 0} ,
                 "Metal dream"
         },
-
+        {
+                { 6, 14, 2, 6} ,
+                { 22, 52, 57, 55} ,
+                { 128, 88, 128, 0} ,
+                { 3, 0, 8, 0} ,
+                { 0, 0, 23, 0} ,
+                { 0, 0, 16, 0} ,
+                { 0, 0, 16, -17} ,
+                { 2, 0, 48, 0} ,
+                { 0, 0, 16, 0} ,
+                { 127, 83, 217, 166} ,
+                { 44, 95, 36, 209} ,
+                { 162, 100, 255, 168} ,
+                { 53, 113, 137, 255} ,
+                { 138, 150, 160, 159} ,
+                { 218, 150, 255, 204} ,
+                { 7, 16, 5, 0} ,
+                { 5, 64, 1, 0} ,
+                { 1, 23, 1, 0} ,
+                { 2, 9, 6, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, -128, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 0, 0, 0} ,
+                { 0, 36, 0, 128} ,
+                { 0, 72, 127, 6} ,
+                { 0, 3, 0, 0} ,
+                { 0, 4, 0, 0} ,
+                "Space Wave"
+        },
         {
                 { 0,0,0,0} ,
                 { 5, 14, 0, 0},

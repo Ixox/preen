@@ -10,9 +10,9 @@
 |/       |/   \__/(_______/(_______/|/    )_)|/       |/     \|
 
 -----------------------------------------                                            
-V0.0.11
+V0.0.1
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-May 14th 2011
+May 15th 2011
 
 
 http://www.preenfm.net
@@ -28,10 +28,12 @@ as published by the Free Software Foundation version 3.
 
 Preen Current Features:
 
-. 8 FM algorithms available
-. Polyphonic (12 operators in realtime) up to 4 voices (when 3 ops per voice)
-. 1 operator  = 1 oscillator  + 1 enveloppe
-. 4 LFOs 
+. 9 FM algorithms available from 3 to 6 operators (1 operator = 1 oscillator + 1 enveloppe)
+. Polyphonic : 12 operators in realtime
+. Oscillator : 5 waveform (4 sin variation + noise), linked to keyb freq or fix, fine tune.
+. Enveloppe : ADSR (A,D and R up to 2 seconds).
+. 4 voices for 3 ops Algos, 3 voices for 4 ops algos, and 2 voices for 6 ops algo
+. 4 LFOs (3 waveform, frequency in Hz, can be synced to new note, ramp up to 4 seconds).
 . 8 rows moldulation matrix
 . Glide available when voice set to 1
 
@@ -46,7 +48,7 @@ Preen Current Features:
 
 . LCD 4x20 
   . updated in realtime showing the parameter you modify.
-  . Consistency display of each parameters.
+  . Consistency display of each parameters (signed, unsigned, strings, float...)
 
 . Surface Control
   . 4 encoders + 7 buttons
@@ -54,8 +56,8 @@ Preen Current Features:
   . Synth Mode + menu Mode 
 
 . Sampling rate : 
-  32768 Hz (makes division faster ;-) for audio. Pseudo 11 bits.
-  1024 Hz for LFO and Modulation Matrix.
+  . 32768 Hz (makes division faster ;-) for audio. Pseudo 11 bits.
+  . 1024 Hz for LFO and Modulation Matrix.
 
 . Analog filter
   . 6th order active low pass bessel filter to get rid (as much as possible) of the aliasing
@@ -63,6 +65,10 @@ Preen Current Features:
 
 
 --------------------------------------------
+Update May 15th:
+. 9 FM alogs
+. new presets
+
 Udpdate May 14th:
 . new LFO new features :  bias + keyboard sync + ramp up
 . refactoring : new PresetUtil class.

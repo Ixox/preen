@@ -345,7 +345,7 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 	case MENU_LOAD_USER_BANK:
 	case MENU_LOAD_INTERNAL_BANK:
 		eraseRow(menuRow-1);
-		lcd->setCursor(4, menuRow-1);
+		lcd->setCursor(2, menuRow-1);
 		lcd->print(fullState->menuSelect);
 		lcd->print(" - ");
 		lcd->print(synthState.params.presetName);

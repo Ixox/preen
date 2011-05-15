@@ -101,6 +101,7 @@ enum Algorithm {
     ALGO6,
     ALGO7,
     ALGO8,
+    ALGO9,
 	ALGO_END
 };
 
