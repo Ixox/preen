@@ -653,6 +653,22 @@ void SynthState::encoderTurned(int encoder, int ticks) {
 
         if (newValue != oldValue) {
             propagateNewParamValue(currentRow, encoder, param, oldValue, newValue);
+            if (currentRow == ROW_ENGINE && encoder == ENCODER_ENGINE_ALGO) {
+                int voiceMax = 4;
+                switch (showUp[newValue].osc) {
+                case 4:
+                    voiceMax = 3;
+                    break;
+                case 6:
+                    voiceMax = 2;
+                    break;
+                }
+
+                if (params.engine1.numberOfVoice > voiceMax) {
+                    setNewValue(ROW_ENGINE, ENCODER_ENGINE_VOICE, voiceMax);
+                }
+                engine1ParameterRow.params[ENCODER_ENGINE_VOICE].maxValue = voiceMax;
+            }
         }
     } else {
         if (encoder==0) {
