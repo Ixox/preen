@@ -125,33 +125,38 @@ public:
             break;
             case ALGO3:
                 /*
-                  .---.  .---.  .---.
-                  | 2 |  | 3 |  | 4 |
-                  '---'  '---'  '---'
-                     \IM1  |IM2  /IM3
+
+                               IM4
+                              ---->
+                  .---.  .---.     .---.
+                  | 2 |  | 3 |     | 4 |
+                  '---'  '---'     '---'
+                     \IM1  |IM2    /IM3
                          .---.
                          | 1 |
                          '---'
                  */
             {
 
-                int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-                freq4 >>= 19;
-                freq4 *= oscState4.mainFrequency;
-                freq4 >>= 15;
-                freq4 *= IM3;
-
-                int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-                freq3 >>= 19;
-                freq3 *= oscState3.mainFrequency;
-                freq3 >>= 15;
-                freq3 *= IM2;
 
                 int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
                 freq2 >>= 19;
                 freq2 *= oscState2.mainFrequency;
                 freq2 >>= 15;
                 freq2 *= IM1;
+
+                int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
+                freq3 >>= 19;
+                freq3 *= oscState3.mainFrequency;
+                freq3 >>= 15;
+                oscState4.frequency =  freq3 * IM4 + oscState4.mainFrequency;
+                freq3 *= IM2;
+
+                int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
+                freq4 >>= 19;
+                freq4 *= oscState4.mainFrequency;
+                freq4 >>= 15;
+                freq4 *= IM3;
 
                 oscState1.frequency =  freq2 + freq3 + freq4 + oscState5.mainFrequency;
                 currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
@@ -218,13 +223,13 @@ public:
                 /*
 				         .---.
 				         | 4 |
-				         '---'
-				           |IM3
-				         .---.
-				         | 3 |
-				         '---'
-				           |IM2
-				         .---.
+				         '---'  \
+				           |IM3  |
+				         .---.   |
+				         | 3 |   | IM4
+				         '---'   |
+				           |IM2  |
+				         .---.  /
 				         | 2 |
 				         '---'
 				           |IM1
@@ -234,20 +239,19 @@ public:
 
                  */
             {
-                int freq = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-                freq >>= 19;
-                freq *= oscState4.mainFrequency;
-                freq >>= 15;
-                freq *= IM3;
+                int freq2 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
+                freq2 >>= 19;
+                freq2 *= oscState4.mainFrequency;
+                freq2 >>= 15;
 
-                oscState3.frequency =  freq + oscState3.mainFrequency;
-                freq = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
+                oscState3.frequency =  freq2 * IM3  + oscState3.mainFrequency;
+                int freq = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
                 freq >>= 19;
                 freq *= oscState3.mainFrequency;
                 freq >>= 15;
                 freq *= IM2;
 
-                oscState2.frequency =  freq + oscState2.mainFrequency;
+                oscState2.frequency =  freq + freq2*IM4 + oscState2.mainFrequency;
                 freq = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
                 freq >>= 19;
                 freq *= oscState2.mainFrequency; // Convertion in Hertz
@@ -316,8 +320,10 @@ public:
             }
             case ALGO7:
                 /*
-                     .---.  .---.  .---. ^
-                     | 2 |  | 4 |  | 6 | | Feedback
+                                IM4
+                               ---->
+                     .---.  .---.  .---.
+                     | 2 |  | 4 |  | 6 |
                      '---'  '---'  '---'
                        |IM1   |IM2   |IM3
                      .---.  .---.  .---.
@@ -339,15 +345,18 @@ public:
                 freq >>= 19;
                 freq *= oscState4.mainFrequency;
                 freq >>= 15;
-                freq *= IM2;
-                oscState3.frequency =  freq + oscState3.mainFrequency;
 
-                freq = osc6->getNextSample(&oscState6) * env6->getNextAmp(&envState6);
-                freq >>= 19;
-                freq *= oscState6.mainFrequency;
-                freq >>= 15;
-                freq *= IM3;
-                oscState5.frequency =  freq + oscState5.mainFrequency;
+                // Use freq to modulate op6 by IM4.
+                oscState6.frequency =  freq * IM4 + oscState6.mainFrequency;
+                int freq2 = osc6->getNextSample(&oscState6) * env6->getNextAmp(&envState6);
+                freq2 >>= 19;
+                freq2 *= oscState6.mainFrequency;
+                freq2 >>= 15;
+                freq2 *= IM3;
+                oscState5.frequency =  freq2 + oscState5.mainFrequency;
+
+                oscState3.frequency =  freq * IM2 + oscState3.mainFrequency;
+
 
                 int currentSample3 = osc5->getNextSample(&oscState5)*env5->getNextAmp(&envState5);
                 currentSample3  >>= 7; // 7 for mixOsc3

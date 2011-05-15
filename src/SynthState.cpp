@@ -147,11 +147,11 @@ struct AllParameterRowsDisplay allParameterRows = {
 struct ShowUpAlgo showUp[9] = {
         { 3, 3, 0}, // ALGO1
         { 3, 2, 2}, // ALGO2
-        { 4, 3, 0}, // ALGO3
+        { 4, 4, 0}, // ALGO3
         { 4, 4, 2}, // ALGO4
-        { 4, 3, 0}, // ALGO5
+        { 4, 4, 0}, // ALGO5
         { 4, 3, 3}, // ALGO6
-        { 6, 3, 3},  // ALGO7
+        { 6, 4, 3},  // ALGO7
         { 6, 4, 2},  // ALGO8
         { 6, 4, 2}   // ALGO9
 };
