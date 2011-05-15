@@ -69,6 +69,7 @@ struct FullState {
 	MenuItem* currentMenuItem;
 	char name[13];
 	unsigned char midiChannel;
+	bool presetModified;
 };
 
 extern struct MenuItem allMenus[];

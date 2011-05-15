@@ -64,6 +64,7 @@ public:
 	boolean needRefresh() { return refreshStatus != 0; }
 	void refreshAllScreenByStep();
 	void displayPreset();
+    void checkPresetModified();
 
 
     void newSynthMode(FullState* fullState) ;
@@ -75,7 +76,9 @@ public:
     void newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newcurrentRow(int newcurrentRow);
-    void beforeNewParamsLoad() {};
+    void beforeNewParamsLoad() {
+        presetModifed = false;
+    };
 
 
 private:
@@ -84,6 +87,8 @@ private:
 	int displayedRow;
 
 	int menuRow;
+	// Local value preset modified to know whether it's currently showing up
+	boolean presetModifed;
 
 };
 

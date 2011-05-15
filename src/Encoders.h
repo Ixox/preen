@@ -46,7 +46,7 @@ class Encoders {
 public:
 	Encoders();
 	~Encoders();
-	void checkStatus();
+	boolean checkStatus();
 
 
 

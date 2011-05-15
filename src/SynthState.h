@@ -401,12 +401,14 @@ public:
 	}
 
 	void propagateNewParamValue(int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+        fullState.presetModified = true;
 		for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
 			listener->newParamValue(getListenerType(currentRow), currentRow, encoder, param, oldValue, newValue);
 		}
 	}
 
 	void propagateNewParamValueFromExternal(int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+        fullState.presetModified = true;
 		for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
 			listener->newParamValueFromExternal(getListenerType(currentRow), currentRow, encoder, param, oldValue, newValue);
 		}
@@ -458,5 +460,6 @@ extern struct AllParameterRowsDisplay allParameterRows;
 extern SynthState	synthState;
 extern const struct AllSynthParams presets[];
 extern const char* allChars;
+
 
 #endif /* SYNTHSTATUS_H_ */

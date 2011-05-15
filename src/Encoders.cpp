@@ -51,7 +51,8 @@ Encoders::~Encoders() {
 }
 
 
-void Encoders::checkStatus() {
+boolean Encoders::checkStatus() {
+    boolean modified = false;
 	// Copy the values in the HC165 registers
 	digitalWrite(HC165_LOAD, 0);
 	digitalWrite(HC165_LOAD, 1);
@@ -79,6 +80,7 @@ void Encoders::checkStatus() {
 				tickSpeed[k] +=3;
 				lastMove[k] = LAST_MOVE_INC;
 			}
+            modified = true;
 		} else {
 			lastMove[k] = LAST_MOVE_NONE;
 			if (tickSpeed[k] > 1 && ((cpt & 0xf) == 0)) {
@@ -100,4 +102,5 @@ void Encoders::checkStatus() {
 		buttonOldState[k] = b1;
 	}
 	cpt++;
+	return modified;
 }

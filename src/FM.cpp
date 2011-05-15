@@ -86,8 +86,8 @@ void setup()
     byte midiIn[8] = {
       B01110,
       B10001,
+      B10001,
       B01110,
-      B00000,
       B00000,
       B00000,
       B00000,
@@ -95,14 +95,23 @@ void setup()
 
     byte midiOut[8] = {
       B01110,
-      B10101,
+      B11111,
+      B11111,
       B01110,
-      B00000,
       B00000,
       B00000,
       B00000,
     };
 
+    byte modified[8] = {
+      B00101,
+      B00010,
+      B00101,
+      B00000,
+      B00000,
+      B00000,
+      B00000,
+    };
 
     lcd.begin(20, 4);
     lcd.setCursor(0,0);
@@ -116,6 +125,7 @@ void setup()
 
      lcd.createChar(0, midiIn);
      lcd.createChar(1, midiOut);
+     lcd.createChar(2, modified);
 
 
 
@@ -131,7 +141,6 @@ void setup()
     synthState.insertMenuListener(&fmDisplay);
 
     midiDecoder.setSynth(&synth);
-    fmDisplay.init(&lcd);
     /*
 	int cpt= 0;
 	while (cpt<20) {
@@ -142,9 +151,6 @@ void setup()
      */
 
     Serial2.begin(31250);
-
-
-
 
     Timer1.setOverflow(2197);
     Timer1.setPrescaleFactor(1);
@@ -166,7 +172,10 @@ void setup()
         synth.noteOff(60+k);
         delay(5);
     }
-/*
+
+    fmDisplay.init(&lcd);
+
+    /*
     Timer2.setOverflow(1000);
     Timer2.setPrescaleFactor(16);
     Timer2.setCompare1(500);
@@ -229,6 +238,8 @@ void loop() {
 
 
     encoders.checkStatus();
+
+
     /*
 	if ((mainCpt & 0xff) == 0) {
         lcd.setCursor(0,0);

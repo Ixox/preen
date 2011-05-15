@@ -807,11 +807,13 @@ MenuItem* SynthState::afterButtonPressed() {
         break;
     case MENU_LOAD_INTERNAL_BANK:
         copyPatch((char*)&params, (char*)&backupParams, true);
+        fullState.presetModified = false;
         break;
     case MENU_LOAD_USER_BANK:
         propagateBeforeNewParamsLoad();
         PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
         copyPatch((char*)&params, (char*)&backupParams, true);
+        fullState.presetModified = false;
         break;
     case MENU_SAVE_CHOOSE_PRESET:
         for (int k=0; k<12 && params.presetName[k] != 0; k++) {

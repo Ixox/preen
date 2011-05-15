@@ -21,6 +21,7 @@
 
 FMDisplay::FMDisplay() {
 	refreshStatus = 10;
+	presetModifed = false;
 }
 
 FMDisplay::~FMDisplay() {
@@ -188,7 +189,7 @@ void FMDisplay::updateEncoderName(int row, int encoder) {
 }
 
 void FMDisplay::refreshAllScreenByStep() {
-	if (refreshStatus==10 ) {
+    if (refreshStatus==10 ) {
 		lcd->setCursor(3,1);
 		lcd->print("               ");
 	} else if (refreshStatus==9 ) {
@@ -221,21 +222,37 @@ void FMDisplay::refreshAllScreenByStep() {
 
 
 void FMDisplay::displayPreset() {
+    FullState* fullState = &synthState.fullState;
 	int length = getLength(synthState.params.presetName);
 	lcd->setCursor(19-length,0);
 	lcd->print(synthState.params.presetName);
+	if (fullState->presetModified) {
+	    lcd->print((char)2);
+	}
 }
+
+void FMDisplay::checkPresetModified() {
+    if (!presetModifed && synthState.fullState.presetModified && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
+        presetModifed = true;
+        lcd->setCursor(19,0);
+        lcd->print((char)2);
+    }
+}
+
+
 
 // Update FMDisplay regarding the callbacks from SynthState
 
 
 void FMDisplay::newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+    checkPresetModified();
 	if (currentRow == this->displayedRow) {
 		updateEncoderValue(currentRow, encoder, param, newValue);
 	}
 }
 
 void FMDisplay::newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param,  int oldValue, int newValue) {
+    checkPresetModified();
 	if (synthState.getSynthMode() == SYNTH_MODE_EDIT) {
 		if (currentRow != this->displayedRow) {
 			newcurrentRow(currentRow);
