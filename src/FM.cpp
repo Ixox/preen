@@ -47,13 +47,13 @@ int min = 1024;
 
 int cpt;
 void IRQSendSample() {
-/*
+    /*
     if (rb.getCount()>0) {
         pwmWrite(AUDIO_PIN , rb.remove());
     } else {
         glitches++;
     }
-    */
+     */
 
     pwmWrite(AUDIO_PIN , currentSample);
     synth.nextSample();
@@ -84,48 +84,46 @@ void setup()
 {
     //	timer_disable_all();
     byte midiIn[8] = {
-      B01110,
-      B10001,
-      B10001,
-      B01110,
-      B00000,
-      B00000,
-      B00000,
+            B01100,
+            B10010,
+            B10010,
+            B01100,
+            B00000,
+            B00000,
+            B00000,
     };
 
     byte midiOut[8] = {
-      B01110,
-      B11111,
-      B11111,
-      B01110,
-      B00000,
-      B00000,
-      B00000,
+            B01100,
+            B11110,
+            B11110,
+            B01100,
+            B00000,
+            B00000,
+            B00000,
     };
 
     byte modified[8] = {
-      B00101,
-      B00010,
-      B00101,
-      B00000,
-      B00000,
-      B00000,
-      B00000,
+            B00101,
+            B00010,
+            B00101,
+            B00000,
+            B00000,
+            B00000,
+            B00000,
     };
 
     lcd.begin(20, 4);
     lcd.setCursor(0,0);
-    lcd.print("Preen FM Synth V0.1");
+    lcd.print("PreenFM V0.1");
     lcd.setCursor(0,1);
     lcd.print("          By Ixox");
     lcd.setCursor(0,3);
     lcd.print("Powered by Leaflabs");
 
-
-
-     lcd.createChar(0, midiIn);
-     lcd.createChar(1, midiOut);
-     lcd.createChar(2, modified);
+    lcd.createChar(0, midiIn);
+    lcd.createChar(1, midiOut);
+    lcd.createChar(2, modified);
 
 
 
@@ -181,7 +179,7 @@ void setup()
     Timer2.setCompare1(500);
     Timer2.setChannel1Mode(TIMER_OUTPUTCOMPARE);
     Timer2.attachCompare1Interrupt(IRQEncoders);
-*/
+     */
 }
 
 
@@ -249,7 +247,7 @@ void loop() {
         lcd.print("  ");
     }
      */
-//    delayMicroseconds(300);
+    //    delayMicroseconds(300);
 }
 
 // Force init to be called *first*, i.e. before static object allocation.

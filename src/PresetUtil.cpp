@@ -39,7 +39,7 @@ void PresetUtil::dumpLine(int a, int b, int c, int d) {
 
 
 void PresetUtil::dumpPatch() {
-    dumpLine(synthState.params.engine1.algo, synthState.params.engine1.numberOfVoice, synthState.params.engine1.velocity, synthState.params.engine1.glide );
+    dumpLine(synthState.params.engine1.algo, synthState.params.engine1.velocity, synthState.params.engine1.numberOfVoice, synthState.params.engine1.glide );
     dumpLine(synthState.params.engine2.modulationIndex1, synthState.params.engine2.modulationIndex2, synthState.params.engine2.modulationIndex3, synthState.params.engine2.modulationIndex4 );
     dumpLine(synthState.params.engine3.mixOsc1, synthState.params.engine3.mixOsc2, synthState.params.engine3.mixOsc3, synthState.params.engine3.mixOsc4 );
     OscillatorParams * o = (OscillatorParams *)(&(synthState.params.osc1));
@@ -56,7 +56,7 @@ void PresetUtil::dumpPatch() {
     }
     LfoParams* l = (LfoParams*)(&(synthState.params.lfo1));
     for (int k=0; k<4; k++) {
-        dumpLine(l[k].shape, l[k].freq, 0, 0);
+        dumpLine(l[k].shape, l[k].freq, l[k].bias, l[k].keybRamp);
     }
     SerialUSB.println(synthState.params.presetName);
 }

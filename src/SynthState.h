@@ -457,7 +457,7 @@ private:
 
 // Global structure used all over the code
 extern struct AllParameterRowsDisplay allParameterRows;
-extern SynthState	synthState;
+extern SynthState synthState;
 extern const struct AllSynthParams presets[];
 extern const char* allChars;
 
