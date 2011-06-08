@@ -42,7 +42,7 @@ void SendSamples() {
 	}
 }
 
-void setup() 
+void setup()
 {
 	midiDecoder.setSynth(&synth);
 	synth.noteOn(40,127);

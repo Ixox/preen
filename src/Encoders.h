@@ -25,9 +25,9 @@
 #include "SynthState.h"
 #include "EncodersListener.h"
 
-#define HC165_DATA   18
-#define HC165_LOAD   19
-#define HC165_CLOCK  20
+#define HC165_CLOCK  17
+#define HC165_LOAD   18
+#define HC165_DATA   19
 
 
 enum LastEncoderMove {

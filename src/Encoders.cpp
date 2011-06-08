@@ -19,9 +19,14 @@
 
 
 Encoders::Encoders() {
-	char encoderPins[] = { 2,3,0,1,10,11, 8,9 };
-	char buttonPins[] = { 7,6,5,4, 12,14,13 };
-	firstListener= 0;
+	//char encoderPins[] = { 2,3,0,1,10,11, 8,9 };
+	// PCB....
+    char encoderPins[] = { 9, 8, 11, 10, 2,3, 0,1};
+    //char buttonPins[] = { 7,6,5,4, 12,14,13 };
+
+    char buttonPins[] = { 12, 13, 14, 15, 7, 5, 6};
+
+    firstListener= 0;
 
 	pinMode(HC165_DATA, INPUT);
 	pinMode(HC165_CLOCK, OUTPUT);
@@ -61,9 +66,7 @@ boolean Encoders::checkStatus() {
 	int registerBits = 0;
 	for(int i=0; i<16; i++) {
 		digitalWrite(HC165_CLOCK, 0);
-        delayMicroseconds(20);
 		registerBits |= (digitalRead(HC165_DATA) << i) ;
-        delayMicroseconds(5);
 		digitalWrite(HC165_CLOCK, 1);
 	}
 

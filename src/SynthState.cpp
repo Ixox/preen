@@ -532,7 +532,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
         },
         {
                 { 6, 14, 2, 6} ,
-                { 22, 52, 57, 55} ,
+                { 22, 52, 57, 0} ,
                 { 128, 88, 128, 0} ,
                 { 3, 0, 8, 0} ,
                 { 0, 0, 23, 0} ,

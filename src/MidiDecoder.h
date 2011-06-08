@@ -76,6 +76,13 @@ enum AllControlChange {
 
 };
 
+struct Nrpn {
+    uint8 paramLSB;
+    uint8 paramMSB;
+    uint8 valueLSB;
+    uint8 valueMSB;
+};
+
 struct ControlChange {
     uint8 control;
     uint8 value;
@@ -88,6 +95,8 @@ public:
     ~MidiDecoder();
     void newByte(unsigned char byte);
     void sendMidiEvent();
+    void controlChange(unsigned char *currentEvent);
+    void decodeNrpn();
     void setSynth(Synth* synth);
     void newParamValueFromExternal(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newParamValue(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
@@ -110,6 +119,7 @@ private:
     RingBuffer<ControlChange, 16> midiToSend;
     int maxInBuffer;
     int maxInARow;
+    struct Nrpn currentNrpn;
 };
 
 #endif /* MIDIDECODER_H_ */

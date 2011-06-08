@@ -152,7 +152,7 @@ void PresetUtil::midiPatchDump() {
     uint8 newPatch[] = {0xf0, 0x7d, 0x01};
 
     for (int k=0; k<=2; k++) {
-        Serial2.print(newPatch[k]);
+        Serial3.print(newPatch[k]);
     }
 
     int checksum = 0;
@@ -162,14 +162,14 @@ void PresetUtil::midiPatchDump() {
         uint8 byte = ((unsigned char*)&synthState.params)[k];
         checksum+= byte;
         while (byte >= 127) {
-            Serial2.print((uint8)127);
+            Serial3.print((uint8)127);
             byte -= 127;
         }
-        Serial2.print(byte);
+        Serial3.print(byte);
     }
 
-    Serial2.print((uint8)(checksum % 128));
-    Serial2.print((uint8)0xf7);
+    Serial3.print((uint8)(checksum % 128));
+    Serial3.print((uint8)0xf7);
 }
 
 void PresetUtil::formatEEPROM() {
