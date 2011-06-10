@@ -410,81 +410,81 @@ void MidiDecoder::newParamValueFromExternal(SynthParamType type, int currentrow,
 
 void MidiDecoder::newParamValue(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
 
-    struct ControlChange cc1, cc2, cc3;
-    cc1.control = 99;
-    cc1.value = 0;
-    midiToSend.insert(cc1);
-    cc2.control = 98;
-    cc2.value = (uint8)currentrow*NUMBER_OF_ENCODERS + encoder;
-    midiToSend.insert(cc2);
-/*    cc.control = 38;
-    cc.value = 0;
-    midiToSend.insert(cc);
-    */
-    cc3.control = 6;
-    cc3.value = (uint8)newValue;
-    midiToSend.insert(cc3);
-
+    if (false) {
+        // NRPN SEND... IN PROGRESS....
+        struct ControlChange cc1, cc2, cc3;
+        cc1.control = 99;
+        cc1.value = 0;
+        midiToSend.insert(cc1);
+        cc2.control = 98;
+        cc2.value = (uint8)currentrow*NUMBER_OF_ENCODERS + encoder;
+        midiToSend.insert(cc2);
+        /*    cc.control = 38;
+        cc.value = 0;
+        midiToSend.insert(cc);
+         */
+        cc3.control = 6;
+        cc3.value = (uint8)newValue;
+        midiToSend.insert(cc3);
+    }
 
     // Send control change
-    if (false) {
-        struct ControlChange cc;
-        cc.control = 0;
-        cc.value = 0;
+    struct ControlChange cc;
+    cc.control = 0;
+    cc.value = 0;
 
-        switch (currentrow) {
-        case ROW_ENGINE:
-            if (encoder == ENCODER_ENGINE_VOICE) {
-                cc.control = CC_VOICE;
-                cc.value =  newValue;
-            } else if (encoder == ENCODER_ENGINE_GLIDE) {
-                cc.control = CC_GLIDE;
-                cc.value =  newValue;
-            }
-            break;
-        case ROW_MODULATION:
-            cc.control = CC_IM1 + encoder;
-            cc.value =  newValue>>1;
-            break;
-        case ROW_OSC_MIX:
-            cc.control = CC_MIX1 + encoder;
+    switch (currentrow) {
+    case ROW_ENGINE:
+        if (encoder == ENCODER_ENGINE_VOICE) {
+            cc.control = CC_VOICE;
             cc.value =  newValue;
-            break;
-        case ROW_OSC_FIRST...ROW_OSC_LAST:
-        if (encoder == ENCODER_OSC_FREQ) {
-            cc.control = CC_OSC1_FREQ + (currentrow - ROW_OSC_FIRST);
-            cc.value = newValue>>1;
-        } else if (encoder == ENCODER_OSC_FTUNE) {
-            cc.control = CC_OSC1_DETUNE + (currentrow - ROW_OSC_FIRST);
-            cc.value = newValue>>1;
+        } else if (encoder == ENCODER_ENGINE_GLIDE) {
+            cc.control = CC_GLIDE;
+            cc.value =  newValue;
         }
         break;
-        case ROW_ENV_FIRST...ROW_ENV_LAST:
-        if (encoder == ENCODER_ENV_A) {
-            cc.control = CC_ENV1_ATTACK + (currentrow - ROW_ENV_FIRST);
-            cc.value = newValue>>1;
-        } else if (encoder==ENCODER_ENV_R) {
-            cc.control = CC_ENV1_RELEASE + (currentrow - ROW_ENV_FIRST);
-            cc.value = newValue>>1;
-        }
+    case ROW_MODULATION:
+        cc.control = CC_IM1 + encoder;
+        cc.value =  newValue>>1;
         break;
-        case ROW_MATRIX_FIRST...ROW_MATRIX_LAST:
-        if (encoder==ENCODER_MATRIX_MUL) {
-            cc.control = CC_MATRIXROW1_MUL + currentrow - ROW_MATRIX_FIRST;
-            cc.value = (newValue>>1)+64;
-        }
+    case ROW_OSC_MIX:
+        cc.control = CC_MIX1 + encoder;
+        cc.value =  newValue;
         break;
-        case ROW_LFO_FIRST...ROW_LFO_LAST:
-        if (encoder==ENCODER_LFO_FREQ) {
-            cc.control = CC_MATRIXROW1_MUL + currentrow - ROW_LFO_FIRST;
-            cc.value = (newValue>>1);
-        }
-        break;
-        }
+    case ROW_OSC_FIRST...ROW_OSC_LAST:
+    if (encoder == ENCODER_OSC_FREQ) {
+        cc.control = CC_OSC1_FREQ + (currentrow - ROW_OSC_FIRST);
+        cc.value = newValue>>1;
+    } else if (encoder == ENCODER_OSC_FTUNE) {
+        cc.control = CC_OSC1_DETUNE + (currentrow - ROW_OSC_FIRST);
+        cc.value = newValue>>1;
+    }
+    break;
+    case ROW_ENV_FIRST...ROW_ENV_LAST:
+    if (encoder == ENCODER_ENV_A) {
+        cc.control = CC_ENV1_ATTACK + (currentrow - ROW_ENV_FIRST);
+        cc.value = newValue>>1;
+    } else if (encoder==ENCODER_ENV_R) {
+        cc.control = CC_ENV1_RELEASE + (currentrow - ROW_ENV_FIRST);
+        cc.value = newValue>>1;
+    }
+    break;
+    case ROW_MATRIX_FIRST...ROW_MATRIX_LAST:
+    if (encoder==ENCODER_MATRIX_MUL) {
+        cc.control = CC_MATRIXROW1_MUL + currentrow - ROW_MATRIX_FIRST;
+        cc.value = (newValue>>1)+64;
+    }
+    break;
+    case ROW_LFO_FIRST...ROW_LFO_LAST:
+    if (encoder==ENCODER_LFO_FREQ) {
+        cc.control = CC_MATRIXROW1_MUL + currentrow - ROW_LFO_FIRST;
+        cc.value = (newValue>>1);
+    }
+    break;
+    }
 
-        if (cc.control!=0) {
-            midiToSend.insert(cc);
-        }
+    if (cc.control!=0) {
+        midiToSend.insert(cc);
     }
 }
 
