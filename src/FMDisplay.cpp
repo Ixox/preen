@@ -189,10 +189,13 @@ void FMDisplay::updateEncoderName(int row, int encoder) {
 }
 
 void FMDisplay::refreshAllScreenByStep() {
-    if (refreshStatus==10 ) {
+    switch (refreshStatus) {
+    case 10:
 		lcd->setCursor(3,1);
 		lcd->print("               ");
-	} else if (refreshStatus==9 ) {
+		break;
+    case 9:
+    {
 		int row = synthState.getCurrentRow();
 		lcd->setCursor(0,1);
 		lcd->print(allParameterRows.row[row]->rowName);
@@ -200,10 +203,17 @@ void FMDisplay::refreshAllScreenByStep() {
             lcd->print(" ");
             lcd->print(getRowNumberRelative(row));
 		}
-	} else if (refreshStatus>4) {
+        break;
+    }
+    case 5:
+    case 6:
+    case 7:
+    case 8:
 		updateEncoderName(synthState.getCurrentRow(), refreshStatus -5);
-	} else {
+        break;
+    default :
 	    updateEncoderValue(refreshStatus);
+
 	}
     refreshStatus --;
 }

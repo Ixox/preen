@@ -133,9 +133,7 @@ int Synth::getSample() {
 
 void Synth::nextSample() {
 
-    if ((cpt & 3) == 0) {
-        osc1.updateRandomNumber();
-    }
+    osc1.updateRandomNumber();
 
     // step 32 : update lfo1 , step 33 update lfo2 etc....
     int step32 = cpt & 0x1f;

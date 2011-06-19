@@ -40,8 +40,7 @@ Encoders::Encoders() {
 		encoderBit2[k] = 1 << encoderPins[k*2 + 1];
 		encoderOldBit1[k] = true;
 		lastMove[k] = LAST_MOVE_NONE;
-		ticks[k] = 0;
-		tickSpeed[k] = 4;
+		tickSpeed[k] = 1;
 	}
 
 	for (int k=0; k<NUMBER_OF_BUTTONS; k++) {
@@ -49,16 +48,15 @@ Encoders::Encoders() {
 		buttonOldState[k] = true;
 	}
 
-	cpt = 0;
+	encoderTimer = 0;
 }
 
 Encoders::~Encoders() {
 }
 
 
-boolean Encoders::checkStatus() {
-    boolean modified = false;
-	// Copy the values in the HC165 registers
+void Encoders::checkStatus() {
+    // Copy the values in the HC165 registers
 	digitalWrite(HC165_LOAD, 0);
 	digitalWrite(HC165_LOAD, 1);
 
@@ -83,10 +81,9 @@ boolean Encoders::checkStatus() {
 				tickSpeed[k] +=3;
 				lastMove[k] = LAST_MOVE_INC;
 			}
-            modified = true;
 		} else {
 			lastMove[k] = LAST_MOVE_NONE;
-			if (tickSpeed[k] > 1 && ((cpt & 0xf) == 0)) {
+			if (tickSpeed[k] > 1 && ((encoderTimer & 0x3) == 0)) {
 				tickSpeed[k] = tickSpeed[k] - 1;
 			}
 		}
@@ -104,6 +101,5 @@ boolean Encoders::checkStatus() {
 		}
 		buttonOldState[k] = b1;
 	}
-	cpt++;
-	return modified;
+	encoderTimer++;
 }

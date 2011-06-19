@@ -61,8 +61,7 @@ unsigned int fullDelay;
 
 
 inline void fillSoundBuffer() {
-    int cpt= 0;
-    while (cpt<10 && !rb.isFull()) {
+    for (int cpt=0; cpt<20 && !rb.isFull(); cpt++) {
         synth.nextSample();
         rb.insert((uint16)(synth.getSample()>>5)+1024);
         cpt++;
@@ -79,8 +78,10 @@ inline void fillSoundBufferFull() {
 
 void setup()
 {
-    //SerialUSB.end();
-    systick_disable();
+    SerialUSB.end();
+    nvic_irq_disable(NVIC_USB_LP_CAN_RX0);
+    // systick_disable();
+
     byte midiIn[8] = {
             B01100,
             B10010,
@@ -184,63 +185,93 @@ void setup()
 
 unsigned short midiReceive = 0;
 unsigned short midiSent = 0;
+uint32 encoderMicros = 0;
+uint32 midiInMicros = 0;
+uint32 midiOutMicros = 0;
+int cptTmp = 0;
+
 
 void loop() {
+    uint32 newMicros = micros();
 
+    mainCpt++;
     fillSoundBuffer();
 
-    while (Serial3.available()) {
-        midiDecoder.newByte(Serial3.read());
-        if (midiReceive == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
-            fillSoundBuffer();
-            midiReceive = 1500;
-            lcd.setCursor(0,0);
-            lcd.print((char)0);
+    if ((newMicros - midiInMicros) > 200) {
+        while (Serial3.available()) {
+            midiDecoder.newByte(Serial3.read());
+            if (midiReceive == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
+                fillSoundBuffer();
+                midiReceive = 2500;
+                lcd.setCursor(0,0);
+                lcd.print((char)0);
+            }
         }
-    }
 
-    if (midiDecoder.hasMidiToSend()) {
-        if (midiSent == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
-            fillSoundBuffer();
-            midiSent = 1500;
-            lcd.setCursor(1,0);
-            lcd.print((char)1);
+        if (midiReceive>0) {
+            if (midiReceive == 1) {
+                fillSoundBuffer();
+                lcd.setCursor(0,0);
+                lcd.print(' ');
+            }
+            midiReceive--;
         }
-    }
-    mainCpt++;
 
-    if ((mainCpt&0xf) == 1) {
-        fillSoundBuffer();
-        midiDecoder.sendOneMidiEvent();
+        midiInMicros = newMicros;
     }
 
-    if (midiSent>0) {
-        if (midiSent == 1) {
+    if ((newMicros - midiOutMicros) > 240) {
+        if (midiDecoder.hasMidiToSend()) {
+
             fillSoundBuffer();
-            lcd.setCursor(1,0);
-            lcd.print(' ');
+            midiDecoder.sendOneMidiEvent();
+
+            if (midiSent == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
+                fillSoundBuffer();
+                midiSent = 2500;
+                lcd.setCursor(1,0);
+                lcd.print((char)1);
+            }
         }
-        midiSent--;
+
+        if (midiSent>0) {
+            if (midiSent == 1) {
+                fillSoundBuffer();
+                lcd.setCursor(1,0);
+                lcd.print(' ');
+            }
+            midiSent--;
+        }
+
+        midiOutMicros = newMicros;
     }
 
-    if (midiReceive>0) {
-        if (midiReceive == 1) {
-            fillSoundBuffer();
-            lcd.setCursor(0,0);
-            lcd.print(' ');
-        }
-        midiReceive--;
-    }
 
-    if (fmDisplay.needRefresh() && ((mainCpt & 0x3) == 0)) {
+
+
+    if (fmDisplay.needRefresh() && ((mainCpt & 0xf) == 0)) {
         fillSoundBufferFull();
         fmDisplay.refreshAllScreenByStep();
     }
 
 
-    if ((mainCpt&0x1) == 1) {
+    if ((newMicros - encoderMicros) > 1900) {
         fillSoundBuffer();
         encoders.checkStatus();
+        encoderMicros = newMicros;
+
+        /*
+         * interesting informations
+            if ((mainCpt&0x3f)==0) {
+                fillSoundBuffer();
+                lcd.setCursor(4,0);
+                lcd.print(mainCpt-cptTmp);
+                lcd.print(" ");
+            }
+
+            cptTmp = mainCpt;
+         */
+
     }
 
 }

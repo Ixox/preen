@@ -46,7 +46,7 @@ class Encoders {
 public:
 	Encoders();
 	~Encoders();
-	boolean checkStatus();
+	void checkStatus();
 
 
 
@@ -76,13 +76,12 @@ private:
 	int encoderBit1[NUMBER_OF_ENCODERS];
 	int encoderBit2[NUMBER_OF_ENCODERS];
 	LastEncoderMove lastMove[NUMBER_OF_ENCODERS];
+    int tickSpeed[NUMBER_OF_ENCODERS];
 
 	int buttonBit[NUMBER_OF_BUTTONS];
 	bool buttonOldState[NUMBER_OF_BUTTONS];
-	int ticks[NUMBER_OF_BUTTONS];
-	int tickSpeed[NUMBER_OF_BUTTONS];
 
-	int cpt;
+	int encoderTimer;
 	EncodersListener* firstListener;
 };
 
