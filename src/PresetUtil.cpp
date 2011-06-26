@@ -17,6 +17,9 @@
 
 #include "PresetUtil.h"
 
+
+char PresetUtil::readName[13];
+
 PresetUtil::PresetUtil() {
 }
 
@@ -104,6 +107,32 @@ void PresetUtil::readFromEEPROM(int bankNumber, int preset) {
     i2c_master_xfer(I2C1, msgsRead, 2, 500);
 
     delay(5);
+}
+
+
+char* PresetUtil::readPresetNameFromEEPROM(int bankNumber, int preset) {
+
+    uint8 deviceaddress = 0b1010000;
+    int address = preset*128 +  bankNumber * 128*128 + 108;
+    uint8 bufReadAddress[2];
+    i2c_msg msgsRead[2];
+
+    bufReadAddress[0] = (uint8)((int)address >> 8);
+    bufReadAddress[1] = (uint8)((int)address & 0xff);
+
+    msgsRead[0].addr = deviceaddress;
+    msgsRead[0].flags = 0;
+    msgsRead[0].length = 2;
+    msgsRead[0].data = bufReadAddress;
+
+    msgsRead[1].addr = deviceaddress;
+    msgsRead[1].flags = I2C_MSG_READ;
+    msgsRead[1].length = 13;
+    msgsRead[1].data = (uint8*)readName;
+
+    i2c_master_xfer(I2C1, msgsRead, 2, 500);
+
+    return readName;
 }
 
 

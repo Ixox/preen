@@ -29,12 +29,14 @@ public:
     static void dumpLine(int a, int b, int c, int d);
 
     static void readFromEEPROM(int bankNumber, int preset);
+    static char* readPresetNameFromEEPROM(int bankNumber, int preset);
     static void pruneToEEPROM(int bankNumber, int preset);
     static void formatEEPROM();
 
     static void midiPatchDump();
 
-
+private:
+    static char readName[13];
 
 };
 

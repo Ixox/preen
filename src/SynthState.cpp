@@ -693,7 +693,7 @@ void SynthState::encoderTurned(int encoder, int ticks) {
 
                 propagateNewMenuSelect();
             }
-        } else if (encoder==3) {
+        } else if (encoder==1) {
             if (fullState.currentMenuItem->menuState == MENU_ENTER_NAME) {
                 fullState.name[fullState.menuSelect] = (fullState.name[fullState.menuSelect] + (ticks>0? 1: -1));
                 if (fullState.name[fullState.menuSelect]<0) {
@@ -701,6 +701,28 @@ void SynthState::encoderTurned(int encoder, int ticks) {
                 }
                 if (fullState.name[fullState.menuSelect]>= getLength(allChars)) {
                     fullState.name[fullState.menuSelect]= getLength(allChars)-1;
+                }
+                propagateNewMenuSelect();
+            }
+        } else if (encoder==2) {
+            if (fullState.currentMenuItem->menuState == MENU_ENTER_NAME) {
+                fullState.name[fullState.menuSelect] = (fullState.name[fullState.menuSelect] + (ticks>0? 1: -1));
+                if (fullState.name[fullState.menuSelect]<1) {
+                    fullState.name[fullState.menuSelect]=1;
+                }
+                if (fullState.name[fullState.menuSelect]> 26) {
+                    fullState.name[fullState.menuSelect] = 26;
+                }
+                propagateNewMenuSelect();
+            }
+        } else if (encoder==3) {
+            if (fullState.currentMenuItem->menuState == MENU_ENTER_NAME) {
+                fullState.name[fullState.menuSelect] = (fullState.name[fullState.menuSelect] + (ticks>0? 1: -1));
+                if (fullState.name[fullState.menuSelect]<28) {
+                    fullState.name[fullState.menuSelect]=28;
+                }
+                if (fullState.name[fullState.menuSelect]> 53) {
+                    fullState.name[fullState.menuSelect] = 53;
                 }
                 propagateNewMenuSelect();
             }
@@ -823,7 +845,38 @@ void SynthState::buttonPressed(int button) {
             PresetUtil::dumpPatch();
             break;
         }
-
+        case BUTTON_LFO:
+        {
+            if (fullState.currentMenuItem->menuState == MENU_ENTER_NAME) {
+                fullState.name[fullState.menuSelect] = 0;
+                propagateNewMenuSelect();
+            }
+            break;
+        }
+        case BUTTON_MATRIX:
+        {
+            if (fullState.currentMenuItem->menuState == MENU_ENTER_NAME) {
+                fullState.name[fullState.menuSelect] = 27;
+                propagateNewMenuSelect();
+            }
+            break;
+        }
+        case BUTTON_ENV:
+        {
+            if (fullState.currentMenuItem->menuState == MENU_ENTER_NAME) {
+                fullState.name[fullState.menuSelect] = 55;
+                propagateNewMenuSelect();
+            }
+            break;
+        }
+        case BUTTON_OSC:
+        {
+            if (fullState.currentMenuItem->menuState == MENU_ENTER_NAME) {
+                fullState.name[fullState.menuSelect] = 66;
+                propagateNewMenuSelect();
+            }
+            break;
+        }
         // MENU MODE
         }
     }

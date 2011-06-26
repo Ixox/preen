@@ -368,8 +368,9 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 	case MENU_SAVE_CHOOSE_PRESET:
 		eraseRow(menuRow-1);
 		lcd->setCursor(4, menuRow-1);
-		lcd->print(" Preset ");
 		lcd->print(fullState->menuSelect);
+        lcd->print(" - ");
+        lcd->print(PresetUtil::readPresetNameFromEEPROM(fullState->bankNumber, fullState->menuSelect));
 		break;
 	case MENU_ENTER_NAME:
 		/*

@@ -43,7 +43,7 @@ MidiDecoder        midiDecoder;
 Encoders		   encoders;
 RingBuffer<uint16, 50> rb;
 FMDisplay          fmDisplay;
-LiquidCrystal      lcd(2,8,3,4,5,6,7, 27,26,25, 22);
+LiquidCrystal      lcd(2, 8, 3, 4, 5, 6, 7, 31, 30, 29, 28);
 
 HardwareTimer mainTimer(TIME_NUMBER);
 
