@@ -102,6 +102,7 @@ public:
     void newParamValue(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newcurrentRow(int newcurrentRow) {}
     void beforeNewParamsLoad() {};
+    void afterNewParamsLoad() {};
     void sendOneMidiEvent();
     void readSysex();
     boolean hasMidiToSend() {

@@ -105,7 +105,9 @@ void MidiDecoder::readSysex() {
      */
 
     if (checksum == sentChecksum) {
+        synthState.propagateBeforeNewParamsLoad();
         synthState.copyPatch((char*)&synthState.backupParams, (char*)&synthState.params, true);
+        synthState.propagateAfterNewParamsLoad();
         synthState.resetDisplay();
     }
 

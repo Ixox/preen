@@ -72,7 +72,7 @@ public:
             }
         } else if (type == SYNTH_PARAM_TYPE_MATRIX && encoder == ENCODER_MATRIX_DEST) {
             // Reset all destination
-            matrix.resetAllDestination();
+            matrix.resetCurrentDestination();
         } else if (type == SYNTH_PARAM_TYPE_LFO && encoder == ENCODER_LFO_KSYNC) {
             lfo[currentRow - ROW_LFO1].reloadRamp();
         }
@@ -85,6 +85,19 @@ public:
         // Stop all voices
         allSoundOff();
     };
+
+    void afterNewParamsLoad() {
+        env1.reloadADSR();
+        env2.reloadADSR();
+        env3.reloadADSR();
+        env4.reloadADSR();
+        env5.reloadADSR();
+        env6.reloadADSR();
+        matrix.resetCurrentDestination();
+        for (int k=0; k<NUMBER_OF_LFOS; k++) {
+            lfo[k].reloadRamp();
+        }
+    }
 
 
 private:

@@ -427,6 +427,12 @@ public:
         }
     }
 
+    void propagateAfterNewParamsLoad() {
+        for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
+            listener->afterNewParamsLoad();
+        }
+    }
+
     SynthMode getSynthMode() {
 		return fullState.synthMode;
 	}

@@ -30,14 +30,12 @@ enum SynthMode {
 enum MenuState {
 	MAIN_MENU = 0,
 	MENU_LOAD,
-	MENU_SAVE_CHOOSE_PRESET,
-	MENU_SAVE_CHOOSE_USER_BANK,
-	MENU_SAVE_PRESET,
-	MENU_LOAD_INTERNAL_BANK,
+    MENU_SAVE_SELECT_USER_BANK,
+	MENU_SAVE_SELECT_PRESET,
+	MENU_LOAD_INTERNAL,
 	MENU_LOAD_USER_SELECT_BANK,
-	MENU_LOAD_USER_BANK,
-	MENU_LOAD_CHOOSE_USER_BANK,
-	MENU_ENTER_NAME,
+    MENU_LOAD_USER_SELECT_PRESET,
+	MENU_SAVE_ENTER_NAME,
 	MENU_MIDI,
 	MENU_MIDI_CHANNEL,
 	MENU_MIDI_BANK,
@@ -64,12 +62,15 @@ struct FullState {
 	SynthMode synthMode;
 	int menuSelect;
     int previousMenuSelect;
+    int bankNumber;
 	int presetNumber;
-	int bankNumber;
+	int internalPresetNumber;
 	MenuItem* currentMenuItem;
 	char name[13];
 	unsigned char midiChannel;
 	bool presetModified;
+	int loadPresetOrUser;
+	int firstMenu;
 };
 
 extern struct MenuItem allMenus[];

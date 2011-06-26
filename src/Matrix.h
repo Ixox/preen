@@ -34,7 +34,7 @@ public:
     void reinitUsage();
     void reinitUsage(int k, int oldValue, int value);
 
-    void resetAllDestination() {
+    void resetCurrentDestination() {
         for (int k=0; k< DESTINATION_MAX; k++) {
             currentDestinations[k] = 0;
         }

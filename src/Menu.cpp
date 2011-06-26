@@ -24,7 +24,7 @@ struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		"",
 		true,
 		4,
-		{MENU_LOAD, MENU_SAVE_CHOOSE_USER_BANK, MENU_MIDI, MENU_FORMAT_BANK }
+		{MENU_LOAD, MENU_SAVE_SELECT_USER_BANK, MENU_MIDI, MENU_FORMAT_BANK }
 	},
 	// === LOAD
 	{
@@ -32,24 +32,24 @@ struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		"Load",
 		true,
 		2,
-		{MENU_LOAD_INTERNAL_BANK, MENU_LOAD_CHOOSE_USER_BANK}
+		{MENU_LOAD_INTERNAL, MENU_LOAD_USER_SELECT_BANK}
 	},
 	{
-		MENU_LOAD_INTERNAL_BANK,
+		MENU_LOAD_INTERNAL,
 		"Pres",
 		false,
 		INTERNAL_LAST_BANK,
 		{MENU_DONE}
 	},
 	{
-		MENU_LOAD_CHOOSE_USER_BANK,
+		MENU_LOAD_USER_SELECT_BANK,
 		"User",
 		false,
 		3,
-		{MENU_LOAD_USER_BANK}
+		{MENU_LOAD_USER_SELECT_PRESET}
 	},
 	{
-		MENU_LOAD_USER_BANK,
+		MENU_LOAD_USER_SELECT_PRESET,
 		"",
 		false,
 		127,
@@ -57,21 +57,21 @@ struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 	},
 	// === SAVE
 	{
-		MENU_SAVE_CHOOSE_USER_BANK,
+		MENU_SAVE_SELECT_USER_BANK,
 		"Save",
 		false,
 		3,
-		{MENU_SAVE_CHOOSE_PRESET}
+		{MENU_SAVE_SELECT_PRESET}
 	},
 	{
-		MENU_SAVE_CHOOSE_PRESET,
+		MENU_SAVE_SELECT_PRESET,
 		"",
 		false,
 		127,
-		{MENU_ENTER_NAME}
+		{MENU_SAVE_ENTER_NAME}
 	},
 	{
-		MENU_ENTER_NAME,
+		MENU_SAVE_ENTER_NAME,
 		"Enter name",
 		false,
 		12,
