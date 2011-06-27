@@ -24,7 +24,7 @@ struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		"",
 		true,
 		4,
-		{MENU_LOAD, MENU_SAVE_SELECT_USER_BANK, MENU_MIDI, MENU_FORMAT_BANK }
+		{MENU_LOAD, MENU_SAVE_SELECT_USER_BANK, MENU_MIDI, MENU_CONFIG }
 	},
 	// === LOAD
 	{
@@ -36,7 +36,7 @@ struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 	},
 	{
 		MENU_LOAD_INTERNAL,
-		"Pres",
+		"Preset",
 		false,
 		INTERNAL_LAST_BANK,
 		{MENU_DONE}
@@ -52,7 +52,7 @@ struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		MENU_LOAD_USER_SELECT_PRESET,
 		"",
 		false,
-		127,
+		128,
 		{MENU_DONE}
 	},
 	// === SAVE
@@ -67,7 +67,7 @@ struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		MENU_SAVE_SELECT_PRESET,
 		"",
 		false,
-		127,
+		128,
 		{MENU_SAVE_ENTER_NAME}
 	},
 	{
@@ -83,15 +83,22 @@ struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		"Midi",
 		true,
 		3,
-		{MENU_MIDI_CHANNEL, MENU_MIDI_BANK, MENU_MIDI_PATCH }
+		{MENU_MIDI_CHANNEL, MENU_MIDI_SYS_EX, MENU_MIDI_IO }
 	},
-	{
-		MENU_MIDI_CHANNEL,
-		"Chan",
-		false,
-		16,
-		{MENU_DONE}
-	},
+    {
+        MENU_MIDI_CHANNEL,
+        "Channel",
+        false,
+        16,
+        {MENU_DONE}
+    },
+    {
+        MENU_MIDI_SYS_EX,
+        "SysEx",
+        true,
+        2,
+        { MENU_MIDI_BANK, MENU_MIDI_PATCH }
+    },
 	{
 		MENU_MIDI_BANK,
 		"Bank",
@@ -101,39 +108,48 @@ struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 	},
 	{
 		MENU_MIDI_BANK_GET,
-		"Get",
+		"Receive",
 		false,
 		0,
 		{MENU_DONE}
 	},
 	{
 		MENU_MIDI_BANK_DUMP,
-		"Dump",
+		"Send",
 		false,
 		0,
 		{MENU_DONE}
 	},
 	{
 		MENU_MIDI_PATCH,
-		"Patc",
+		"Patch",
 		true,
 		2,
 		{MENU_MIDI_PATCH_GET, MENU_MIDI_PATCH_DUMP}
 	},
 	{
 		MENU_MIDI_PATCH_GET,
-		"Get",
+		"Receive",
 		false,
 		0,
 		{MENU_DONE}
 	},
 	{
 		MENU_MIDI_PATCH_DUMP,
-		"Dump",
+		"Send",
 		false,
 		0,
 		{MENU_DONE}
 	},
+    {
+        MENU_MIDI_IO,
+        "IO",
+        false,
+        0,
+        {MENU_DONE}
+    },
+
+
 	// === DONE
 	{
 		MENU_DONE,
@@ -142,10 +158,31 @@ struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		0,
 		{MENU_DONE}
 	},
-	// ==  FORMAT BANK
+	// ==  CONFIG
+    {
+        MENU_CONFIG,
+        "Conf",
+        true,
+        3,
+        {MENU_CONFIG_SAVE, MENU_CONFIG_RESET, MENU_FORMAT_BANK}
+    },
+    {
+        MENU_CONFIG_SAVE,
+        "Save",
+        true,
+        1,
+        {MENU_DONE}
+    },
+    {
+        MENU_CONFIG_RESET,
+        "Reset",
+        true,
+        1,
+        {MENU_DONE}
+    },
 	{
 		MENU_FORMAT_BANK,
-		"Frmt",
+		"Format",
 		true,
 		1,
 		{MENU_DONE}

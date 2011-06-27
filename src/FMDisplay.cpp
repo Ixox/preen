@@ -302,9 +302,13 @@ void FMDisplay::newSynthMode(FullState* fullState)  {
 void FMDisplay::newMenuState(FullState* fullState) {
 	menuRow++;
 	if (fullState->currentMenuItem->hasSubMenu) {
+	    int pos = 0;
 		for (int k=0; k<fullState->currentMenuItem->maxValue; k++) {
-			lcd->setCursor(k*5+1, menuRow-1);
-			lcd->print(MenuItemUtil::getMenuItem(fullState->currentMenuItem->subMenu[k])->name);
+		    fullState->menuPosition[k] = pos;
+			lcd->setCursor(pos +1, menuRow-1);
+			const char* name = MenuItemUtil::getMenuItem(fullState->currentMenuItem->subMenu[k])->name;
+			pos = pos + (getLength(name) + 1);
+            lcd->print(name);
 		}
 	}
 
@@ -313,6 +317,9 @@ void FMDisplay::newMenuState(FullState* fullState) {
 		case MENU_SAVE_SELECT_USER_BANK:
 			lcd->setCursor(1, menuRow-1);
 			lcd->print("Bnk1 Bnk2 Bnk3");
+            fullState->menuPosition[0] = 0;
+            fullState->menuPosition[1] = 5;
+            fullState->menuPosition[2] = 10;
 			break;
 		case MENU_SAVE_ENTER_NAME:
 			lcd->setCursor(1, menuRow-1);
@@ -340,16 +347,18 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 	switch(fullState->currentMenuItem->menuState) {
 	case MAIN_MENU:
 	case MENU_LOAD:
+    case MENU_CONFIG:
 	case MENU_MIDI:
+    case MENU_MIDI_SYS_EX:
 	case MENU_MIDI_BANK:
 	case MENU_MIDI_PATCH:
 	case MENU_LOAD_USER_SELECT_BANK:
 	case MENU_SAVE_SELECT_USER_BANK:
-		for (int k=0; k<4; k++) {
-			lcd->setCursor(k*5, menuRow-1);
+		for (int k=0; k<fullState->currentMenuItem->maxValue; k++) {
+			lcd->setCursor(fullState->menuPosition[k], menuRow-1);
 			lcd->print(" ");
 		}
-		lcd->setCursor(fullState->menuSelect*5, menuRow-1);
+		lcd->setCursor(fullState->menuPosition[fullState->menuSelect], menuRow-1);
 		lcd->print(">");
 		break;
 	case MENU_LOAD_USER_SELECT_PRESET:
@@ -367,17 +376,12 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 		break;
 	case MENU_SAVE_SELECT_PRESET:
 		eraseRow(menuRow-1);
-		lcd->setCursor(4, menuRow-1);
+		lcd->setCursor(2, menuRow-1);
 		lcd->print(fullState->menuSelect);
         lcd->print(" - ");
         lcd->print(PresetUtil::readPresetNameFromEEPROM(fullState->bankNumber, fullState->menuSelect));
 		break;
 	case MENU_SAVE_ENTER_NAME:
-		/*
-		lcd->setCursor(1, menuRow-1);
-		for (int k=0;k<12; k++) {
-			lcd->print(allChars[(int)fullState->name[k]]);
-		}*/
 		lcd->setCursor(1+fullState->menuSelect, menuRow-1);
 		lcd->print(allChars[(int)fullState->name[fullState->menuSelect]]);
 		lcd->setCursor(1+fullState->menuSelect, menuRow-1);

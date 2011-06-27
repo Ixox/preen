@@ -38,6 +38,8 @@ enum MenuState {
 	MENU_SAVE_ENTER_NAME,
 	MENU_MIDI,
 	MENU_MIDI_CHANNEL,
+	MENU_MIDI_SYS_EX,
+    MENU_MIDI_IO,
 	MENU_MIDI_BANK,
 	MENU_MIDI_BANK_GET,
 	MENU_MIDI_BANK_DUMP,
@@ -45,6 +47,9 @@ enum MenuState {
 	MENU_MIDI_PATCH_GET,
 	MENU_MIDI_PATCH_DUMP,
 	MENU_DONE,
+    MENU_CONFIG,
+    MENU_CONFIG_RESET,
+    MENU_CONFIG_SAVE,
 	MENU_FORMAT_BANK,
 	LAST_MENU
 };
@@ -57,6 +62,7 @@ struct MenuItem {
 	short maxValue;
 	MenuState subMenu[4];
 };
+
 
 struct FullState {
 	SynthMode synthMode;
@@ -71,6 +77,7 @@ struct FullState {
 	bool presetModified;
 	int loadPresetOrUser;
 	int firstMenu;
+	int menuPosition[4];
 };
 
 extern struct MenuItem allMenus[];

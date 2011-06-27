@@ -87,7 +87,8 @@ void PresetUtil::readFromEEPROM(int bankNumber, int preset) {
     msgsRead[1].data = (uint8*)&synthState.params;
 
     i2c_master_xfer(I2C1, msgsRead, 2, 500);
-    delay(5);
+
+    delay(20);
 
     int block2Size = sizeof(struct AllSynthParams) - block1Size;
 
@@ -106,7 +107,7 @@ void PresetUtil::readFromEEPROM(int bankNumber, int preset) {
     msgsRead[1].data = &((uint8*)&synthState.params)[block1Size];
     i2c_master_xfer(I2C1, msgsRead, 2, 500);
 
-    delay(5);
+    delay(20);
 }
 
 
@@ -131,6 +132,8 @@ char* PresetUtil::readPresetNameFromEEPROM(int bankNumber, int preset) {
     msgsRead[1].data = (uint8*)readName;
 
     i2c_master_xfer(I2C1, msgsRead, 2, 500);
+
+    delay(20);
 
     return readName;
 }

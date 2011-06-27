@@ -123,7 +123,6 @@ void setup()
     lcd.print("          By Ixox");
     lcd.setCursor(0,3);
     lcd.print("Powered by Leaflabs");
-
     // Dependencies injection
 
     // synthstate is updated by encoder change

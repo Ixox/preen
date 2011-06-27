@@ -677,31 +677,12 @@ void SynthState::encoderTurned(int encoder, int ticks) {
             }
         }
     } else {
+        int oldMenuSelect = fullState.menuSelect;
         if (encoder==0) {
-            int oldMenuSelect = fullState.menuSelect;
             if (ticks>0) {
-                if (fullState.menuSelect< fullState.currentMenuItem->maxValue-1) {
-                    fullState.menuSelect = fullState.menuSelect + 1;
-                }
+                fullState.menuSelect = fullState.menuSelect + 1;
             } else if (ticks<0) {
-                if (fullState.menuSelect>0) {
-                    fullState.menuSelect = fullState.menuSelect - 1;
-                }
-            }
-            if (fullState.menuSelect != oldMenuSelect) {
-                if (fullState.currentMenuItem->menuState == MENU_LOAD_INTERNAL) {
-                    char* preset = (char*)&(presets[fullState.menuSelect].engine1);
-                    propagateBeforeNewParamsLoad();
-                    copyPatch(preset, (char*)&params, true);
-                    propagateAfterNewParamsLoad();
-                    fullState.internalPresetNumber = fullState.menuSelect;
-                } else if (fullState.currentMenuItem->menuState == MENU_LOAD_USER_SELECT_PRESET) {
-                    propagateBeforeNewParamsLoad();
-                    PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
-                    propagateAfterNewParamsLoad();
-                    fullState.presetNumber = fullState.menuSelect;
-                }
-                propagateNewMenuSelect();
+                fullState.menuSelect = fullState.menuSelect - 1;
             }
         } else if (encoder==1) {
             if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
@@ -713,6 +694,12 @@ void SynthState::encoderTurned(int encoder, int ticks) {
                     fullState.name[fullState.menuSelect]= getLength(allChars)-1;
                 }
                 propagateNewMenuSelect();
+            } else if (fullState.currentMenuItem->maxValue == 128) {
+                if (ticks>0) {
+                    fullState.menuSelect = fullState.menuSelect + 5;
+                } else if (ticks<0) {
+                    fullState.menuSelect = fullState.menuSelect - 5;
+                }
             }
         } else if (encoder==2) {
             if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
@@ -724,6 +711,12 @@ void SynthState::encoderTurned(int encoder, int ticks) {
                     fullState.name[fullState.menuSelect] = 26;
                 }
                 propagateNewMenuSelect();
+            } else if (fullState.currentMenuItem->maxValue == 128) {
+                if (ticks>0) {
+                    fullState.menuSelect = fullState.menuSelect + 10;
+                } else if (ticks<0) {
+                    fullState.menuSelect = fullState.menuSelect - 10;
+                }
             }
         } else if (encoder==3) {
             if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
@@ -735,7 +728,36 @@ void SynthState::encoderTurned(int encoder, int ticks) {
                     fullState.name[fullState.menuSelect] = 53;
                 }
                 propagateNewMenuSelect();
+            } else if (fullState.currentMenuItem->maxValue == 128) {
+                if (ticks>0) {
+                    fullState.menuSelect = fullState.menuSelect + 25;
+                } else if (ticks<0) {
+                    fullState.menuSelect = fullState.menuSelect - 25;
+                }
             }
+        }
+
+        if (fullState.menuSelect> fullState.currentMenuItem->maxValue - 1) {
+            fullState.menuSelect = fullState.currentMenuItem->maxValue - 1;
+        }
+        if (fullState.menuSelect< 0) {
+            fullState.menuSelect = 0;
+        }
+
+        if (fullState.menuSelect != oldMenuSelect) {
+            if (fullState.currentMenuItem->menuState == MENU_LOAD_INTERNAL) {
+                char* preset = (char*)&(presets[fullState.menuSelect].engine1);
+                propagateBeforeNewParamsLoad();
+                copyPatch(preset, (char*)&params, true);
+                propagateAfterNewParamsLoad();
+                fullState.internalPresetNumber = fullState.menuSelect;
+            } else if (fullState.currentMenuItem->menuState == MENU_LOAD_USER_SELECT_PRESET) {
+                propagateBeforeNewParamsLoad();
+                PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
+                propagateAfterNewParamsLoad();
+                fullState.presetNumber = fullState.menuSelect;
+            }
+            propagateNewMenuSelect();
         }
     }
 
