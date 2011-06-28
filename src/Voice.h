@@ -158,7 +158,7 @@ public:
                 freq4 >>= 15;
                 freq4 *= IM3;
 
-                oscState1.frequency =  freq2 + freq3 + freq4 + oscState5.mainFrequency;
+                oscState1.frequency =  freq2 + freq3 + freq4 + oscState1.mainFrequency;
                 currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
                 currentSample  >>= 15;
                 currentSample *= velocity;
@@ -176,7 +176,7 @@ public:
 				 	  .---.         .---.
 				 	  | 3 |         | 4 |
 				 	  '---'         '---'
-                       |IM1 \IM2  /IM3 |IM4
+                       |IM1 \IM4  /IM3 |IM2
   				 	 .---.          .---.
 				 	 | 1 |          | 2 |
 				 	 '---'          '---'
