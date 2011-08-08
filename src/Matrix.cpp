@@ -21,7 +21,6 @@
 Matrix::Matrix() {
 	currentDestinations = destinations2;
 	futurDestinations = destinations1;
-	rows = &synthState.params.matrixRowState1;
 }
 
 Matrix::~Matrix() {

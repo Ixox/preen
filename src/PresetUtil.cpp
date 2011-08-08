@@ -16,9 +16,10 @@
  */
 
 #include "PresetUtil.h"
-
+#include "SynthState.h"
 
 char PresetUtil::readName[13];
+SynthState * PresetUtil::synthState;
 
 PresetUtil::PresetUtil() {
 }
@@ -26,6 +27,12 @@ PresetUtil::PresetUtil() {
 PresetUtil::~PresetUtil() {
 }
 
+void PresetUtil::setSynthState(SynthState* synthState) {
+	// init
+	PresetUtil::synthState = synthState;
+    // enable the i2c bus
+    i2c_master_enable(I2C1, 0);
+}
 
 void PresetUtil::dumpLine(int a, int b, int c, int d) {
     SerialUSB.print("{ ");
@@ -42,26 +49,26 @@ void PresetUtil::dumpLine(int a, int b, int c, int d) {
 
 
 void PresetUtil::dumpPatch() {
-    dumpLine(synthState.params.engine1.algo, synthState.params.engine1.velocity, synthState.params.engine1.numberOfVoice, synthState.params.engine1.glide );
-    dumpLine(synthState.params.engine2.modulationIndex1, synthState.params.engine2.modulationIndex2, synthState.params.engine2.modulationIndex3, synthState.params.engine2.modulationIndex4 );
-    dumpLine(synthState.params.engine3.mixOsc1, synthState.params.engine3.mixOsc2, synthState.params.engine3.mixOsc3, synthState.params.engine3.mixOsc4 );
-    OscillatorParams * o = (OscillatorParams *)(&(synthState.params.osc1));
+    dumpLine(PresetUtil::synthState->params.engine1.algo, PresetUtil::synthState->params.engine1.velocity, PresetUtil::synthState->params.engine1.numberOfVoice, PresetUtil::synthState->params.engine1.glide );
+    dumpLine(PresetUtil::synthState->params.engine2.modulationIndex1, PresetUtil::synthState->params.engine2.modulationIndex2, PresetUtil::synthState->params.engine2.modulationIndex3, PresetUtil::synthState->params.engine2.modulationIndex4 );
+    dumpLine(PresetUtil::synthState->params.engine3.mixOsc1, PresetUtil::synthState->params.engine3.mixOsc2, PresetUtil::synthState->params.engine3.mixOsc3, PresetUtil::synthState->params.engine3.mixOsc4 );
+    OscillatorParams * o = (OscillatorParams *)(&(PresetUtil::synthState->params.osc1));
     for (int k=0; k<6; k++) {
         dumpLine(o[k].shape, o[k].frequencyType, o[k].frequencyMul, o[k].detune);
     }
-    EnvelopeParams * e = (EnvelopeParams*)(&(synthState.params.env1));
+    EnvelopeParams * e = (EnvelopeParams*)(&(PresetUtil::synthState->params.env1));
     for (int k=0; k<6; k++) {
         dumpLine(e[k].attack, e[k].decay, e[k].sustain, e[k].release);
     }
-    MatrixRowParams* m = (MatrixRowParams*)(&(synthState.params.matrixRowState1));
+    MatrixRowParams* m = (MatrixRowParams*)(&(PresetUtil::synthState->params.matrixRowState1));
     for (int k=0; k<8; k++) {
         dumpLine(m[k].source, m[k].mul, m[k].destination, 0);
     }
-    LfoParams* l = (LfoParams*)(&(synthState.params.lfo1));
+    LfoParams* l = (LfoParams*)(&(PresetUtil::synthState->params.lfo1));
     for (int k=0; k<4; k++) {
         dumpLine(l[k].shape, l[k].freq, l[k].bias, l[k].keybRamp);
     }
-    SerialUSB.println(synthState.params.presetName);
+    SerialUSB.println(PresetUtil::synthState->params.presetName);
 }
 
 
@@ -84,7 +91,7 @@ void PresetUtil::readFromEEPROM(int bankNumber, int preset) {
     msgsRead[1].addr = deviceaddress;
     msgsRead[1].flags = I2C_MSG_READ;
     msgsRead[1].length = block1Size;
-    msgsRead[1].data = (uint8*)&synthState.params;
+    msgsRead[1].data = (uint8*)&PresetUtil::synthState->params;
 
     i2c_master_xfer(I2C1, msgsRead, 2, 500);
 
@@ -104,7 +111,7 @@ void PresetUtil::readFromEEPROM(int bankNumber, int preset) {
     msgsRead[1].addr = deviceaddress;
     msgsRead[1].flags = I2C_MSG_READ;
     msgsRead[1].length = block2Size;
-    msgsRead[1].data = &((uint8*)&synthState.params)[block1Size];
+    msgsRead[1].data = &((uint8*)&PresetUtil::synthState->params)[block1Size];
     i2c_master_xfer(I2C1, msgsRead, 2, 500);
 
     delay(20);
@@ -150,7 +157,7 @@ void PresetUtil::pruneToEEPROM(int bankNumber, int preset) {
     bufWrite1[0] = (uint8)((int)address >> 8);
     bufWrite1[1] = (uint8)((int)address & 0xff);
     for (int k=0; k<block1Size; k++) {
-        bufWrite1[k+2] = ((uint8*)&synthState.params)[k];
+        bufWrite1[k+2] = ((uint8*)&PresetUtil::synthState->params)[k];
     }
     /* Write test pattern  */
     msgWrite1.addr = deviceaddress;
@@ -166,7 +173,7 @@ void PresetUtil::pruneToEEPROM(int bankNumber, int preset) {
     bufWrite2[0] = (uint8)((int)address >> 8);
     bufWrite2[1] = (uint8)((int)address & 0xff);
     for (int k=0; k<block2Size; k++) {
-        bufWrite2[k+2] = ((uint8*)&synthState.params)[k+block1Size];
+        bufWrite2[k+2] = ((uint8*)&PresetUtil::synthState->params)[k+block1Size];
     }
     msgWrite2.addr = deviceaddress;
     msgWrite2.flags = 0;
@@ -191,7 +198,7 @@ void PresetUtil::midiPatchDump() {
     int total = sizeof(struct AllSynthParams);
 
     for (int k=0; k<total; k++) {
-        uint8 byte = ((unsigned char*)&synthState.params)[k];
+        uint8 byte = ((unsigned char*)&PresetUtil::synthState->params)[k];
         checksum+= byte;
         while (byte >= 127) {
             Serial3.print((uint8)127);

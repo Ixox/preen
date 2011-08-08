@@ -35,11 +35,12 @@ enum MenuState {
 	MENU_LOAD_INTERNAL,
 	MENU_LOAD_USER_SELECT_BANK,
     MENU_LOAD_USER_SELECT_PRESET,
+    MENU_SAVE,
 	MENU_SAVE_ENTER_NAME,
-	MENU_MIDI,
-	MENU_MIDI_CHANNEL,
+	MENU_MIDI_SYSEX_DUMP,
 	MENU_MIDI_SYS_EX,
-    MENU_MIDI_IO,
+	MENU_MIDI_SYSEX_GET,
+    MENU_CONFIG_MIDI,
 	MENU_MIDI_BANK,
 	MENU_MIDI_BANK_GET,
 	MENU_MIDI_BANK_DUMP,
@@ -48,11 +49,11 @@ enum MenuState {
 	MENU_MIDI_PATCH_DUMP,
 	MENU_DONE,
     MENU_CONFIG,
-    MENU_CONFIG_RESET,
     MENU_CONFIG_SAVE,
 	MENU_FORMAT_BANK,
 	LAST_MENU
 };
+
 
 
 struct MenuItem {
@@ -63,29 +64,46 @@ struct MenuItem {
 	MenuState subMenu[4];
 };
 
+enum {
+	MIDICONFIG_CHANNEL = 0,
+	MIDICONFIG_THROUGH = 1,
+	MIDICONFIG_RECEIVES= 2,
+	MIDICONFIG_SENDS = 3,
+	MIDICONFIG_REALTIME_SYSEX = 4,
+	MIDICONFIG_SIZE = 5
+};
+
 
 struct FullState {
 	SynthMode synthMode;
 	int menuSelect;
-    int previousMenuSelect;
-    int bankNumber;
-	int presetNumber;
-	int internalPresetNumber;
-	MenuItem* currentMenuItem;
+	unsigned char previousMenuSelect;
+	unsigned char bankNumber;
+	unsigned char presetNumber;
+	unsigned char internalPresetNumber;
+	const MenuItem* currentMenuItem;
 	char name[13];
-	unsigned char midiChannel;
 	bool presetModified;
-	int loadPresetOrUser;
-	int firstMenu;
-	int menuPosition[4];
+	unsigned char loadPresetOrUser;
+	unsigned char firstMenu;
+	unsigned char  menuPosition[4];
+	char  midiConfigValue[MIDICONFIG_SIZE];
 };
 
-extern struct MenuItem allMenus[];
+struct MidiConfig {
+	const char* title;
+	unsigned char maxValue;
+	const char** valueName;
+};
+
+
+extern const struct MenuItem allMenus[];
+extern struct MidiConfig midiConfig[];
 
 class MenuItemUtil {
 public:
-	static MenuItem* getMenuItem(MenuState ms) {
-		MenuItem* item = &allMenus[0];
+	static const MenuItem* getMenuItem(MenuState ms) {
+		const MenuItem* item = &allMenus[0];
 		int cpt = 0;
 		while (item->menuState != LAST_MENU) {
 			if (item->menuState == ms) {
@@ -97,8 +115,8 @@ public:
 		return 0;
 	}
 
-    static MenuItem* getParentMenuItem(MenuState ms) {
-        MenuItem* item = &allMenus[0];
+    static const MenuItem* getParentMenuItem(MenuState ms) {
+        const MenuItem* item = &allMenus[0];
         int cpt = 0;
         while (item->menuState != LAST_MENU) {
             for (int k=0; k<4; k++) {
@@ -113,7 +131,7 @@ public:
     }
 
     static int getParentMenuSelect(MenuState ms) {
-        MenuItem* item = &allMenus[0];
+        const MenuItem* item = &allMenus[0];
         int cpt = 0;
         while (item->menuState != LAST_MENU) {
             for (int k=0; k<4; k++) {

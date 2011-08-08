@@ -20,7 +20,6 @@
 
 #include "libmaple_types.h"
 #include "wirish.h"
-#include "i2c.h"
 #include "EncodersListener.h"
 #include "SynthParamListener.h"
 #include "SynthMenuListener.h"
@@ -111,7 +110,6 @@ struct ShowUpAlgo {
     unsigned char mix;
 };
 
-extern struct ShowUpAlgo showUp[];
 
 enum OscShape {
 	OSC_SHAPE_SIN = 0,
@@ -217,8 +215,6 @@ struct MatrixRowParams {
 	uchar destination;
 	char not_used;
 };
-
-
 
 
 enum {
@@ -335,6 +331,8 @@ struct AllParameterRowsDisplay {
 class SynthState : public EncodersListener {
 public:
 	SynthState();
+
+
 	void encoderTurned(int num, int ticks);
 
 	static SynthParamType getListenerType(int row) {
@@ -355,8 +353,8 @@ public:
 	void buttonPressed(int number);
 	void setNewValue(int row, int number, int newValue);
 
-	MenuItem* afterButtonPressed();
-	MenuItem* menuBack();
+	const MenuItem* afterButtonPressed();
+	const MenuItem* menuBack();
 
 	int getCurrentRow() {
 		return currentRow;
@@ -464,9 +462,9 @@ private:
 
 // Global structure used all over the code
 extern struct AllParameterRowsDisplay allParameterRows;
-extern SynthState synthState;
 extern const struct AllSynthParams presets[];
 extern const char* allChars;
+extern const struct ShowUpAlgo showUp[];
 
 
 #endif /* SYNTHSTATUS_H_ */

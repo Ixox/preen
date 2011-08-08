@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "SynthStateAware.h"
 #include "Matrix.h"
 
 #define SAMPLE_RATE_x_8 264144
@@ -35,7 +36,7 @@ struct OscState {
 };
 
 template <int number>
-class Osc
+class Osc : public SynthStateAware
 {
 public:
     Osc();
@@ -166,8 +167,6 @@ private:
     DestinationEnum destFreq;
     DestinationEnum destAmp;
     Matrix* matrix;
-
-    // Random number
 };
 
 
@@ -189,8 +188,6 @@ Osc<number>::Osc()
         this->destFreq = OSC4_FREQ;
         break;
     }
-    OscillatorParams * o = (OscillatorParams *)(&(synthState.params.osc1));
-    oscillator = &o[number-1];
 }
 
 template <int number>
@@ -201,6 +198,9 @@ Osc<number>::~Osc()
 template <int number>
 void Osc<number>::init(Matrix* matrix) {
     this->matrix = matrix;
+
+    OscillatorParams * o = (OscillatorParams *)(&(this->synthState->params.osc1));
+    oscillator = &o[number-1];
 }
 
 template <int number>
@@ -234,6 +234,6 @@ void Osc<number>::glideToNote(struct OscState& oscState, int note) {
 
 template <int number>
 void Osc<number>::glideStep(struct OscState& oscState, int step) {
-    oscState.mainFrequency = ((oscState.fromFrequency * ((1<<synthState.params.engine1.glide) - step)) + oscState.nextFrequency * step) >> synthState.params.engine1.glide;
+    oscState.mainFrequency = ((oscState.fromFrequency * ((1<<this->synthState->params.engine1.glide) - step)) + oscState.nextFrequency * step) >> this->synthState->params.engine1.glide;
     oscState.frequency = oscState.mainFrequency;
 }

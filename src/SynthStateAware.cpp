@@ -15,24 +15,5 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Lfo.h"
+#include "SynthStateAware.h"
 
-Lfo::Lfo() {
-	type = LFO_RAMP;
-}
-
-Lfo::~Lfo() {
-}
-
-void Lfo::init(int number, Matrix *matrix, SourceEnum source) {
-	this->matrix = matrix;
-	this->source = source;
-    this->ramp = 0;
-    this->rampIndex = 0;
-	LfoParams* lfoTmp = (LfoParams *)&this->synthState->params.lfo1;
-	this->lfo = &lfoTmp[number];
-	this->index = 0;
-    this->rampIndex =  0;
-    this->ramp = lfo->keybRamp << 4;
-
-}

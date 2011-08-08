@@ -65,112 +65,14 @@ Preen Current Features:
 
 
 --------------------------------------------
-Update May 15th:
-. 9 FM alogs
-. new presets
+Update August 8th
+. Much work of the hardware.. So new maple-mini pin assigment
+. Better nrpn
+. New midi options in configuration menu
+. Menu redesign (simpler)
+. Refactoring
+. Bug fix - now it plays in tune...
 
-Udpdate May 14th:
-. new LFO new features :  bias + keyboard sync + ramp up
-. refactoring : new PresetUtil class.
-
-Udpdate May 9th:
-. Sysex : dump patch and receive
-
-Uddate May 5th:
-. New CC + better numbers 
-. Stop playing before loading new patch
-. Deal with new midi events
-
-Update May 1st:
-. Midi Control changes are back (44 parameters read and sent).
-. 2 functions turned to assembly to prevent interuption (audio click)
-
-Update April 30th
-. Gliding enhancement
-. Mix display from 0.00 to 1.00.
-
-Update April 29th
-. Gliding added in engine + display (available when number of voice = 1)
-
-Update April 26th
-. Get rid of expenential enveloppe... Too much resource.
-. Assembly for osc and env : better performance.
-
-Update April 21th
-. Expenential env. Sound better for long release.
-. Velocity as source.
-. New presets.
-. Random wafeform available for osc.
-. Current performance is weak... 
-
-Update April 19th
-. 6 oscs (and so 6 envs) 
-. ALGO 7 to play with the 6 envs... 
-
-Update April 18th
-. 8 rows in the Matrix
-. 4 midi CC added as matric sources
-. MIX osc 1 to 3 added as matrix destination
-. Frequency display issue fixed
-. MinValue and MaxValue fixed for "char" param type.
-
-2nd Update April 17th
-. Feedback added on all ALGOs
-. Fixed bug IM2 on ALGO2
-
-Update April 17th
-. Feedback added (ALGO1 OSC3 for the moment). 
-. Mix added when several last stage osc (ALGO2 and ALGO4)
-. Show only parameter relevant to curent algo
-. Frequency type (fix / Keyboard) display bug fix.
-
-Update 	April 5th
-. Add 3 variations around sinusoid for oscillator (many new sounds possible)
-. Add delay during 74hc165 reading to get rid of a HISS noise.
-. Hardware wise : validate the PCB.
-
-Update March 27th
-. New menu - keyboard velocity sensitivity - number of voice
-. Laverage the 11 bit resolution
-. Refactor parameters - much easier to add param rows
-. Mix1 params ready to be able to mix serveral "final" oscillator
-. Fixes env refresh when browsing preset/User banks
-
-Update March 23th
-. Refactor menu - much easier to add new menu/submenu
-. New midi menu
-. Take care of midi channel - redirect to midi out if not the same channel
-. Can now load and save to 3 different user banks
-
-Update March 20th
-. Read midi CC to change parameters
-. Send midi CC when user move encoders
-
-Update March 19th
-. Compile against "i2c-wip" libmaple branch
-. Add EEPROM Load and Save (24LC512)
-. Can edit preset names with 2 encoders
-. New 4 ops algo
-. Number of voices depenndent of the algo
-
-Update March 13th 2011
-. Several types of parameter display : fixed point decimal supported
-. Load internal preset can be listen while browsing and cancelled if not really loaded
-
-Update March 8th 2011
-. Removed click when all the voices are buisy and a 6th note arrive...
-. Remove click when a same note is hit quickly several time.
-
-Update March 6th 2011
-. Refactoring :
-  Add "EncoderListener" and "separation of concern" between Encoders, FMDisplay, and SynthStatus. 
-  Will make Menu maintenance much easier.
-
-Update March 5th 2011
-. Dump preset on serialUSB when a button is pressed (to collect them)
-. Get rid of the audio ring buffer, i was surprised to note a big improvement in the signal/noise ratio.
-. Encoder improvement by calling them more regularly
-. Make menu remember the row when go to an other part (E.G from osc to matrix) then back to the first one.
 
 --------------------------------------------
 
@@ -191,13 +93,12 @@ Later V2.0 :
 Hardware (to be detailed)
 . LCD LiquidCrystal compatible 4x20 + variable resistance for contrast
 . 2 74HC165 to plug buttons and rotary encoders  (I used the DIN schema from midibox.org).
-. 4 rotary encodeers + 7 buttons
-. condensators and resistor to make the 2nd order Low pass filter.
-. 2 chimical condo to remove the constant voltage bias in filter chain
+. 4 rotary encoders + 7 buttons
+. condensators and resistors to make the 6nd order Low pass filter.
+. Chimical condo to remove the constant voltage bias in filter chain + noise filtering.
 . 1 chip of 4 omp amps (MC32204): 1 for virtual ground + 3 2nd order filter
-. Midi Jack + optocoupler 6N138 + diodes
-. 24lc512 to save the preset
-
+. Midi Jack + optocoupler 6N137 + diodes
+. 2 x 24lc512 to save the presets and the configuration state
 .... Full schema soon... 
 
 ---------------------------------------------

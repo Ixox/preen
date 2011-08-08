@@ -18,12 +18,22 @@
 #ifndef PRESETUTIL_H_
 #define PRESETUTIL_H_
 
-#include "SynthState.h"
+#include "libmaple_types.h"
+#include "wirish.h"
+#include "i2c.h"
 
-class PresetUtil {
+
+class SynthState;
+
+// is included by SynthState so cannot be SynthStateAware...
+// have to implement its own get/set synthState
+
+class PresetUtil  {
 public:
     PresetUtil();
-    virtual ~PresetUtil();
+    ~PresetUtil();
+
+    static void setSynthState(SynthState* synthState);
 
     static void dumpPatch();
     static void dumpLine(int a, int b, int c, int d);
@@ -37,6 +47,7 @@ public:
 
 private:
     static char readName[13];
+    static SynthState * synthState;
 
 };
 

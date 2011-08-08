@@ -17,187 +17,237 @@
 
 #include "Synth.h"
 
-Synth::Synth(void)
-{
-    osc1.init(&matrix);
-    osc2.init(&matrix);
-    osc3.init(&matrix);
-    osc4.init(&matrix);
-    osc5.init(&matrix);
-    osc6.init(&matrix);
+Synth::Synth(void) {
+}
 
+Synth::~Synth(void) {
+}
+
+// Must be call after setSynthState
+void Synth::init() {
+	matrix.setSynthState(this->synthState);
+
+	env1.setSynthState(this->synthState);
+	env2.setSynthState(this->synthState);
+	env3.setSynthState(this->synthState);
+	env4.setSynthState(this->synthState);
+	env5.setSynthState(this->synthState);
+	env6.setSynthState(this->synthState);
+	env1.reloadADSR();
+	env2.reloadADSR();
+	env3.reloadADSR();
+	env4.reloadADSR();
+	env5.reloadADSR();
+	env6.reloadADSR();
+
+	osc1.setSynthState(this->synthState);
+	osc2.setSynthState(this->synthState);
+	osc3.setSynthState(this->synthState);
+	osc4.setSynthState(this->synthState);
+	osc5.setSynthState(this->synthState);
+	osc6.setSynthState(this->synthState);
+	osc1.init(&matrix);
+	osc2.init(&matrix);
+	osc3.init(&matrix);
+	osc4.init(&matrix);
+	osc5.init(&matrix);
+	osc6.init(&matrix);
+
+	for (int k = 0; k < NUMBER_OF_LFOS; k++) {
+		lfo[k].setSynthState(this->synthState);
+		lfo[k].init(k, &this->matrix, (SourceEnum)(LFO1 + k));
+	}
+	for (int k = 0; k < MAX_NUMBER_OF_VOICES; k++) {
+		voices[k].setSynthState(this->synthState);
+		voices[k].init(&this->matrix, this->lfo, &this->env1, &this->env2,
+				&this->env3, &this->env4, &this->env5, &this->env6,
+				&this->osc1, &this->osc2, &this->osc3, &this->osc4,
+				&this->osc5, &this->osc6);
+	}
+
+
+}
+
+void Synth::noteOn(char note, char velocity) {
+	int numberOfNote = this->synthState->params.engine1.numberOfVoice;
+
+	int zeroVelo = (16 - this->synthState->params.engine1.velocity) * 8;
+	velocity = zeroVelo + velocity * (128 - zeroVelo) / 128;
+
+	int freeNote = -1;
+
+	for (int k = 0; k < numberOfNote && freeNote == -1; k++) {
+		if (!voices[k].isPlaying()) {
+			freeNote = k;
+		}
+	}
+	if (freeNote >= 0) {
+		voices[freeNote].noteOn(note, velocity, voiceIndex++);
+	} else {
+		unsigned int indexMin = 4294967295;
+		for (int k = 0; k < numberOfNote; k++) {
+			if (voices[k].getNote() == note || voices[k].isReleased()) {
+				indexMin = 0;
+				freeNote = k;
+			}
+			if (voices[k].getIndex() < indexMin) {
+				indexMin = voices[k].getIndex();
+				freeNote = k;
+			}
+		}
+		voices[freeNote].noteOnWithoutPop(note, velocity, voiceIndex++);
+	}
+}
+
+void Synth::noteOff(char note) {
+	for (int k = 0; k < MAX_NUMBER_OF_VOICES; k++) {
+		if (voices[k].getNextNote() == 0) {
+			if (voices[k].getNote() == note) {
+				voices[k].noteOff();
+			}
+		} else {
+			// if gliding and releasing first note
+			if (voices[k].getNote() == note) {
+				voices[k].glideNoteOff();
+			}
+			// if gliding and releasing next note
+			if (voices[k].getNextNote() == note) {
+				voices[k].glideToNote(voices[k].getNote());
+				voices[k].glideNoteOff();
+			}
+		}
+	}
+}
+
+void Synth::allNoteOff() {
+	for (int k = 0; k < MAX_NUMBER_OF_VOICES; k++) {
+		voices[k].noteOff();
+	}
+}
+
+void Synth::allSoundOff() {
+	for (int k = 0; k < MAX_NUMBER_OF_VOICES; k++) {
+		voices[k].killNow();
+	}
+}
+
+bool Synth::isPlaying() {
+	for (int k = 0; k < MAX_NUMBER_OF_VOICES; k++) {
+		if (voices[k].isPlaying()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+int Synth::getSample() {
+	int sample = voices[0].getSample();
+	sample += voices[1].getSample();
+	sample += voices[2].getSample();
+	sample += voices[3].getSample();
+	return sample / this->synthState->params.engine1.numberOfVoice;
+	// 4 voices :
+	//return sample >> 2;
+}
+
+void Synth::nextSample() {
+
+	osc1.updateRandomNumber();
+
+	// step 32 : update lfo1 , step 33 update lfo2 etc....
+	int step32 = cpt & 0x1f;
+	switch (step32) {
+	case 0:
+	case 1:
+	case 2:
+	case 3:
+		this->lfo[step32].nextValue();
+		break;
+	case 4:
+		this->matrix.resetUsedDestination();
+		break;
+	case 5:
+	case 6:
+	case 7:
+	case 8:
+	case 9:
+	case 10:
+	case 11:
+	case 12:
+		this->matrix.computeFutureDestintation(step32 - 5);
+		break;
+	case 13:
+		this->matrix.useNewValues();
+		break;
+	case 14:
+		// Update static members, can be called a ony voice
+		this->voices[0].updateModulationIndex1();
+		break;
+	case 15:
+		this->voices[0].updateModulationIndex2();
+		break;
+	case 16:
+		this->voices[0].updateModulationIndex3();
+		break;
+	case 17:
+		this->voices[0].updateModulationIndex4();
+		break;
+	case 18:
+		this->voices[0].updateMixOsc1();
+		break;
+	case 19:
+		this->voices[0].updateMixOsc2();
+		break;
+	case 20:
+		this->voices[0].updateMixOsc3();
+		break;
+	case 21:
+		this->voices[0].updateMixOsc4();
+		break;
+	case 22:
+		// glide can happens only on Voice 0
+		this->voices[0].glide();
+	default:
+		break;
+
+	}
+
+	// Compute samples
+	this->voices[0].nextSample();
+	this->voices[1].nextSample();
+	this->voices[2].nextSample();
+	this->voices[3].nextSample();
+	cpt++;
+}
+
+void Synth::checkMaxVoice() {
+	int voiceMax = 4;
+	switch (showUp[this->synthState->params.engine1.algo].osc) {
+	case 4:
+		voiceMax = 3;
+		break;
+	case 6:
+		voiceMax = 2;
+		break;
+	}
+	if (this->synthState->params.engine1.numberOfVoice > voiceMax) {
+		this->synthState->setNewValue(ROW_ENGINE, ENCODER_ENGINE_VOICE, voiceMax);
+	}
+	allParameterRows.row[0]->params[ENCODER_ENGINE_VOICE].maxValue = voiceMax;
+}
+
+void Synth::afterNewParamsLoad() {
+	matrix.resetSources();
+    matrix.resetCurrentDestination();
     env1.reloadADSR();
     env2.reloadADSR();
     env3.reloadADSR();
     env4.reloadADSR();
     env5.reloadADSR();
     env6.reloadADSR();
-
     for (int k=0; k<NUMBER_OF_LFOS; k++) {
-        lfo[k].init(k, &this->matrix, (SourceEnum)(LFO1 + k));
+        lfo[k].reloadRamp();
     }
-    for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
-        voices[k].init(&this->matrix, this->lfo, &this->env1, &this->env2, &this->env3, &this->env4, &this->env5, &this->env6, &this->osc1, &this->osc2, &this->osc3, &this->osc4, &this->osc5, &this->osc6);
-    }
-}
-
-
-Synth::~Synth(void)
-{
-}
-
-
-void Synth::noteOn(char note, char velocity) {
-    int numberOfNote = synthState.params.engine1.numberOfVoice;
-
-    int zeroVelo = (16-synthState.params.engine1.velocity)*8;
-    velocity = zeroVelo + velocity*(128-zeroVelo)/128;
-
-    int freeNote = -1;
-
-    for (int k=0; k<numberOfNote && freeNote==-1; k++) {
-        if (!voices[k].isPlaying()) {
-            freeNote = k;
-        }
-    }
-    if (freeNote >= 0) {
-        voices[freeNote].noteOn(note, velocity, voiceIndex++);
-    } else {
-        unsigned int indexMin =  4294967295;
-        for (int k=0; k<numberOfNote; k++) {
-            if (voices[k].getNote()==note || voices[k].isReleased()) {
-                indexMin = 0;
-                freeNote = k;
-            }
-            if (voices[k].getIndex()<indexMin) {
-                indexMin = voices[k].getIndex();
-                freeNote = k;
-            }
-        }
-        voices[freeNote].noteOnWithoutPop(note, velocity, voiceIndex++);
-    }
-}
-
-void Synth::noteOff(char note) {
-    for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
-        if (voices[k].getNextNote()==0) {
-            if (voices[k].getNote() == note) {
-                voices[k].noteOff();
-            }
-        } else {
-            // if gliding and releasing first note
-            if (voices[k].getNote() == note) {
-                voices[k].glideNoteOff();
-            }
-            // if gliding and releasing next note
-            if (voices[k].getNextNote() == note) {
-                voices[k].glideToNote(voices[k].getNote());
-                voices[k].glideNoteOff();
-            }
-        }
-    }
-}
-
-void Synth::allNoteOff() {
-    for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
-        voices[k].noteOff();
-    }
-}
-
-void Synth::allSoundOff() {
-    for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
-        voices[k].killNow();
-    }
-}
-
-
-bool Synth::isPlaying() {
-    for (int k=0; k<MAX_NUMBER_OF_VOICES; k++) {
-        if (voices[k].isPlaying()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-
-int Synth::getSample() {
-    int sample = voices[0].getSample();
-    sample += voices[1].getSample();
-    sample += voices[2].getSample();
-    sample += voices[3].getSample();
-    return sample / synthState.params.engine1.numberOfVoice;
-    // 4 voices :
-    //return sample >> 2;
-}
-
-void Synth::nextSample() {
-
-    osc1.updateRandomNumber();
-
-    // step 32 : update lfo1 , step 33 update lfo2 etc....
-    int step32 = cpt & 0x1f;
-    switch (step32) {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-        this->lfo[step32].nextValue();
-        break;
-    case 4:
-        this->matrix.resetUsedDestination();
-        break;
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
-        this->matrix.computeFutureDestintation(step32 - 5);
-        break;
-    case 13:
-        this->matrix.useNewValues();
-        break;
-    case 14:
-        // Update static members, can be called a ony voice
-        this->voices[0].updateModulationIndex1();
-        break;
-    case 15:
-        this->voices[0].updateModulationIndex2();
-        break;
-    case 16:
-        this->voices[0].updateModulationIndex3();
-        break;
-    case 17:
-        this->voices[0].updateModulationIndex4();
-        break;
-    case 18:
-        this->voices[0].updateMixOsc1();
-        break;
-    case 19:
-        this->voices[0].updateMixOsc2();
-        break;
-    case 20:
-        this->voices[0].updateMixOsc3();
-        break;
-    case 21:
-        this->voices[0].updateMixOsc4();
-        break;
-    case 22:
-        // glide can happens only on Voice 0
-        this->voices[0].glide();
-    default:
-        break;
-
-    }
-
-    // Compute samples
-    this->voices[0].nextSample();
-    this->voices[1].nextSample();
-    this->voices[2].nextSample();
-    this->voices[3].nextSample();
-    cpt++;
+	checkMaxVoice();
 }
 

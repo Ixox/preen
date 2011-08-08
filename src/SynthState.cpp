@@ -25,8 +25,8 @@
 const char* allChars  = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 &*$,;:";
 
 const char* nullNames []= {};
-const char* algoNames []= { "alg1", "alg2", "alg3", "alg4", "alg5", "alg6", "alg7", "alg8", "alg9" };
-struct ParameterRowDisplay engine1ParameterRow = {
+const char* algoNames [] = { "alg1", "alg2", "alg3", "alg4", "alg5", "alg6", "alg7", "alg8", "alg9" };
+struct ParameterRowDisplay engine1ParameterRow  = {
         "Engine" ,
         { "Algo", "Velo", "Voic", "Glid" },
         {
@@ -82,7 +82,6 @@ struct ParameterRowDisplay envParameterRow = {
                 { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames }
         }
 };
-
 
 const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW", "Velo", "CC1 ", "CC2 ", "CC3 ", "CC4 "} ;
 const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "IM1 ", "IM2 ", "IM3 ", "IM4 ", "Mix1", "Mix2", "Mix3", "Mix4"} ;
@@ -144,7 +143,7 @@ struct AllParameterRowsDisplay allParameterRows = {
 };
 
 
-struct ShowUpAlgo showUp[9] = {
+const struct ShowUpAlgo showUp[9] = {
         { 3, 3, 0}, // ALGO1
         { 3, 2, 2}, // ALGO2
         { 4, 4, 0}, // ALGO3
@@ -609,7 +608,11 @@ SynthState::SynthState() {
     fullState.presetNumber = 0;
     fullState.internalPresetNumber = 0;
     fullState.loadPresetOrUser = 0;
-    fullState.midiChannel = 0;
+    fullState.midiConfigValue[MIDICONFIG_CHANNEL] = 0;
+    fullState.midiConfigValue[MIDICONFIG_THROUGH] = 0;
+    fullState.midiConfigValue[MIDICONFIG_RECEIVES] = 3;
+    fullState.midiConfigValue[MIDICONFIG_SENDS] = 1;
+    fullState.midiConfigValue[MIDICONFIG_REALTIME_SYSEX] = 0;
     fullState.firstMenu = 0;
 
     for (int k=0; k<12; k++) {
@@ -620,8 +623,6 @@ SynthState::SynthState() {
     for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
         ((char*)&params)[k] = ((char*)presets)[k];
     }
-    // enable the i2c bus
-    i2c_master_enable(I2C1, 0);
 }
 
 void SynthState::encoderTurned(int encoder, int ticks) {
@@ -659,22 +660,6 @@ void SynthState::encoderTurned(int encoder, int ticks) {
 
         if (newValue != oldValue) {
             propagateNewParamValue(currentRow, encoder, param, oldValue, newValue);
-            if (currentRow == ROW_ENGINE && encoder == ENCODER_ENGINE_ALGO) {
-                int voiceMax = 4;
-                switch (showUp[newValue].osc) {
-                case 4:
-                    voiceMax = 3;
-                    break;
-                case 6:
-                    voiceMax = 2;
-                    break;
-                }
-
-                if (params.engine1.numberOfVoice > voiceMax) {
-                    setNewValue(ROW_ENGINE, ENCODER_ENGINE_VOICE, voiceMax);
-                }
-                engine1ParameterRow.params[ENCODER_ENGINE_VOICE].maxValue = voiceMax;
-            }
         }
     } else {
         int oldMenuSelect = fullState.menuSelect;
@@ -727,6 +712,15 @@ void SynthState::encoderTurned(int encoder, int ticks) {
                 if (fullState.name[fullState.menuSelect]> 53) {
                     fullState.name[fullState.menuSelect] = 53;
                 }
+                propagateNewMenuSelect();
+            } else if (fullState.currentMenuItem->menuState == MENU_CONFIG_MIDI) {
+            	fullState.midiConfigValue[fullState.menuSelect] = fullState.midiConfigValue[fullState.menuSelect] + (ticks>0? 1: -1);
+            	if (fullState.midiConfigValue[fullState.menuSelect] >= midiConfig[fullState.menuSelect].maxValue) {
+            		fullState.midiConfigValue[fullState.menuSelect] = midiConfig[fullState.menuSelect].maxValue - 1;
+            	}
+            	if (fullState.midiConfigValue[fullState.menuSelect] < 0 ) {
+            		fullState.midiConfigValue[fullState.menuSelect] = 0;
+            	}
                 propagateNewMenuSelect();
             } else if (fullState.currentMenuItem->maxValue == 128) {
                 if (ticks>0) {
@@ -928,9 +922,6 @@ void SynthState::buttonPressed(int button) {
     }
 }
 
-
-
-
 void SynthState::setNewValue(int row, int number, int newValue) {
     int index = row * NUMBER_OF_ENCODERS + number;
     struct ParameterDisplay* param = &(allParameterRows.row[row]->params[number]);
@@ -943,8 +934,8 @@ void SynthState::setNewValue(int row, int number, int newValue) {
     propagateNewParamValueFromExternal(row, number, param, oldValue, newValue);
 }
 
-MenuItem* SynthState::afterButtonPressed() {
-    MenuItem* rMenuItem = 0;
+const MenuItem* SynthState::afterButtonPressed() {
+    const MenuItem* rMenuItem = 0;
 
     if (fullState.currentMenuItem->hasSubMenu ) {
         rMenuItem = MenuItemUtil::getMenuItem(fullState.currentMenuItem->subMenu[fullState.menuSelect]);
@@ -952,13 +943,12 @@ MenuItem* SynthState::afterButtonPressed() {
         rMenuItem = MenuItemUtil::getMenuItem(fullState.currentMenuItem->subMenu[0]);
     }
 
+    // ------------------------
     // Previous state switch
+
     switch (fullState.currentMenuItem->menuState) {
     case MAIN_MENU:
         fullState.firstMenu = fullState.menuSelect;
-        break;
-    case MENU_MIDI_CHANNEL:
-        fullState.midiChannel = fullState.menuSelect;
         break;
     case MENU_SAVE_SELECT_USER_BANK:
         fullState.bankNumber = fullState.menuSelect;
@@ -1034,10 +1024,6 @@ MenuItem* SynthState::afterButtonPressed() {
     case MENU_LOAD:
         fullState.menuSelect = fullState.loadPresetOrUser;
         break;
-    case MENU_MIDI_CHANNEL:
-        fullState.menuSelect = fullState.midiChannel;
-        // We return now, don't want to set menuSelect to 0
-        break;
     case MENU_LOAD_INTERNAL:
         propagateBeforeNewParamsLoad();
         copyPatch((char*)&presets[fullState.internalPresetNumber], (char*)&params, true);
@@ -1051,15 +1037,14 @@ MenuItem* SynthState::afterButtonPressed() {
         fullState.menuSelect = 0;
     }
 
-
     // Save menu select for menuBack Action
     fullState.previousMenuSelect = fullState.menuSelect;
     return rMenuItem;
 }
 
 
-MenuItem* SynthState::menuBack() {
-    MenuItem* rMenuItem = 0;
+const MenuItem* SynthState::menuBack() {
+    const MenuItem* rMenuItem = 0;
 
     // default menuSelect value
     fullState.menuSelect = MenuItemUtil::getParentMenuSelect(fullState.currentMenuItem->menuState);
@@ -1088,7 +1073,6 @@ MenuItem* SynthState::menuBack() {
         break;
     case MENU_FORMAT_BANK:
     case MENU_LOAD_USER_SELECT_BANK:
-    case MENU_MIDI:
     case MENU_MIDI_PATCH:
     case MENU_SAVE_SELECT_USER_BANK:
     case MENU_MIDI_BANK:

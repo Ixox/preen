@@ -21,18 +21,28 @@
 
 #define MATRIX_SIZE 6
 
-#include "SynthState.h"
+#include "SynthStateAware.h"
 #include "SynthParamListener.h"
 
 
 
 
-class Matrix  {
+class Matrix : public SynthStateAware {
 public:
     Matrix();
     ~Matrix();
-    void reinitUsage();
-    void reinitUsage(int k, int oldValue, int value);
+
+	void setSynthState(SynthState* sState) {
+		SynthStateAware::setSynthState(sState);
+		rows = &this->synthState->params.matrixRowState1;
+	}
+
+
+	void resetSources() {
+        for (int k=0; k< SOURCE_MAX; k++) {
+        	setSource((SourceEnum)k, 0);
+        }
+	}
 
     void resetCurrentDestination() {
         for (int k=0; k< DESTINATION_MAX; k++) {
@@ -50,19 +60,12 @@ public:
         futurDestinations[(int)rows[k].destination] += sources[(int)rows[k].source] * rows[k].mul;
     }
 
-    void setRowSource(int index, SourceEnum source);
-    void setRowDestination(int index, DestinationEnum destination) ;
-    void setRowMul(int index, short mul);
-    void checkRow(int index);
-
     void setSource(SourceEnum source, int value) {
         this->sources[source] = value;
     }
     int getDestination(DestinationEnum destination)   __attribute__((always_inline))  {
         return this->currentDestinations[destination];
     }
-
-    void newParamValue(int param, int oldValue, int newValue);;
 
     void useNewValues() {
         if (currentDestinations == destinations1) {

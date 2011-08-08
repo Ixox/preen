@@ -51,14 +51,14 @@ void FMDisplay::printValueWithSpace(int value) {
 
 
 boolean FMDisplay::shouldThisValueShowUp(int row, int encoder) {
-    int algo = synthState.params.engine1.algo;
+    int algo = this->synthState->params.engine1.algo;
     if (row == ROW_MODULATION && (encoder+1)> showUp[algo].im) {
         return false;
     }
     if (row == ROW_OSC_MIX && (encoder+1)> showUp[algo].mix) {
         return false;
     }
-    if (row == ROW_ENGINE && encoder == ENCODER_ENGINE_GLIDE && synthState.params.engine1.numberOfVoice >1) {
+    if (row == ROW_ENGINE && encoder == ENCODER_ENGINE_GLIDE && this->synthState->params.engine1.numberOfVoice >1) {
         return false;
     }
 
@@ -148,7 +148,7 @@ displaySignedChar:
 	{
 		// Hack... to deal with the special case of the fixe frequency.....
 		int oRow = row - ROW_OSC_FIRST;
-		OscillatorParams* oParam = (OscillatorParams*)&synthState.params.osc1;
+		OscillatorParams* oParam = (OscillatorParams*)&this->synthState->params.osc1;
 		OscFrequencyType ft = (OscFrequencyType)oParam[oRow].frequencyType;
 
 		if (ft == OSC_FT_FIXE) {
@@ -184,7 +184,7 @@ void FMDisplay::updateEncoderName(int row, int encoder) {
         lcd->print("    ");
         return;
     }
-	struct ParameterRowDisplay* paramRow = allParameterRows.row[row];
+	const struct ParameterRowDisplay* paramRow = allParameterRows.row[row];
 	lcd->print(paramRow->paramName[encoder]);
 }
 
@@ -196,7 +196,7 @@ void FMDisplay::refreshAllScreenByStep() {
 		break;
     case 9:
     {
-		int row = synthState.getCurrentRow();
+		int row = this->synthState->getCurrentRow();
 		lcd->setCursor(0,1);
 		lcd->print(allParameterRows.row[row]->rowName);
 		if (row> ROW_ENGINE_LAST) {
@@ -209,7 +209,7 @@ void FMDisplay::refreshAllScreenByStep() {
     case 6:
     case 7:
     case 8:
-		updateEncoderName(synthState.getCurrentRow(), refreshStatus -5);
+		updateEncoderName(this->synthState->getCurrentRow(), refreshStatus -5);
         break;
     default :
 	    updateEncoderValue(refreshStatus);
@@ -219,30 +219,30 @@ void FMDisplay::refreshAllScreenByStep() {
 }
 
  void FMDisplay::updateEncoderValue(int refreshStatus) {
-    int row = synthState.getCurrentRow();
+    int row = this->synthState->getCurrentRow();
     struct ParameterDisplay param = allParameterRows.row[row]->params[refreshStatus -1];
     int newValue;
     if (param.displayType == DISPLAY_TYPE_SIGNED_CHAR) {
-        newValue = ((char*)&synthState.params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
+        newValue = ((char*)&this->synthState->params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
     } else {
-        newValue = ((unsigned char*)&synthState.params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
+        newValue = ((unsigned char*)&this->synthState->params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
     }
-    updateEncoderValue(synthState.getCurrentRow(), refreshStatus -1, &param, newValue);
+    updateEncoderValue(this->synthState->getCurrentRow(), refreshStatus -1, &param, newValue);
 }
 
 
 void FMDisplay::displayPreset() {
-    FullState* fullState = &synthState.fullState;
-	int length = getLength(synthState.params.presetName);
+    FullState* fullState = &this->synthState->fullState;
+	int length = getLength(this->synthState->params.presetName);
 	lcd->setCursor(19-length,0);
-	lcd->print(synthState.params.presetName);
+	lcd->print(this->synthState->params.presetName);
 	if (fullState->presetModified) {
 	    lcd->print((char)2);
 	}
 }
 
 void FMDisplay::checkPresetModified() {
-    if (!presetModifed && synthState.fullState.presetModified && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
+    if (!presetModifed && this->synthState->fullState.presetModified && this->synthState->fullState.synthMode == SYNTH_MODE_EDIT) {
         presetModifed = true;
         lcd->setCursor(19,0);
         lcd->print((char)2);
@@ -263,7 +263,7 @@ void FMDisplay::newParamValueFromExternal(SynthParamType type, int currentRow, i
 
 void FMDisplay::newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param,  int oldValue, int newValue) {
     checkPresetModified();
-	if (synthState.getSynthMode() == SYNTH_MODE_EDIT) {
+	if (this->synthState->getSynthMode() == SYNTH_MODE_EDIT) {
 		if (currentRow != this->displayedRow) {
 			newcurrentRow(currentRow);
 			return;
@@ -327,13 +327,17 @@ void FMDisplay::newMenuState(FullState* fullState) {
 				lcd->print(allChars[(int)fullState->name[k]]);
 			}
 			break;
-		case MENU_MIDI_CHANNEL:
-			lcd->setCursor(1, menuRow-1);
-			lcd->print("Midi channel:");
-			break;
 		case MENU_FORMAT_BANK:
 			lcd->setCursor(1, menuRow-1);
 			lcd->print("Confirm Format ?");
+			break;
+		case MENU_MIDI_SYSEX_GET:
+			lcd->setCursor(1, menuRow-1);
+			lcd->print("Waiting SysEx...");
+			break;
+		case MENU_CONFIG_MIDI:
+			lcd->setCursor(1, menuRow-1);
+			lcd->print(midiConfig[fullState->menuSelect].title);
 			break;
 	}
 
@@ -347,13 +351,14 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 	switch(fullState->currentMenuItem->menuState) {
 	case MAIN_MENU:
 	case MENU_LOAD:
+	case MENU_SAVE:
     case MENU_CONFIG:
-	case MENU_MIDI:
     case MENU_MIDI_SYS_EX:
 	case MENU_MIDI_BANK:
 	case MENU_MIDI_PATCH:
 	case MENU_LOAD_USER_SELECT_BANK:
 	case MENU_SAVE_SELECT_USER_BANK:
+	case MENU_MIDI_SYSEX_DUMP:
 		for (int k=0; k<fullState->currentMenuItem->maxValue; k++) {
 			lcd->setCursor(fullState->menuPosition[k], menuRow-1);
 			lcd->print(" ");
@@ -367,7 +372,7 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 		lcd->setCursor(2, menuRow-1);
 		lcd->print(fullState->menuSelect);
 		lcd->print(" - ");
-		lcd->print(synthState.params.presetName);
+		lcd->print(this->synthState->params.presetName);
 		break;
 	case MENU_DONE:
 		lcd->clear();
@@ -387,10 +392,11 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 		lcd->setCursor(1+fullState->menuSelect, menuRow-1);
 		lcd->cursor();
 		break;
-	case MENU_MIDI_CHANNEL:
-		lcd->setCursor(15, menuRow-1);
-		lcd->print(fullState->menuSelect+1);
-		lcd->print(" ");
+	case MENU_CONFIG_MIDI:
+		eraseRow(menuRow-1);
+		lcd->setCursor(1, menuRow-1);
+		lcd->print(midiConfig[fullState->menuSelect].title);
+		lcd->print(midiConfig[fullState->menuSelect].valueName[fullState->midiConfigValue[fullState->menuSelect]]);
 		break;
 	default:
 		break;

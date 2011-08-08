@@ -18,7 +18,7 @@
 #ifndef LFO_H_
 #define LFO_H_
 
-#include "SynthState.h"
+#include "SynthStateAware.h"
 #include "Matrix.h"
 
 // LFo sample rate is 32 times slower than the rest
@@ -28,7 +28,7 @@
 #define NUMBER_OF_LFOS 4
 
 
-class Lfo {
+class Lfo : public SynthStateAware {
 public:
 	Lfo();
 	~Lfo();

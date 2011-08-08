@@ -30,11 +30,17 @@
 
 #define UINT_MAX  4294967295
 
-class Synth : public SynthParamListener
+class Synth : public SynthParamListener, public SynthStateAware
 {
 public:
     Synth(void);
     ~Synth(void);
+
+	void setSynthState(SynthState* sState) {
+		SynthStateAware::setSynthState(sState);
+		init();
+	}
+
     void noteOn(char note, char velocity);
     void noteOff(char note);
     void allNoteOff();
@@ -44,12 +50,15 @@ public:
     int getSample();
     void nextSample();
 
+
     void newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
         newParamValue(type, currentRow, encoder, param, oldValue, newValue);
     }
 
     void newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
-        if (type == SYNTH_PARAM_TYPE_ENV) {
+    	if (type == SYNTH_PARAM_TYPE_ENGINE && encoder == ENCODER_ENGINE_ALGO) {
+    		checkMaxVoice();
+		} else if (type == SYNTH_PARAM_TYPE_ENV) {
             switch (currentRow) {
             case ROW_ENV1:
                 env1.reloadADSR();
@@ -76,7 +85,10 @@ public:
         } else if (type == SYNTH_PARAM_TYPE_LFO && encoder == ENCODER_LFO_KSYNC) {
             lfo[currentRow - ROW_LFO1].reloadRamp();
         }
+
     }
+
+    void checkMaxVoice();
 
     void newcurrentRow(int newcurrentRow)  {
         // Nothing to do
@@ -86,21 +98,13 @@ public:
         allSoundOff();
     };
 
-    void afterNewParamsLoad() {
-        env1.reloadADSR();
-        env2.reloadADSR();
-        env3.reloadADSR();
-        env4.reloadADSR();
-        env5.reloadADSR();
-        env6.reloadADSR();
-        matrix.resetCurrentDestination();
-        for (int k=0; k<NUMBER_OF_LFOS; k++) {
-            lfo[k].reloadRamp();
-        }
-    }
+    void afterNewParamsLoad();
 
 
 private:
+    // Called by setSynthState
+    void init();
+
     Matrix matrix;
     Voice voices[MAX_NUMBER_OF_VOICES];
     unsigned int voiceIndex;
@@ -108,14 +112,14 @@ private:
 
     Lfo lfo[NUMBER_OF_LFOS];
 
-    // 4 oscillators Max
+    // 6 oscillators Max
     Osc<1> osc1;
     Osc<2> osc2;
     Osc<3> osc3;
     Osc<4> osc4;
     Osc<5> osc5;
     Osc<6> osc6;
-    // And their 4 envelopes
+    // And their 6 envelopes
     Env<1> env1;
     Env<2> env2;
     Env<3> env3;

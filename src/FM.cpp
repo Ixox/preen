@@ -37,6 +37,7 @@
 #define CHANNEL_INTERUPT  TIMER_CH2
 #define AUDIO_PIN    25
 */
+
 SynthState		   synthState;
 Synth              synth;
 MidiDecoder        midiDecoder;
@@ -54,10 +55,6 @@ void IRQSendSample() {
         pwmWrite(AUDIO_PIN , rb.remove());
     }
 }
-
-unsigned int time = 0;
-unsigned int previousTime = 0;
-unsigned int fullDelay;
 
 
 inline void fillSoundBuffer() {
@@ -78,8 +75,8 @@ inline void fillSoundBufferFull() {
 
 void setup()
 {
-    SerialUSB.end();
-    nvic_irq_disable(NVIC_USB_LP_CAN_RX0);
+	SerialUSB.end();
+	nvic_irq_disable(NVIC_USB_LP_CAN_RX0);
     // systick_disable();
 
     byte midiIn[8] = {
@@ -123,7 +120,22 @@ void setup()
     lcd.print("          By Ixox");
     lcd.setCursor(0,3);
     lcd.print("Powered by Leaflabs");
-    // Dependencies injection
+
+    // ---------------------------------------
+    // Dependencies Injection
+
+    // to SynthStateAware Class
+    // MidiDecoder, Synth (Env,Osc, Lfo, Matrix, Voice ), FMDisplay, PresetUtil...
+
+    synth.setSynthState(&synthState);
+    midiDecoder.setSynthState(&synthState);
+    fmDisplay.setSynthState(&synthState);
+    PresetUtil::setSynthState(&synthState);
+
+    midiDecoder.setSynth(&synth);
+
+    // ---------------------------------------
+    // Register listener
 
     // synthstate is updated by encoder change
     encoders.insertListener(&synthState);
@@ -134,9 +146,9 @@ void setup()
     synthState.insertParamListener(&midiDecoder);
     synthState.insertMenuListener(&fmDisplay);
 
-    midiDecoder.setSynth(&synth);
 
 
+    // Timer init
     mainTimer.pause();
     mainTimer.setOverflow(2197);
     mainTimer.setPrescaleFactor(1);
@@ -168,12 +180,12 @@ void setup()
         synth.noteOn(60+k,100);
         for (int cpt=0; cpt<1500; cpt++) {
             fillSoundBuffer();
-            delayMicroseconds(20);
+            delayMicroseconds(30);
         }
         synth.noteOff(60+k);
         for (int cpt=0; cpt<100; cpt++) {
             fillSoundBuffer();
-            delayMicroseconds(20);
+            delayMicroseconds(30);
         }
     }
 
@@ -181,13 +193,11 @@ void setup()
 
 }
 
-
 unsigned short midiReceive = 0;
 unsigned short midiSent = 0;
 uint32 encoderMicros = 0;
 uint32 midiInMicros = 0;
 uint32 midiOutMicros = 0;
-int cptTmp = 0;
 
 
 void loop() {

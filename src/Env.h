@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "SynthState.h"
+#include "SynthStateAware.h"
 
 
 enum EnvState {
@@ -36,15 +36,13 @@ struct EnvData {
     unsigned int currentAmp;
     // State of the env
     unsigned int envState;
-    // Release speed and acceleration (dependent on the voice when RELEASE)
+    // Release speed (dependent on the voice when RELEASE)
     unsigned int currentAmpSpeed;
-
-    unsigned int currentAmpAcc;
 };
 
 
 template <int number>
-class Env
+class Env : public SynthStateAware
 {
 public:
     Env() {
@@ -53,7 +51,7 @@ public:
     }
 
     void reloadADSR() {
-        EnvelopeParams * e = (EnvelopeParams *)&(synthState.params.env1);
+        EnvelopeParams * e = (EnvelopeParams *)&(this->synthState->params.env1);
         EnvelopeParams* envState = &e[number-1];
 
         adsr[0] = envState->attack * envState->attack +1;
@@ -61,27 +59,8 @@ public:
         adsr[2] = envState->sustain << 7;
         adsr[3] = envState->release * envState->release+1;
 
-        /*
-        if (adsr[0]>=640000) {
-            incA = (32767<<15) / adsr[0];
-            incIncA = incA / ((adsr[0]+1)/2);
-            incA = incA + ((adsr[0]+1)/2)*incIncA;
-        } else {
-         */
         incA = (32767<<15) / adsr[0];
-        incIncA = 0;
-        //        }
-
-        /*
-        if (adsr[1]>=640000) {
-            incD = ((32768 - adsr[2]) << 15) / adsr[1];
-            incIncD = incD / ((adsr[1]+1)/2);
-            incD = incD + ((adsr[1]+1)/2)*incIncD;
-        } else {
-         */
         incD = ((32767 - adsr[2]) << 15) / adsr[1];
-        incIncD = 0;
-        //        }
     }
 
 
@@ -89,14 +68,12 @@ public:
     void noteOn(struct EnvData& env) {
         env.currentAmp= 0;
         env.currentAmpSpeed = incA;
-        env.currentAmpAcc = incIncA;
         env.index = adsr[0] + 1;
         env.envState = ENV_STATE_ON_A;
     }
 
     void noteOffQuick(struct EnvData* env) {
         // assembly to update all env value at the same time...
-        // Because it happens outside of main synth thread
         asm volatile(
                 // r5 : index, r6 : currentAmp, r7 : envState, r8 : currentAmpSpeed
                 "    ldm %[env], {r5-r8}\n\t"
@@ -210,8 +187,8 @@ public:
 private:
     // ADSR
     unsigned int adsr[4];
-    // Ramp speed and acceleration if attack and Decay
-    unsigned int incA, incD, incIncA, incIncD;
+    // Ramp speed Of attack and Decay
+    unsigned int incA, incD;
 
 };
 

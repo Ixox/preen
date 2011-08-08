@@ -28,7 +28,7 @@ extern int max;
 extern int min;
 
 
-class Voice
+class Voice : public SynthStateAware
 {
 public:
     Voice();
@@ -44,7 +44,7 @@ public:
 
     void nextSample() {
         if (playing) {
-            switch (synthState.params.engine1.algo) {
+            switch (this->synthState->params.engine1.algo) {
             case ALGO1:
                 /*
                           IM3
@@ -515,28 +515,28 @@ public:
 
 
     void updateModulationIndex1() {
-        IM1 = synthState.params.engine2.modulationIndex1 + (matrix->getDestination(INDEX_MODULATION1)>>4);
+        IM1 = this->synthState->params.engine2.modulationIndex1 + (matrix->getDestination(INDEX_MODULATION1)>>4);
     }
     void updateModulationIndex2() {
-        IM2 = synthState.params.engine2.modulationIndex2 + (matrix->getDestination(INDEX_MODULATION2)>>4);
+        IM2 = this->synthState->params.engine2.modulationIndex2 + (matrix->getDestination(INDEX_MODULATION2)>>4);
     }
     void updateModulationIndex3() {
-        IM3 = synthState.params.engine2.modulationIndex3 + (matrix->getDestination(INDEX_MODULATION3)>>4);
+        IM3 = this->synthState->params.engine2.modulationIndex3 + (matrix->getDestination(INDEX_MODULATION3)>>4);
     }
     void updateModulationIndex4() {
-        IM4 = synthState.params.engine2.modulationIndex4 + (matrix->getDestination(INDEX_MODULATION4)>>4);
+        IM4 = this->synthState->params.engine2.modulationIndex4 + (matrix->getDestination(INDEX_MODULATION4)>>4);
     }
     void updateMixOsc1() {
-        MIX1 = synthState.params.engine3.mixOsc1 + (matrix->getDestination(MIX_OSC1)>>4);
+        MIX1 = this->synthState->params.engine3.mixOsc1 + (matrix->getDestination(MIX_OSC1)>>4);
     }
     void updateMixOsc2() {
-        MIX2 = synthState.params.engine3.mixOsc2 + (matrix->getDestination(MIX_OSC2)>>4);
+        MIX2 = this->synthState->params.engine3.mixOsc2 + (matrix->getDestination(MIX_OSC2)>>4);
     }
     void updateMixOsc3() {
-        MIX3 = synthState.params.engine3.mixOsc3 + (matrix->getDestination(MIX_OSC3)>>4);
+        MIX3 = this->synthState->params.engine3.mixOsc3 + (matrix->getDestination(MIX_OSC3)>>4);
     }
     void updateMixOsc4() {
-        MIX4 = synthState.params.engine3.mixOsc4 + (matrix->getDestination(MIX_OSC4)>>4);
+        MIX4 = this->synthState->params.engine3.mixOsc4 + (matrix->getDestination(MIX_OSC4)>>4);
     }
 
     void endNoteOfBeginNextOne() {

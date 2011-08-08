@@ -19,14 +19,14 @@
 #define FMDISPLAY_H_
 
 
-#include "SynthState.h"
+#include "SynthStateAware.h"
 #include "LiquidCrystal.h"
 #include "Menu.h"
 
 
 
 
-class FMDisplay : public SynthParamListener, public SynthMenuListener {
+class FMDisplay : public SynthParamListener, public SynthMenuListener, public SynthStateAware {
 public:
 	FMDisplay();
 	~FMDisplay();

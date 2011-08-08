@@ -18,6 +18,7 @@
 #ifndef MIDIDECODER_H_
 #define MIDIDECODER_H_
 
+#include "SynthStateAware.h"
 #include "Synth.h"
 #include "RingBuffer.h"
 
@@ -81,6 +82,7 @@ struct Nrpn {
     uint8 paramMSB;
     uint8 valueLSB;
     uint8 valueMSB;
+    bool readyToSend;
 };
 
 struct ControlChange {
@@ -88,7 +90,7 @@ struct ControlChange {
     uint8 value;
 };
 
-class MidiDecoder : public SynthParamListener
+class MidiDecoder : public SynthParamListener, public SynthStateAware
 {
 public:
     MidiDecoder();
