@@ -18,9 +18,12 @@
 #ifndef PRESETUTIL_H_
 #define PRESETUTIL_H_
 
+#define EEPROM_CONFIG_CHECK 39
+
 #include "libmaple_types.h"
 #include "wirish.h"
 #include "i2c.h"
+
 
 
 class SynthState;
@@ -42,6 +45,8 @@ public:
     static char* readPresetNameFromEEPROM(int bankNumber, int preset);
     static void pruneToEEPROM(int bankNumber, int preset);
     static void formatEEPROM();
+    static void saveConfigToEEPROM();
+    static void loadConfigFromEEPROM();
 
     static void midiPatchDump();
 

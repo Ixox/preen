@@ -998,6 +998,9 @@ const MenuItem* SynthState::afterButtonPressed() {
     case MENU_FORMAT_BANK:
         PresetUtil::formatEEPROM();
         break;
+    case MENU_CONFIG_MIDI_SAVE:
+        PresetUtil::saveConfigToEEPROM();
+        break;
     case MENU_LOAD:
         fullState.loadPresetOrUser = fullState.menuSelect;
         break;

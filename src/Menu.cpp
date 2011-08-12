@@ -177,6 +177,13 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
         "Midi",
         false,
         MIDICONFIG_SIZE,
+        {MENU_CONFIG_MIDI_SAVE}
+    },
+    {
+    	MENU_CONFIG_MIDI_SAVE,
+        "",
+        false,
+        MENU_CONFIG_MIDI,
         {MENU_DONE}
     },
     {

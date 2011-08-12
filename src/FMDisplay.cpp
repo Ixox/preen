@@ -339,6 +339,10 @@ void FMDisplay::newMenuState(FullState* fullState) {
 			lcd->setCursor(1, menuRow-1);
 			lcd->print(midiConfig[fullState->menuSelect].title);
 			break;
+		case MENU_CONFIG_MIDI_SAVE:
+			lcd->setCursor(1, menuRow-1);
+			lcd->print("Save to EEPROM ?");
+			break;
 	}
 
 	newMenuSelect(fullState);

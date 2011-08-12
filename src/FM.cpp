@@ -165,6 +165,8 @@ void setup()
     lcd.createChar(1, midiOut);
     lcd.createChar(2, modified);
 
+    // Load config from EEPROM if has been saved...
+    PresetUtil::loadConfigFromEEPROM();
 
     // init the audio interupt
     mainTimer.setCompare(CHANNEL_INTERUPT, 2048);

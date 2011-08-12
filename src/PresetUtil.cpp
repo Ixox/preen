@@ -211,6 +211,65 @@ void PresetUtil::midiPatchDump() {
     Serial3.print((uint8)0xf7);
 }
 
+void PresetUtil::loadConfigFromEEPROM() {
+    uint8 deviceaddress = 0b1010001;
+    int address = 0;
+    uint8 bufReadAddress[2];
+    i2c_msg msgsRead[2];
+    uint8 eeprom[MIDICONFIG_SIZE +1];
+
+    bufReadAddress[0] = (uint8)((int)address >> 8);
+    bufReadAddress[1] = (uint8)((int)address & 0xff);
+
+    msgsRead[0].addr = deviceaddress;
+    msgsRead[0].flags = 0;
+    msgsRead[0].length = 2;
+    msgsRead[0].data = bufReadAddress;
+
+    msgsRead[1].addr = deviceaddress;
+    msgsRead[1].flags = I2C_MSG_READ;
+    msgsRead[1].length = MIDICONFIG_SIZE +1;
+    msgsRead[1].data = (uint8*)eeprom;
+
+    i2c_master_xfer(I2C1, msgsRead, 2, 500);
+
+    if (eeprom[0] == EEPROM_CONFIG_CHECK) {
+        for (int k=0; k<MIDICONFIG_SIZE; k++) {
+        	PresetUtil::synthState->fullState.midiConfigValue[k] = eeprom[k+1];
+        }
+    }
+
+    delay(20);
+}
+
+void PresetUtil::saveConfigToEEPROM() {
+	// Select the second EEprom
+    uint8 deviceaddress = 0b1010001;
+
+    i2c_msg msgWrite1;
+    int block1Size = MIDICONFIG_SIZE +1;
+    int address = 0;
+    uint8 bufWrite1[block1Size + 2];
+
+    bufWrite1[0] = (uint8)((int)address >> 8);
+    bufWrite1[1] = (uint8)((int)address & 0xff);
+
+    bufWrite1[2] = (uint8) EEPROM_CONFIG_CHECK;
+
+    for (int k=0; k<MIDICONFIG_SIZE; k++) {
+        bufWrite1[k+3] = PresetUtil::synthState->fullState.midiConfigValue[k];
+    }
+
+    /* Write test pattern  */
+    msgWrite1.addr = deviceaddress;
+    msgWrite1.flags = 0;
+    msgWrite1.length = block1Size +2;
+    msgWrite1.data = bufWrite1;
+    i2c_master_xfer(I2C1, &msgWrite1, 1, 500);
+    delay(50);
+
+}
+
 void PresetUtil::formatEEPROM() {
     uint8 deviceaddress = 0b1010000;
     for (int bankNumber=0; bankNumber<3; bankNumber++) {
