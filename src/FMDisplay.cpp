@@ -313,19 +313,30 @@ void FMDisplay::newMenuState(FullState* fullState) {
 	}
 
 	switch (fullState->currentMenuItem->menuState) {
+		case MENU_SAVE_BANK:
+			menuRow = 2;
+			lcd->setCursor(1, menuRow-2);
+			lcd->print("Store new bank in");
+			// Then what follow : no break
 		case MENU_LOAD_USER_SELECT_BANK:
 		case MENU_SAVE_SELECT_USER_BANK:
+		case MENU_MIDI_BANK_SELECT_DUMP:
 			lcd->setCursor(1, menuRow-1);
-			lcd->print("Bnk1 Bnk2 Bnk3");
+			lcd->print("Bnk1 Bnk2 Bnk3 Bnk4");
             fullState->menuPosition[0] = 0;
             fullState->menuPosition[1] = 5;
             fullState->menuPosition[2] = 10;
+            fullState->menuPosition[3] = 15;
 			break;
 		case MENU_SAVE_ENTER_NAME:
 			lcd->setCursor(1, menuRow-1);
 			for (int k=0;k<12; k++) {
 				lcd->print(allChars[(int)fullState->name[k]]);
 			}
+			break;
+		case MENU_SAVE_BANK_CONFIRM:
+			lcd->setCursor(1, menuRow-1);
+			lcd->print("Confirm replace ?");
 			break;
 		case MENU_FORMAT_BANK:
 			lcd->setCursor(1, menuRow-1);
@@ -346,7 +357,6 @@ void FMDisplay::newMenuState(FullState* fullState) {
 	}
 
 	newMenuSelect(fullState);
-
 }
 
 void FMDisplay::newMenuSelect(FullState* fullState) {
@@ -362,7 +372,9 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 	case MENU_MIDI_PATCH:
 	case MENU_LOAD_USER_SELECT_BANK:
 	case MENU_SAVE_SELECT_USER_BANK:
+	case MENU_MIDI_BANK_SELECT_DUMP:
 	case MENU_MIDI_SYSEX_DUMP:
+	case MENU_SAVE_BANK:
 		for (int k=0; k<fullState->currentMenuItem->maxValue; k++) {
 			lcd->setCursor(fullState->menuPosition[k], menuRow-1);
 			lcd->print(" ");
@@ -382,6 +394,11 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 		lcd->clear();
 		lcd->setCursor(8,1);
 		lcd->print("DONE");
+		break;
+	case MENU_IN_PROGRESS:
+		lcd->clear();
+		lcd->setCursor(3,1);
+		lcd->print("In Progress...");
 		break;
 	case MENU_SAVE_SELECT_PRESET:
 		eraseRow(menuRow-1);
@@ -413,6 +430,9 @@ void FMDisplay::eraseRow(int row) {
 }
 
 void FMDisplay::menuBack(FullState* fullState) {
+	if (fullState->currentMenuItem->menuState == MENU_DONE) {
+		return;
+	}
 	menuRow --;
 	eraseRow(menuRow);
 	// -2 because new menu will add 1...

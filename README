@@ -10,10 +10,9 @@
 |/       |/   \__/(_______/(_______/|/    )_)|/       |/     \|
 
 -----------------------------------------                                            
-V0.0.1
+V0.90
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-May 15th 2011
-
+August 14th 2011
 
 http://www.preenfm.net
 
@@ -38,13 +37,15 @@ Preen Current Features:
 . Glide available when voice set to 1
 
 . Load and save preset to EEPROM.
-  . 3 banks of 128 user preset
+  . 4 banks of 128 user preset
 
-. Midi
+. Patch and Bank exchange with a computer through midi (sysex).
+
+. Midi control
   . Control change : 44 CC linked to parameters.
-  . sysex : Patch dump and read 
   . 4 CC + modwheel + after touch + velocity assignable as source in the modulation matrix.
-  . Midi channel selectable. Midi for other channels are forwarded.
+  . Nrpn : allow access to ALL parameter
+  . Midi channel selectable. Midi for other channels can be forwarded.
 
 . LCD 4x20 
   . updated in realtime showing the parameter you modify.
@@ -53,7 +54,6 @@ Preen Current Features:
 . Surface Control
   . 4 encoders + 7 buttons
   . The full synth state is easily updated
-  . Synth Mode + menu Mode 
 
 . Sampling rate : 
   . 32768 Hz (makes division faster ;-) for audio. Pseudo 11 bits.
@@ -65,29 +65,16 @@ Preen Current Features:
 
 
 --------------------------------------------
-Update August 8th
-. Much work of the hardware.. So new maple-mini pin assigment
-. Better nrpn
-. New midi options in configuration menu
-. Menu redesign (simpler)
-. Refactoring
-. Bug fix - now it plays in tune...
-
+Update August 14th
+. Midi sysex: dump and read banks
 
 --------------------------------------------
 
-To do before v0.1 (in no order) :
+Todo before V1.0 : 
 . Implement all midi events
-. SYSEX pach/bank receive/dump
-
-
-Later V1.0 : 
 . Documentation
-. a nice PCB and a Box
-
-Later V2.0 : 
-. A version 2 with 2 maples (or more) in a chain to take care of more voices.
-
+. Bugs : sometime freeze when reading EEPROM
+         Current patch can be corrupted after loading new one.
 
 --------------------------------------------
 Hardware (to be detailed)

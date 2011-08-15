@@ -435,8 +435,8 @@ public:
 		return fullState.synthMode;
 	}
 
+    void newBankReady();
 
-    void copyPatch(char* source, char* dest, bool propagate);
     void resetDisplay();
 	struct AllSynthParams params;
     struct AllSynthParams backupParams;

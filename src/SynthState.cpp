@@ -742,12 +742,12 @@ void SynthState::encoderTurned(int encoder, int ticks) {
             if (fullState.currentMenuItem->menuState == MENU_LOAD_INTERNAL) {
                 char* preset = (char*)&(presets[fullState.menuSelect].engine1);
                 propagateBeforeNewParamsLoad();
-                copyPatch(preset, (char*)&params, true);
+                PresetUtil::copyPatch(preset, (char*)&params);
                 propagateAfterNewParamsLoad();
                 fullState.internalPresetNumber = fullState.menuSelect;
             } else if (fullState.currentMenuItem->menuState == MENU_LOAD_USER_SELECT_PRESET) {
                 propagateBeforeNewParamsLoad();
-                PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
+                PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect, (char*)&params);
                 propagateAfterNewParamsLoad();
                 fullState.presetNumber = fullState.menuSelect;
             }
@@ -755,22 +755,6 @@ void SynthState::encoderTurned(int encoder, int ticks) {
         }
     }
 
-}
-
-
-void SynthState::copyPatch(char* source, char* dest, bool propagate) {
-    for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
-        int currentRow = k / NUMBER_OF_ENCODERS;
-        char oldValue = dest[k];
-        dest[k] = source[k];
-/*
-        if ((currentRow < NUMBER_OF_ROWS) && propagate) {
-            int encoder = k % NUMBER_OF_ENCODERS;
-            struct ParameterDisplay* param = &(allParameterRows.row[currentRow]->params[encoder]);
-            propagateNewParamValue(currentRow, encoder, param, oldValue, source[k]);
-        }
-        */
-    }
 }
 
 
@@ -852,11 +836,12 @@ void SynthState::buttonPressed(int button) {
             fullState.synthMode = SYNTH_MODE_MENU;
             fullState.menuSelect = fullState.firstMenu;
             // allow undo event after trying some patches
-            copyPatch((char*)&params, (char*)&backupParams, true);
+            PresetUtil::copyPatch((char*)&params, (char*)&backupParams);
             fullState.currentMenuItem = MenuItemUtil::getMenuItem(MAIN_MENU);
             break;
         }
     } else {
+    	// MENU MODE
         switch (button) {
         case BUTTON_MENUSELECT:
             fullState.currentMenuItem = afterButtonPressed();
@@ -905,11 +890,7 @@ void SynthState::buttonPressed(int button) {
         // MENU MODE
         }
     }
-    /*
-	if (oldMenuSelect != fullState.menuSelect) {
-		propagateNewMenuSelect();
-	}
-     */
+
     if (oldSynthMode != fullState.synthMode) {
         propagateNewSynthMode();
         return;
@@ -951,20 +932,24 @@ const MenuItem* SynthState::afterButtonPressed() {
         fullState.firstMenu = fullState.menuSelect;
         break;
     case MENU_SAVE_SELECT_USER_BANK:
+    case MENU_SAVE_BANK:
         fullState.bankNumber = fullState.menuSelect;
         break;
     case MENU_LOAD_INTERNAL:
         // Make change definitive
-        copyPatch((char*)&params, (char*)&backupParams, true);
+        PresetUtil::copyPatch((char*)&params, (char*)&backupParams);
         fullState.presetModified = false;
         break;
+    case MENU_SAVE_BANK_CONFIRM:
+    	PresetUtil::copyBank(4, fullState.bankNumber);
+    	break;
     case MENU_LOAD_USER_SELECT_BANK:
         fullState.bankNumber = fullState.menuSelect;
         break;
     case MENU_LOAD_USER_SELECT_PRESET:
         propagateBeforeNewParamsLoad();
-        PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect);
-        copyPatch((char*)&params, (char*)&backupParams, true);
+        PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect, (char*)&params);
+        PresetUtil::copyPatch((char*)&params, (char*)&backupParams);
         propagateAfterNewParamsLoad();
         fullState.presetModified = false;
         break;
@@ -986,12 +971,22 @@ const MenuItem* SynthState::afterButtonPressed() {
             params.presetName[k] = allChars[(int)fullState.name[k]];
         }
         params.presetName[length] = '\0';
-        PresetUtil::pruneToEEPROM(fullState.bankNumber, fullState.presetNumber);
+        PresetUtil::saveCurrentPatchToEEPROM(fullState.bankNumber, fullState.presetNumber);
         break;
     }
     case MENU_MIDI_PATCH_DUMP:
-        PresetUtil::midiPatchDump();
+        PresetUtil::sendCurrentPatchToSysex();
         break;
+    case MENU_MIDI_BANK_SELECT_DUMP:
+    {
+    	const MenuItem *cmi = fullState.currentMenuItem;
+    	// Update display while sending
+    	fullState.currentMenuItem = MenuItemUtil::getMenuItem(MENU_IN_PROGRESS);
+    	propagateNewMenuState();
+        PresetUtil::sendBankToSysex(fullState.menuSelect);
+        fullState.currentMenuItem = cmi;
+        break;
+    }
     case MENU_DONE:
         fullState.synthMode = SYNTH_MODE_EDIT;
         break;
@@ -1017,7 +1012,7 @@ const MenuItem* SynthState::afterButtonPressed() {
         break;
     case MENU_LOAD_USER_SELECT_PRESET:
         propagateBeforeNewParamsLoad();
-        PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.presetNumber);
+        PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.presetNumber, (char*)&params);
         propagateAfterNewParamsLoad();
         fullState.menuSelect = fullState.presetNumber;
         break;
@@ -1029,7 +1024,7 @@ const MenuItem* SynthState::afterButtonPressed() {
         break;
     case MENU_LOAD_INTERNAL:
         propagateBeforeNewParamsLoad();
-        copyPatch((char*)&presets[fullState.internalPresetNumber], (char*)&params, true);
+        PresetUtil::copyPatch((char*)&presets[fullState.internalPresetNumber], (char*)&params);
         propagateAfterNewParamsLoad();
         fullState.menuSelect = fullState.internalPresetNumber;
         break;
@@ -1062,14 +1057,15 @@ const MenuItem* SynthState::menuBack() {
     case MENU_LOAD_USER_SELECT_PRESET:
         fullState.menuSelect = fullState.bankNumber;
         propagateBeforeNewParamsLoad();
-        copyPatch((char*)&backupParams, (char*)&params, true);
+        PresetUtil::copyPatch((char*)&backupParams, (char*)&params);
         propagateAfterNewParamsLoad();
         break;
     case MENU_LOAD_INTERNAL:
         propagateBeforeNewParamsLoad();
-        copyPatch((char*)&backupParams, (char*)&params, true);
+        PresetUtil::copyPatch((char*)&backupParams, (char*)&params);
         propagateAfterNewParamsLoad();
         break;
+    case MENU_SAVE_BANK:
     case MAIN_MENU:
         fullState.synthMode = SYNTH_MODE_EDIT;
         // put back old patch (has been overwritten if a new patch has been loaded)
@@ -1085,4 +1081,13 @@ const MenuItem* SynthState::menuBack() {
     rMenuItem = MenuItemUtil::getParentMenuItem(fullState.currentMenuItem->menuState);
     return rMenuItem;
 }
+
+
+void SynthState::newBankReady() {
+	fullState.synthMode == SYNTH_MODE_MENU;
+	fullState.menuSelect = 0;
+	fullState.currentMenuItem = MenuItemUtil::getMenuItem(MENU_SAVE_BANK);
+	propagateNewSynthMode();
+}
+
 

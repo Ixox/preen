@@ -45,13 +45,17 @@ enum MenuState {
 	MENU_MIDI_BANK,
 	MENU_MIDI_BANK_GET,
 	MENU_MIDI_BANK_DUMP,
+	MENU_MIDI_BANK_SELECT_DUMP,
 	MENU_MIDI_PATCH,
 	MENU_MIDI_PATCH_GET,
 	MENU_MIDI_PATCH_DUMP,
 	MENU_DONE,
+	MENU_IN_PROGRESS,
     MENU_CONFIG,
     MENU_CONFIG_SAVE,
 	MENU_FORMAT_BANK,
+	MENU_SAVE_BANK,
+	MENU_SAVE_BANK_CONFIRM,
 	LAST_MENU
 };
 
@@ -117,6 +121,10 @@ public:
 	}
 
     static const MenuItem* getParentMenuItem(MenuState ms) {
+    	// MENU_DONE exception -> return itself to block back button
+    	if (ms == MENU_DONE) {
+    		return getMenuItem(ms);
+    	}
         const MenuItem* item = &allMenus[0];
         int cpt = 0;
         while (item->menuState != LAST_MENU) {

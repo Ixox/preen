@@ -17,6 +17,10 @@
 
 #include "MidiDecoder.h"
 
+// DEBUG
+extern LiquidCrystal lcd;
+
+
 MidiDecoder::MidiDecoder() {
 	newEvent = true;
 	index = 0;
@@ -31,84 +35,6 @@ void MidiDecoder::setSynth(Synth* synth) {
 	this->synth = synth;
 }
 
-void MidiDecoder::readSysex() {
-	unsigned int HEADER_SIZE = 2;
-	// 0x7d : non commercial
-	// 01 : Device ID
-	// 01 : model ID... Version
-	// 12 : Information sent
-	// 0x000000 : load patch....
-	// .. The patch
-
-	/*
-	 SerialUSB.println("readSysex....");
-	 SerialUSB.print("index up to  :");
-	 SerialUSB.println(sizeof(struct AllSynthParams)+7);
-	 */
-	static int newPatch[] = { 0x7d, 0x01 };
-
-	unsigned int index = 0;
-	uint8 value = 0;
-	int checksum = 0, sentChecksum = 0;
-
-	while (true) {
-		int timeout = 0;
-		while (!Serial3.available() && timeout < 5000) {
-			timeout++;
-		}
-		if (timeout >= 5000) {
-			break;
-		}
-
-		uint8 byte = Serial3.read();
-		if (byte == 0xF7) {
-			break;
-		}
-		if (index < HEADER_SIZE) {
-			if (byte == newPatch[index]) {
-				index++;
-			}
-		} else if (index < sizeof(struct AllSynthParams) + HEADER_SIZE) {
-			value += byte;
-
-			if (byte < 127) {
-				((uint8*) &this->synthState->backupParams)[index - HEADER_SIZE]
-						= value;
-				index++;
-				checksum += value;
-				value = 0;
-			}
-		} else {
-			sentChecksum = byte;
-			checksum = checksum % 128;
-		}
-	}
-
-	/*
-	 SerialUSB.print("Received checksum : ");
-	 SerialUSB.println(sentChecksum);
-
-	 SerialUSB.print("Computed checksum : ");
-	 SerialUSB.println(checksum);
-
-	 for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
-	 SerialUSB.print(k);
-	 SerialUSB.print(" : ");
-	 SerialUSB.print((int)((uint8*) &this->synthState->backupParams)[k]);
-	 SerialUSB.print(" /  ");
-	 }
-	 SerialUSB.println();
-	 */
-
-	if (checksum == sentChecksum) {
-		this->synthState->propagateBeforeNewParamsLoad();
-		this->synthState->copyPatch((char*) &this->synthState->backupParams,
-				(char*) &this->synthState->params, true);
-		this->synthState->propagateAfterNewParamsLoad();
-		this->synthState->resetDisplay();
-	}
-
-}
 
 void MidiDecoder::newByte(unsigned char byte) {
 	bool eventComplete = false;
@@ -145,10 +71,19 @@ void MidiDecoder::newByte(unsigned char byte) {
 			index++;
 			break;
 		case 0xf0:
-			if (this->synthState->fullState.midiConfigValue[MIDICONFIG_REALTIME_SYSEX] == 1) {
-				readSysex();
+		{
+			// Allow patch if real time allowed OR if currenly waiting for sysex
+			// Allow bank if currently waiting for sysex only
+			bool waitingForSysex = this->synthState->fullState.currentMenuItem->menuState == MENU_MIDI_SYSEX_GET;
+			bool realTimeSysexAllowed = this->synthState->fullState.midiConfigValue[MIDICONFIG_REALTIME_SYSEX] == 1;
+			int r = PresetUtil::readSysex(realTimeSysexAllowed || waitingForSysex, waitingForSysex);
+			lcd.setCursor(4, 0);
+			lcd.print((int)r);
+			if (r == 2) {
+				this->synthState->newBankReady();
 			}
 			break;
+		}
 		}
 	} else {
 		currentEvent[index] = byte;
@@ -164,7 +99,6 @@ void MidiDecoder::newByte(unsigned char byte) {
 	}
 }
 
-//extern LiquidCrystal lcd;
 
 void MidiDecoder::sendMidiEvent() {
 	int acceptedChannel = this->synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL] -1;
@@ -207,8 +141,7 @@ void MidiDecoder::sendMidiEvent() {
 		// Programm change
 		this->synth->allSoundOff();
 		// load curentEvent[1]
-		PresetUtil::readFromEEPROM(this->synthState->fullState.bankNumber,
-				currentEvent[1]);
+		PresetUtil::readFromEEPROM(this->synthState->fullState.bankNumber, currentEvent[1],(char*)&this->synthState->params);
 		this->synthState->propagateAfterNewParamsLoad();
 		this->synthState->resetDisplay();
 

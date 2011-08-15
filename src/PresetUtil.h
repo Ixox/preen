@@ -24,6 +24,9 @@
 #include "wirish.h"
 #include "i2c.h"
 
+#define EEPROM1_ID 0b1010000;
+#define EEPROM2_ID 0b1010001;
+
 
 
 class SynthState;
@@ -38,21 +41,39 @@ public:
 
     static void setSynthState(SynthState* synthState);
 
+
     static void dumpPatch();
     static void dumpLine(int a, int b, int c, int d);
 
-    static void readFromEEPROM(int bankNumber, int preset);
+    static void readFromEEPROM(uint8 bankNumber, uint8 preset, char* params);
     static char* readPresetNameFromEEPROM(int bankNumber, int preset);
-    static void pruneToEEPROM(int bankNumber, int preset);
+    static void savePatchToEEPROM(uint8* params, int bankNumber, int preset);
+    static void saveCurrentPatchToEEPROM(int bankNumber, int preset);
     static void formatEEPROM();
     static void saveConfigToEEPROM();
     static void loadConfigFromEEPROM();
 
-    static void midiPatchDump();
+    static void sendBankToSysex(int bankNumber);
+    static void sendCurrentPatchToSysex();
+    static void sendParamsToSysex(char* params, int size);
+    static int  readSysex(bool patchAllowed, bool bankAllowed);
+    static int  readSysexPatch(char* params);
+    static int  readSysexBank();
+
+    static void copyBank(int source, int dest);
+
+    static int  getNextMidiByte();
+    static void copyPatch(char* source, char* dest);
+
 
 private:
     static char readName[13];
     static SynthState * synthState;
+
+    static uint8 getDeviceId(int bankNumber);
+    static int getAddress(int bankNumber, int preset);
+
+
 
 };
 

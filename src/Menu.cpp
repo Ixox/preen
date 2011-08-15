@@ -79,7 +79,7 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		MENU_LOAD_USER_SELECT_BANK,
 		"User",
 		false,
-		3,
+		4,
 		{MENU_LOAD_USER_SELECT_PRESET}
 	},
 	{
@@ -108,7 +108,7 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		MENU_SAVE_SELECT_USER_BANK,
 		"User",
 		false,
-		3,
+		4,
 		{MENU_SAVE_SELECT_PRESET}
 	},
 	{
@@ -131,7 +131,7 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		"SysEx",
 		true,
 		2,
-		{MENU_MIDI_PATCH_DUMP, MENU_MIDI_BANK_DUMP}
+		{MENU_MIDI_PATCH_DUMP, MENU_MIDI_BANK_SELECT_DUMP}
 	},
 	{
 		MENU_MIDI_PATCH_GET,
@@ -141,10 +141,10 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		{MENU_DONE}
 	},
 	{
-		MENU_MIDI_BANK_DUMP,
+		MENU_MIDI_BANK_SELECT_DUMP,
 		"Bank",
 		false,
-		0,
+		4,
 		{MENU_DONE}
 	},
 	{
@@ -163,6 +163,14 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		false,
 		0,
 		{MENU_DONE}
+	},
+	// == In progress
+	{
+		MENU_IN_PROGRESS,
+		"",
+		false,
+		0,
+		{MENU_IN_PROGRESS}
 	},
 	// ==  CONFIG
     {
@@ -199,6 +207,22 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		true,
 		1,
 		{MENU_DONE}
-	}
+	},
+	// ==================== SAVE BANK
+	{
+		MENU_SAVE_BANK,
+		"",
+		false,
+		4,
+		{MENU_SAVE_BANK_CONFIRM}
+	},
+    {
+    	MENU_SAVE_BANK_CONFIRM,
+        "",
+        false,
+        0,
+        {MENU_DONE}
+    }
+
 };
 
