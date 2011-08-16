@@ -673,11 +673,11 @@ void SynthState::encoderTurned(int encoder, int ticks) {
         } else if (encoder==1) {
             if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
                 fullState.name[fullState.menuSelect] = (fullState.name[fullState.menuSelect] + (ticks>0? 1: -1));
-                if (fullState.name[fullState.menuSelect]<0) {
-                    fullState.name[fullState.menuSelect]=0;
+                if (fullState.name[fullState.menuSelect]<28) {
+                    fullState.name[fullState.menuSelect]=28;
                 }
-                if (fullState.name[fullState.menuSelect]>= getLength(allChars)) {
-                    fullState.name[fullState.menuSelect]= getLength(allChars)-1;
+                if (fullState.name[fullState.menuSelect]> 53) {
+                    fullState.name[fullState.menuSelect] = 53;
                 }
                 propagateNewMenuSelect();
             } else if (fullState.currentMenuItem->maxValue == 128) {
@@ -707,11 +707,11 @@ void SynthState::encoderTurned(int encoder, int ticks) {
         } else if (encoder==3) {
             if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
                 fullState.name[fullState.menuSelect] = (fullState.name[fullState.menuSelect] + (ticks>0? 1: -1));
-                if (fullState.name[fullState.menuSelect]<28) {
-                    fullState.name[fullState.menuSelect]=28;
+                if (fullState.name[fullState.menuSelect]<0) {
+                    fullState.name[fullState.menuSelect]=0;
                 }
-                if (fullState.name[fullState.menuSelect]> 53) {
-                    fullState.name[fullState.menuSelect] = 53;
+                if (fullState.name[fullState.menuSelect]>= getLength(allChars)) {
+                    fullState.name[fullState.menuSelect]= getLength(allChars)-1;
                 }
                 propagateNewMenuSelect();
             } else if (fullState.currentMenuItem->menuState == MENU_CONFIG_MIDI) {

@@ -329,7 +329,8 @@ void FMDisplay::newMenuState(FullState* fullState) {
             fullState->menuPosition[3] = 15;
 			break;
 		case MENU_SAVE_ENTER_NAME:
-			lcd->setCursor(1, menuRow-1);
+			// -2 because must erase preset name....
+			lcd->setCursor(6, menuRow-2);
 			for (int k=0;k<12; k++) {
 				lcd->print(allChars[(int)fullState->name[k]]);
 			}
@@ -408,9 +409,9 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
         lcd->print(PresetUtil::readPresetNameFromEEPROM(fullState->bankNumber, fullState->menuSelect));
 		break;
 	case MENU_SAVE_ENTER_NAME:
-		lcd->setCursor(1+fullState->menuSelect, menuRow-1);
+		lcd->setCursor(6+fullState->menuSelect, menuRow-2);
 		lcd->print(allChars[(int)fullState->name[fullState->menuSelect]]);
-		lcd->setCursor(1+fullState->menuSelect, menuRow-1);
+		lcd->setCursor(6+fullState->menuSelect, menuRow-2);
 		lcd->cursor();
 		break;
 	case MENU_CONFIG_MIDI:
