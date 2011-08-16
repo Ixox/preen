@@ -44,15 +44,16 @@ public:
         }
 	}
 
-    void resetCurrentDestination() {
+    void resetAllDestination() {
         for (int k=0; k< DESTINATION_MAX; k++) {
             currentDestinations[k] = 0;
+            futurDestinations[k] = 0;
         }
     }
 
-    void resetUsedDestination() {
+    void resetUsedFuturDestination() {
         for (int k=0; k< MATRIX_SIZE; k++) {
-            currentDestinations[(int)rows[k].destination] = 0;
+        	futurDestinations[(int)rows[k].destination] = 0;
         }
     }
 

@@ -81,7 +81,7 @@ public:
             }
         } else if (type == SYNTH_PARAM_TYPE_MATRIX && encoder == ENCODER_MATRIX_DEST) {
             // Reset all destination
-            matrix.resetCurrentDestination();
+            matrix.resetAllDestination();
         } else if (type == SYNTH_PARAM_TYPE_LFO && encoder == ENCODER_LFO_KSYNC) {
             lfo[currentRow - ROW_LFO1].reloadRamp();
         }

@@ -141,13 +141,11 @@ bool Synth::isPlaying() {
 }
 
 int Synth::getSample() {
-	int sample = voices[0].getSample();
-	sample += voices[1].getSample();
-	sample += voices[2].getSample();
-	sample += voices[3].getSample();
-	return sample / this->synthState->params.engine1.numberOfVoice;
-	// 4 voices :
-	//return sample >> 2;
+		int sample = voices[0].getSample();
+		sample += voices[1].getSample();
+		sample += voices[2].getSample();
+		sample += voices[3].getSample();
+		return sample / this->synthState->params.engine1.numberOfVoice;
 }
 
 void Synth::nextSample() {
@@ -164,7 +162,8 @@ void Synth::nextSample() {
 		this->lfo[step32].nextValue();
 		break;
 	case 4:
-		this->matrix.resetUsedDestination();
+		// Value must be reset because the matrix only add value to destination.
+		this->matrix.resetUsedFuturDestination();
 		break;
 	case 5:
 	case 6:
@@ -238,7 +237,7 @@ void Synth::checkMaxVoice() {
 
 void Synth::afterNewParamsLoad() {
 	matrix.resetSources();
-    matrix.resetCurrentDestination();
+    matrix.resetAllDestination();
     env1.reloadADSR();
     env2.reloadADSR();
     env3.reloadADSR();

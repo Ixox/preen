@@ -607,7 +607,8 @@ SynthState::SynthState() {
     fullState.bankNumber = 0;
     fullState.presetNumber = 0;
     fullState.internalPresetNumber = 0;
-    fullState.loadPresetOrUser = 0;
+    fullState.loadWhat = 0;
+    fullState.saveWhat = 0;
     fullState.midiConfigValue[MIDICONFIG_CHANNEL] = 0;
     fullState.midiConfigValue[MIDICONFIG_THROUGH] = 0;
     fullState.midiConfigValue[MIDICONFIG_RECEIVES] = 3;
@@ -997,7 +998,10 @@ const MenuItem* SynthState::afterButtonPressed() {
         PresetUtil::saveConfigToEEPROM();
         break;
     case MENU_LOAD:
-        fullState.loadPresetOrUser = fullState.menuSelect;
+        fullState.loadWhat = fullState.menuSelect;
+        break;
+    case MENU_SAVE:
+        fullState.saveWhat = fullState.menuSelect;
         break;
      default:
         break;
@@ -1020,7 +1024,10 @@ const MenuItem* SynthState::afterButtonPressed() {
         fullState.menuSelect = fullState.bankNumber;
         break;
     case MENU_LOAD:
-        fullState.menuSelect = fullState.loadPresetOrUser;
+        fullState.menuSelect = fullState.loadWhat;
+        break;
+    case MENU_SAVE:
+        fullState.menuSelect = fullState.saveWhat;
         break;
     case MENU_LOAD_INTERNAL:
         propagateBeforeNewParamsLoad();

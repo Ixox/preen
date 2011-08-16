@@ -89,7 +89,8 @@ struct FullState {
 	const MenuItem* currentMenuItem;
 	char name[13];
 	bool presetModified;
-	unsigned char loadPresetOrUser;
+	unsigned char loadWhat;
+	unsigned char saveWhat;
 	unsigned char firstMenu;
 	unsigned char  menuPosition[4];
 	char  midiConfigValue[MIDICONFIG_SIZE];

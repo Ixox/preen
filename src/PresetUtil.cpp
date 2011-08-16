@@ -152,9 +152,8 @@ void PresetUtil::readFromEEPROM(uint8 bankNumber, uint8 preset, char* params) {
 }
 
 char* PresetUtil::readPresetNameFromEEPROM(int bankNumber, int preset) {
-
 	uint8 deviceaddress = PresetUtil::getDeviceId(bankNumber);
-	int address = PresetUtil::getAddress(bankNumber, preset);
+	int address = PresetUtil::getAddress(bankNumber, preset) + 108;
 	uint8 bufReadAddress[2];
 	i2c_msg msgsRead[2];
 

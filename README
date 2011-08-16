@@ -75,6 +75,9 @@ Todo before V1.0 :
 . Documentation
 . Bugs : sometime freeze when reading EEPROM
          Current patch can be corrupted after loading new one.
+	 Menu memory : Save/Sysex... is not stored...
+. Save add default possibility (replace the default patch).
+. Forward midi must use the ring buffer
 
 --------------------------------------------
 Hardware (to be detailed)
