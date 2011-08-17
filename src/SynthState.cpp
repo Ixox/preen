@@ -997,6 +997,9 @@ const MenuItem* SynthState::afterButtonPressed() {
     case MENU_CONFIG_MIDI_SAVE:
         PresetUtil::saveConfigToEEPROM();
         break;
+    case MENU_SAVE_DEFAULT:
+        PresetUtil::saveCurrentPatchAsDefault();
+        break;
     case MENU_LOAD:
         fullState.loadWhat = fullState.menuSelect;
         break;

@@ -343,6 +343,10 @@ void FMDisplay::newMenuState(FullState* fullState) {
 			lcd->setCursor(1, menuRow-1);
 			lcd->print("Confirm Format ?");
 			break;
+		case MENU_SAVE_DEFAULT:
+			lcd->setCursor(1, menuRow-1);
+			lcd->print("Save to default ?");
+			break;
 		case MENU_MIDI_SYSEX_GET:
 			lcd->setCursor(1, menuRow-1);
 			lcd->print("Waiting SysEx...");

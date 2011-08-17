@@ -65,6 +65,8 @@ public:
     static int  getNextMidiByte();
     static void copyPatch(char* source, char* dest);
 
+    static void loadDefaultPatchIfAny();
+    static void saveCurrentPatchAsDefault();
 
 private:
     static char readName[13];

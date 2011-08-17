@@ -52,8 +52,9 @@ int PresetUtil::getAddress(int bankNumber, int preset) {
 	if (bankNumber <4) {
 		return preset * 128 + bankNumber * 128 * 128;
 	} else {
+		// Bank number 4 where is stored default patch...
 		// Bank number 5 (tmp bank) is at the end of EEPROM2
-		return preset * 128 + 3 * 128 * 128;
+		return preset * 128 + ((bankNumber-4)+1) * 128 * 128;
 	}
 }
 
@@ -532,4 +533,25 @@ void PresetUtil::copyBank(int source, int dest) {
 		PresetUtil::readFromEEPROM(source, preset, params);
 		PresetUtil::savePatchToEEPROM((uint8 *)params, dest, preset);
 	}
+}
+
+
+void PresetUtil::loadDefaultPatchIfAny() {
+	char params[sizeof(struct AllSynthParams)];
+
+	PresetUtil::readFromEEPROM(5, 0, params);
+	if (params[0] == EEPROM_CONFIG_CHECK) {
+        PresetUtil::readFromEEPROM(5, 1, (char*)&PresetUtil::synthState->params);
+	}
+}
+
+
+void PresetUtil::saveCurrentPatchAsDefault() {
+	uint8 params[sizeof(struct AllSynthParams)];
+
+	for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
+		params[k] = EEPROM_CONFIG_CHECK;
+	}
+	PresetUtil::savePatchToEEPROM(params, 5, 0);
+	PresetUtil::saveCurrentPatchToEEPROM(5,1);
 }

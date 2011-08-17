@@ -77,7 +77,7 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 	},
 	{
 		MENU_LOAD_USER_SELECT_BANK,
-		"User",
+		"Bank",
 		false,
 		4,
 		{MENU_LOAD_USER_SELECT_PRESET}
@@ -101,12 +101,12 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		MENU_SAVE,
 		"Save",
 		true,
-		2,
-		{MENU_SAVE_SELECT_USER_BANK, MENU_MIDI_SYSEX_DUMP }
+		3,
+		{MENU_SAVE_SELECT_USER_BANK, MENU_SAVE_DEFAULT, MENU_MIDI_SYSEX_DUMP }
 	},
 	{
 		MENU_SAVE_SELECT_USER_BANK,
-		"User",
+		"Bank",
 		false,
 		4,
 		{MENU_SAVE_SELECT_PRESET}
@@ -117,6 +117,13 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 		false,
 		128,
 		{MENU_SAVE_ENTER_NAME}
+	},
+	{
+		MENU_SAVE_DEFAULT,
+		"Deflt",
+		false,
+		0,
+		{MENU_DONE}
 	},
 	{
 		MENU_SAVE_ENTER_NAME,

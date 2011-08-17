@@ -179,7 +179,7 @@ void setup()
 
     fillSoundBuffer();
     for (int k=0; k<13; k++) {
-        synth.noteOn(60+k,100);
+        synth.noteOn(60+k, 60);
         for (int cpt=0; cpt<1500; cpt++) {
             fillSoundBuffer();
             delayMicroseconds(30);
@@ -191,6 +191,16 @@ void setup()
         }
     }
 
+    for (int cpt=0; cpt<10000; cpt++) {
+        fillSoundBuffer();
+        delayMicroseconds(30);
+    }
+
+    synthState.propagateBeforeNewParamsLoad();
+    PresetUtil::loadDefaultPatchIfAny();
+    synthState.propagateAfterNewParamsLoad();
+
+    fillSoundBuffer();
     fmDisplay.init(&lcd);
 
 }
