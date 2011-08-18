@@ -10,9 +10,9 @@
 |/       |/   \__/(_______/(_______/|/    )_)|/       |/     \|
 
 -----------------------------------------                                            
-V0.90
+V0.91
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-August 14th 2011
+August 17th 2011
 
 http://www.preenfm.net
 
@@ -39,12 +39,12 @@ Preen Current Features:
 . Load and save preset to EEPROM.
   . 4 banks of 128 user preset
 
-. Patch and Bank exchange with a computer through midi (sysex).
+. System exclusive to exchange patch and bank with a computer.
 
 . Midi control
   . Control change : 44 CC linked to parameters.
   . 4 CC + modwheel + after touch + velocity assignable as source in the modulation matrix.
-  . Nrpn : allow access to ALL parameter
+  . Nrpn : allow access to ALL parameters
   . Midi channel selectable. Midi for other channels can be forwarded.
 
 . LCD 4x20 
@@ -65,18 +65,11 @@ Preen Current Features:
 
 
 --------------------------------------------
-Update August 14th
-. Midi sysex: dump and read banks
-
---------------------------------------------
 
 Todo before V1.0 : 
 . Implement all midi events
 . Documentation
-. Bugs : sometime freeze when reading EEPROM
-         Current patch can be corrupted after loading new one.
-. Save add default possibility (replace the default patch).
-. Forward midi must use the ring buffer
+. More matrix destination
 
 --------------------------------------------
 Hardware (to be detailed)

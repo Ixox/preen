@@ -85,9 +85,31 @@ struct Nrpn {
     bool readyToSend;
 };
 
-struct ControlChange {
-    uint8 control;
-    uint8 value;
+enum EventType {
+    MIDI_NOTE_OFF = 0x80,
+    MIDI_NOTE_ON = 0x90,
+    MIDI_CONTROL_CHANGE = 0xb0,
+    MIDI_PROGRAM_CHANGE =0xc0,
+    MIDI_AFTER_TOUCH = 0xd0,
+    MIDI_PITCH_BEND = 0xe0
+};
+
+enum EventState {
+	MIDI_EVENT_NEW = 0,
+    MIDI_EVENT_IN_PROGRESS ,
+	MIDI_EVENT_COMPLETE
+};
+
+struct MidiEventState {
+    EventState eventState;
+    uint8 numberOfBytes;
+    uint8 index;
+};
+
+struct MidiEvent {
+	uint8 channel;
+	EventType eventType;
+	uint8 value[2];
 };
 
 class MidiDecoder : public SynthParamListener, public SynthStateAware
@@ -96,8 +118,8 @@ public:
     MidiDecoder();
     ~MidiDecoder();
     void newByte(unsigned char byte);
-    void sendMidiEvent();
-    void controlChange(unsigned char *currentEvent);
+    void midiEventReceived(MidiEvent midiEvent);
+    void controlChange(MidiEvent& midiEvent);
     void decodeNrpn();
     void setSynth(Synth* synth);
     void newParamValueFromExternal(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
@@ -105,23 +127,18 @@ public:
     void newcurrentRow(int newcurrentRow) {}
     void beforeNewParamsLoad() {};
     void afterNewParamsLoad() {};
-    void sendOneMidiEvent();
+    void sendMidiOut();
     void readSysex();
     boolean hasMidiToSend() {
         return (midiToSend.getCount()>0);
     }
 
 private:
-    unsigned char currentEvent[3];
-    bool newEvent;
-    short index;
-    short numberOfBytes;
-    unsigned char channel;
+    struct MidiEventState currentEventState;
+    struct MidiEvent currentEvent;
     Synth* synth;
     Matrix* matrix;
-    RingBuffer<ControlChange, 16> midiToSend;
-    int maxInBuffer;
-    int maxInARow;
+    RingBuffer<MidiEvent, 16> midiToSend;
     struct Nrpn currentNrpn;
 };
 

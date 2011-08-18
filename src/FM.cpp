@@ -244,8 +244,8 @@ void loop() {
     if ((newMicros - midiOutMicros) > 240) {
         if (midiDecoder.hasMidiToSend()) {
 
-            fillSoundBuffer();
-            midiDecoder.sendOneMidiEvent();
+            fillSoundBufferFull();
+            midiDecoder.sendMidiOut();
 
             if (midiSent == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
                 fillSoundBuffer();

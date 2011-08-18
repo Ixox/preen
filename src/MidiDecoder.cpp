@@ -18,14 +18,12 @@
 #include "MidiDecoder.h"
 
 // DEBUG
-extern LiquidCrystal lcd;
+// extern LiquidCrystal lcd;
 
 
 MidiDecoder::MidiDecoder() {
-	newEvent = true;
-	index = 0;
-	maxInBuffer = 0;
-	maxInARow = 0;
+	currentEventState.eventState = MIDI_EVENT_NEW;
+	currentEventState.index = 0;
 }
 
 MidiDecoder::~MidiDecoder() {
@@ -37,48 +35,33 @@ void MidiDecoder::setSynth(Synth* synth) {
 
 
 void MidiDecoder::newByte(unsigned char byte) {
-	bool eventComplete = false;
-	if (newEvent) {
-		unsigned char hi = byte & 0xf0;
-		channel = byte & 0x0f;
-		/*
-		 SerialUSB.print("hi : ");
-		 SerialUSB.println((int)hi);
-		 */
-		switch (hi) {
-		case 0x80:
-		case 0x90:
-		case 0xb0:
-			currentEvent[0] = hi;
-			newEvent = false;
-			index = 0;
-			numberOfBytes = 3;
-			index++;
+
+	if (currentEventState.eventState == MIDI_EVENT_NEW) {
+
+		currentEvent.eventType = (EventType)(byte & 0xf0);
+		currentEvent.channel = byte & 0x0f;
+
+		switch (currentEvent.eventType) {
+		case MIDI_NOTE_OFF:
+		case MIDI_NOTE_ON:
+		case MIDI_CONTROL_CHANGE:
+		case MIDI_PITCH_BEND:
+			currentEventState.numberOfBytes = 2;
+			currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
 			break;
-		case 0xd0:
-		case 0xc0:
-			currentEvent[0] = hi;
-			newEvent = false;
-			index = 0;
-			numberOfBytes = 2;
-			index++;
-			break;
-		case 0xe0:
-			currentEvent[0] = hi;
-			newEvent = false;
-			index = 0;
-			numberOfBytes = 3;
-			index++;
+		case MIDI_AFTER_TOUCH:
+		case MIDI_PROGRAM_CHANGE:
+			currentEventState.numberOfBytes = 1;
+			currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
 			break;
 		case 0xf0:
 		{
+			// System exclusive
 			// Allow patch if real time allowed OR if currenly waiting for sysex
 			// Allow bank if currently waiting for sysex only
 			bool waitingForSysex = this->synthState->fullState.currentMenuItem->menuState == MENU_MIDI_SYSEX_GET;
 			bool realTimeSysexAllowed = this->synthState->fullState.midiConfigValue[MIDICONFIG_REALTIME_SYSEX] == 1;
 			int r = PresetUtil::readSysex(realTimeSysexAllowed || waitingForSysex, waitingForSysex);
-			lcd.setCursor(4, 0);
-			lcd.print((int)r);
 			if (r == 2) {
 				this->synthState->newBankReady();
 			}
@@ -86,62 +69,49 @@ void MidiDecoder::newByte(unsigned char byte) {
 		}
 		}
 	} else {
-		currentEvent[index] = byte;
-		index++;
-		if (index == numberOfBytes) {
-			eventComplete = true;
-			newEvent = true;
-			index = 0;
+		currentEvent.value[currentEventState.index++] = byte;
+		if (currentEventState.index == currentEventState.numberOfBytes) {
+			midiEventReceived(currentEvent);
+			currentEventState.eventState = MIDI_EVENT_NEW;
+			currentEventState.index = 0;
 		}
-	}
-	if (eventComplete) {
-		sendMidiEvent();
 	}
 }
 
 
-void MidiDecoder::sendMidiEvent() {
+void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 	int acceptedChannel = this->synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL] -1;
-	if (acceptedChannel >= 0 && channel != acceptedChannel) {
+	if (acceptedChannel >= 0 && midiEvent.channel != acceptedChannel) {
 		if (this->synthState->fullState.midiConfigValue[MIDICONFIG_THROUGH] == 1) {
-			Serial3.print((unsigned char) (currentEvent[0] + channel));
-			for (int k = 0; k < numberOfBytes - 1; k++) {
-				Serial3.print((unsigned char) (currentEvent[k + 1]));
-			}
+			// Forward to midiout !
+			midiToSend.insert(midiEvent);
 		}
 		return;
 	}
 
-	switch (currentEvent[0]) {
-	case 0x80:
-		this->synth->noteOff(currentEvent[1]);
+	switch (midiEvent.eventType) {
+	case MIDI_NOTE_OFF:
+		this->synth->noteOff(midiEvent.value[0]);
 		break;
-	case 0x90:
-		this->synth->noteOn(currentEvent[1], currentEvent[2]);
-		this->synth->getMatrix()->setSource(VELOCITY, currentEvent[2]);
+	case MIDI_NOTE_ON:
+		this->synth->noteOn(midiEvent.value[0], midiEvent.value[1]);
+		this->synth->getMatrix()->setSource(VELOCITY, midiEvent.value[1]);
 		break;
-	case 0xb0:
-		/*
-		 SerialUSB.print("control change  : ");
-		 SerialUSB.print( (short)currentEvent[1]);
-		 SerialUSB.print(", ");
-		 SerialUSB.println((short) currentEvent[2]);
-		 */
-		controlChange(currentEvent);
+	case MIDI_CONTROL_CHANGE:
+		controlChange(midiEvent);
 		break;
-	case 0xd0:
-		this->synth->getMatrix()->setSource(AFTERTOUCH, currentEvent[1]);
+	case MIDI_AFTER_TOUCH:
+		this->synth->getMatrix()->setSource(AFTERTOUCH, midiEvent.value[0]);
 		break;
-	case 0xe0:
+	case MIDI_PITCH_BEND:
 		this->synth->getMatrix()->setSource(PITCHBEND,
-				(int) ((((int) currentEvent[2] << 7) + (int) currentEvent[1]
+				(int) ((((int) midiEvent.value[1] << 7) + (int) midiEvent.value[0]
 						- 8192) >> 6));
 		break;
-	case 0xc0:
+	case MIDI_PROGRAM_CHANGE:
 		// Programm change
 		this->synth->allSoundOff();
-		// load curentEvent[1]
-		PresetUtil::readFromEEPROM(this->synthState->fullState.bankNumber, currentEvent[1],(char*)&this->synthState->params);
+		PresetUtil::readFromEEPROM(this->synthState->fullState.bankNumber, midiEvent.value[0],(char*)&this->synthState->params);
 		this->synthState->propagateAfterNewParamsLoad();
 		this->synthState->resetDisplay();
 
@@ -149,203 +119,203 @@ void MidiDecoder::sendMidiEvent() {
 	}
 }
 
-void MidiDecoder::controlChange(unsigned char *currentEvent) {
+void MidiDecoder::controlChange(MidiEvent& midiEvent) {
 	int receives = this->synthState->fullState.midiConfigValue[MIDICONFIG_RECEIVES] ;
 	if (receives == 1 || receives ==3) {
-		switch (currentEvent[1]) {
+		switch (midiEvent.value[0]) {
 		case CC_BANK_SELECT:
-			if (currentEvent[2] >= 1 and currentEvent[2] <= 3) {
-				this->synthState->fullState.bankNumber = currentEvent[2];
+			if (midiEvent.value[1] >= 1 and midiEvent.value[1] <= 3) {
+				this->synthState->fullState.bankNumber = midiEvent.value[1];
 			}
 			break;
 		case CC_MODWHEEL:
-			this->synth->getMatrix()->setSource(MODWHEEL, currentEvent[2]);
+			this->synth->getMatrix()->setSource(MODWHEEL, midiEvent.value[1]);
 			break;
 		case CC_VOICE:
-			if (currentEvent[2] >= 1 and currentEvent[2] <= 4) {
+			if (midiEvent.value[1] >= 1 and midiEvent.value[1] <= 4) {
 				this->synthState->setNewValue(ROW_ENGINE, ENCODER_ENGINE_VOICE,
-						currentEvent[2]);
+						midiEvent.value[1]);
 			}
 			break;
 		case CC_GLIDE:
 			this->synthState->setNewValue(ROW_ENGINE, ENCODER_ENGINE_GLIDE,
-					currentEvent[2]);
+					midiEvent.value[1]);
 			break;
 		case CC_IM1:
 			this->synthState->setNewValue(ROW_MODULATION, ENCODER_ENGINE_IM1,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_IM2:
 			this->synthState->setNewValue(ROW_MODULATION, ENCODER_ENGINE_IM2,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_IM3:
 			this->synthState->setNewValue(ROW_MODULATION, ENCODER_ENGINE_IM3,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_IM4:
 			this->synthState->setNewValue(ROW_MODULATION, ENCODER_ENGINE_IM4,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_MIX1:
 			this->synthState->setNewValue(ROW_OSC_MIX, ENCODER_ENGINE_MIX1,
-					currentEvent[2]);
+					midiEvent.value[1]);
 			break;
 		case CC_MIX2:
 			this->synthState->setNewValue(ROW_OSC_MIX, ENCODER_ENGINE_MIX2,
-					currentEvent[2]);
+					midiEvent.value[1]);
 			break;
 		case CC_MIX3:
 			this->synthState->setNewValue(ROW_OSC_MIX, ENCODER_ENGINE_MIX3,
-					currentEvent[2]);
+					midiEvent.value[1]);
 			break;
 		case CC_MIX4:
 			this->synthState->setNewValue(ROW_OSC_MIX, ENCODER_ENGINE_MIX4,
-					currentEvent[2]);
+					midiEvent.value[1]);
 			break;
 		case CC_OSC1_FREQ:
 			this->synthState->setNewValue(ROW_OSC1, ENCODER_OSC_FREQ,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_OSC2_FREQ:
 			this->synthState->setNewValue(ROW_OSC2, ENCODER_OSC_FREQ,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_OSC3_FREQ:
 			this->synthState->setNewValue(ROW_OSC3, ENCODER_OSC_FREQ,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_OSC4_FREQ:
 			this->synthState->setNewValue(ROW_OSC4, ENCODER_OSC_FREQ,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_OSC5_FREQ:
 			this->synthState->setNewValue(ROW_OSC5, ENCODER_OSC_FREQ,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_OSC6_FREQ:
 			this->synthState->setNewValue(ROW_OSC6, ENCODER_OSC_FREQ,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_OSC1_DETUNE:
 			this->synthState->setNewValue(ROW_OSC1, ENCODER_OSC_FTUNE,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_OSC2_DETUNE:
 			this->synthState->setNewValue(ROW_OSC2, ENCODER_OSC_FTUNE,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_OSC3_DETUNE:
 			this->synthState->setNewValue(ROW_OSC3, ENCODER_OSC_FTUNE,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_OSC4_DETUNE:
 			this->synthState->setNewValue(ROW_OSC4, ENCODER_OSC_FTUNE,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_OSC5_DETUNE:
 			this->synthState->setNewValue(ROW_OSC5, ENCODER_OSC_FTUNE,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_OSC6_DETUNE:
 			this->synthState->setNewValue(ROW_OSC6, ENCODER_OSC_FTUNE,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ENV1_ATTACK:
 			this->synthState->setNewValue(ROW_ENV1, ENCODER_ENV_A,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ENV1_RELEASE:
 			this->synthState->setNewValue(ROW_ENV1, ENCODER_ENV_R,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ENV2_ATTACK:
 			this->synthState->setNewValue(ROW_ENV2, ENCODER_ENV_A,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ENV2_RELEASE:
 			this->synthState->setNewValue(ROW_ENV2, ENCODER_ENV_R,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ENV3_ATTACK:
 			this->synthState->setNewValue(ROW_ENV3, ENCODER_ENV_A,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ENV3_RELEASE:
 			this->synthState->setNewValue(ROW_ENV3, ENCODER_ENV_R,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ENV4_ATTACK:
 			this->synthState->setNewValue(ROW_ENV4, ENCODER_ENV_A,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ENV4_RELEASE:
 			this->synthState->setNewValue(ROW_ENV4, ENCODER_ENV_R,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ENV5_ATTACK:
 			this->synthState->setNewValue(ROW_ENV5, ENCODER_ENV_A,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ENV5_RELEASE:
 			this->synthState->setNewValue(ROW_ENV5, ENCODER_ENV_R,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ENV6_ATTACK:
 			this->synthState->setNewValue(ROW_ENV6, ENCODER_ENV_A,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ENV6_RELEASE:
 			this->synthState->setNewValue(ROW_ENV6, ENCODER_ENV_R,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_MATRIXROW1_MUL:
 			this->synthState->setNewValue(ROW_MATRIX1, ENCODER_MATRIX_MUL,
-					currentEvent[2] * 2 - 128);
+					midiEvent.value[1] * 2 - 128);
 			break;
 		case CC_MATRIXROW2_MUL:
 			this->synthState->setNewValue(ROW_MATRIX2, ENCODER_MATRIX_MUL,
-					currentEvent[2] * 2 - 128);
+					midiEvent.value[1] * 2 - 128);
 			break;
 		case CC_MATRIXROW3_MUL:
 			this->synthState->setNewValue(ROW_MATRIX3, ENCODER_MATRIX_MUL,
-					currentEvent[2] * 2 - 128);
+					midiEvent.value[1] * 2 - 128);
 			break;
 		case CC_MATRIXROW4_MUL:
 			this->synthState->setNewValue(ROW_MATRIX4, ENCODER_MATRIX_MUL,
-					currentEvent[2] * 2 - 128);
+					midiEvent.value[1] * 2 - 128);
 			break;
 		case CC_MATRIXROW5_MUL:
 			this->synthState->setNewValue(ROW_MATRIX5, ENCODER_MATRIX_MUL,
-					currentEvent[2] * 2 - 128);
+					midiEvent.value[1] * 2 - 128);
 			break;
 		case CC_MATRIXROW6_MUL:
 			this->synthState->setNewValue(ROW_MATRIX6, ENCODER_MATRIX_MUL,
-					currentEvent[2] * 2 - 128);
+					midiEvent.value[1] * 2 - 128);
 			break;
 		case CC_MATRIXROW7_MUL:
 			this->synthState->setNewValue(ROW_MATRIX7, ENCODER_MATRIX_MUL,
-					currentEvent[2] * 2 - 128);
+					midiEvent.value[1] * 2 - 128);
 			break;
 		case CC_MATRIXROW8_MUL:
 			this->synthState->setNewValue(ROW_MATRIX8, ENCODER_MATRIX_MUL,
-					currentEvent[2] * 2 - 128);
+					midiEvent.value[1] * 2 - 128);
 			break;
 		case CC_LFO1_FREQ:
 			this->synthState->setNewValue(ROW_LFO1, CC_LFO1_FREQ,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_LFO2_FREQ:
 			this->synthState->setNewValue(ROW_LFO2, CC_LFO1_FREQ,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_LFO3_FREQ:
 			this->synthState->setNewValue(ROW_LFO3, CC_LFO1_FREQ,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_LFO4_FREQ:
 			this->synthState->setNewValue(ROW_LFO4, CC_LFO1_FREQ,
-					currentEvent[2] * 2);
+					midiEvent.value[1] * 2);
 			break;
 		case CC_ALL_NOTES_OFF:
 			this->synth->allNoteOff();
@@ -356,19 +326,20 @@ void MidiDecoder::controlChange(unsigned char *currentEvent) {
 		}
 	}
 
+	// Do we accept NRPN in the menu
 	if (receives == 2 || receives ==3) {
-		switch (currentEvent[1]) {
+		switch (midiEvent.value[0]) {
 		case 99:
-			this->currentNrpn.paramMSB = currentEvent[2];
+			this->currentNrpn.paramMSB = midiEvent.value[1];
 			break;
 		case 98:
-			this->currentNrpn.paramLSB = currentEvent[2];
+			this->currentNrpn.paramLSB = midiEvent.value[1];
 			break;
 		case 38:
-			this->currentNrpn.valueMSB = currentEvent[2];
+			this->currentNrpn.valueMSB = midiEvent.value[1];
 			break;
 		case 6:
-			this->currentNrpn.valueLSB = currentEvent[2];
+			this->currentNrpn.valueLSB = midiEvent.value[1];
 			this->currentNrpn.readyToSend = true;
 			break;
 		case 96:
@@ -412,99 +383,116 @@ void MidiDecoder::newParamValueFromExternal(SynthParamType type,
 void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
 		int encoder, ParameterDisplay* param, int oldValue, int newValue) {
 
-	int sends = this->synthState->fullState.midiConfigValue[MIDICONFIG_SENDS] ;
+	int sendCCOrNRPN = this->synthState->fullState.midiConfigValue[MIDICONFIG_SENDS] ;
+	int channel = this->synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL] -1;
 
-	if (sends == 2) {
+	struct MidiEvent cc;
+	cc.eventType = MIDI_CONTROL_CHANGE;
+	// Si channel = ALL envoie sur 1
+	if (channel == -1) {
+		channel = 0;
+	}
+	cc.channel = channel;
+
+	// Do we send NRPN ?
+	if (sendCCOrNRPN == 2) {
 		// Value to send must be positive
 		int valueToSend = newValue - param->minValue;
-		// NRPN SEND... IN PROGRESS....
-		struct ControlChange cc1, cc2, cc3, cc4;
-		cc1.control = 99;
-		cc1.value = 0;
-		midiToSend.insert(cc1);
-		cc2.control = 98;
-		cc2.value = (uint8) currentrow * NUMBER_OF_ENCODERS + encoder;
-		midiToSend.insert(cc2);
-		cc3.control = 6;
-		cc3.value = (uint8) (valueToSend & 127);
-		midiToSend.insert(cc3);
-		cc4.control = 38;
-		cc4.value = (uint8) (valueToSend >> 7);
-		midiToSend.insert(cc4);
+		// NRPN is 4 control change
+		cc.value[0] = 99;
+		cc.value[1] = 0;
+		midiToSend.insert(cc);
+		cc.value[0] = 98;
+		cc.value[1] = (uint8) currentrow * NUMBER_OF_ENCODERS + encoder;
+		midiToSend.insert(cc);
+		cc.value[0] = 38;
+		cc.value[1] = (uint8) (valueToSend >> 7);
+		midiToSend.insert(cc);
+		cc.value[0] = 6;
+		cc.value[1] = (uint8) (valueToSend & 127);
+		midiToSend.insert(cc);
 	}
 
-	if (sends == 1) {
-		// Send control change
-		struct ControlChange cc;
-		cc.control = 0;
-		cc.value = 0;
+	// Do we send control change
+	if (sendCCOrNRPN == 1) {
+
+		cc.value[0] = 0;
 
 		switch (currentrow) {
 		case ROW_ENGINE:
 			if (encoder == ENCODER_ENGINE_VOICE) {
-				cc.control = CC_VOICE;
-				cc.value = newValue;
+				cc.value[0] = CC_VOICE;
+				cc.value[1] = newValue;
 			} else if (encoder == ENCODER_ENGINE_GLIDE) {
-				cc.control = CC_GLIDE;
-				cc.value = newValue;
+				cc.value[0] = CC_GLIDE;
+				cc.value[1] = newValue;
 			}
 			break;
 		case ROW_MODULATION:
-			cc.control = CC_IM1 + encoder;
-			cc.value = newValue >> 1;
+			cc.value[0] = CC_IM1 + encoder;
+			cc.value[1] = newValue >> 1;
 			break;
 		case ROW_OSC_MIX:
-			cc.control = CC_MIX1 + encoder;
-			cc.value = newValue;
+			cc.value[0] = CC_MIX1 + encoder;
+			cc.value[1] = newValue;
 			break;
 		case ROW_OSC_FIRST ... ROW_OSC_LAST:
 			if (encoder == ENCODER_OSC_FREQ) {
-				cc.control = CC_OSC1_FREQ + (currentrow - ROW_OSC_FIRST);
-				cc.value = newValue >> 1;
+				cc.value[0] = CC_OSC1_FREQ + (currentrow - ROW_OSC_FIRST);
+				cc.value[1] = newValue >> 1;
 			} else if (encoder == ENCODER_OSC_FTUNE) {
-				cc.control = CC_OSC1_DETUNE + (currentrow - ROW_OSC_FIRST);
-				cc.value = newValue >> 1;
+				cc.value[0] = CC_OSC1_DETUNE + (currentrow - ROW_OSC_FIRST);
+				cc.value[1] = newValue >> 1;
 			}
 			break;
 		case ROW_ENV_FIRST ... ROW_ENV_LAST:
 			if (encoder == ENCODER_ENV_A) {
-				cc.control = CC_ENV1_ATTACK + (currentrow - ROW_ENV_FIRST);
-				cc.value = newValue >> 1;
+				cc.value[0] = CC_ENV1_ATTACK + (currentrow - ROW_ENV_FIRST);
+				cc.value[1] = newValue >> 1;
 			} else if (encoder == ENCODER_ENV_R) {
-				cc.control = CC_ENV1_RELEASE + (currentrow - ROW_ENV_FIRST);
-				cc.value = newValue >> 1;
+				cc.value[0] = CC_ENV1_RELEASE + (currentrow - ROW_ENV_FIRST);
+				cc.value[1] = newValue >> 1;
 			}
 			break;
 		case ROW_MATRIX_FIRST ... ROW_MATRIX_LAST:
 			if (encoder == ENCODER_MATRIX_MUL) {
-				cc.control = CC_MATRIXROW1_MUL + currentrow - ROW_MATRIX_FIRST;
-				cc.value = (newValue >> 1) + 64;
+				cc.value[0] = CC_MATRIXROW1_MUL + currentrow - ROW_MATRIX_FIRST;
+				cc.value[1] = (newValue >> 1) + 64;
 			}
 			break;
 		case ROW_LFO_FIRST ... ROW_LFO_LAST:
 			if (encoder == ENCODER_LFO_FREQ) {
-				cc.control = CC_MATRIXROW1_MUL + currentrow - ROW_LFO_FIRST;
-				cc.value = (newValue >> 1);
+				cc.value[0] = CC_MATRIXROW1_MUL + currentrow - ROW_LFO_FIRST;
+				cc.value[1] = (newValue >> 1);
 			}
 			break;
 		}
 
-		if (cc.control != 0) {
+		if (cc.value[0] != 0) {
 			midiToSend.insert(cc);
 		}
 	}
 }
 
-void MidiDecoder::sendOneMidiEvent() {
+void MidiDecoder::sendMidiOut() {
 	int howManyToSend = midiToSend.getCount();
 	if (howManyToSend > 0) {
-		ControlChange toSend = midiToSend.remove();
-		while (midiToSend.getOneAfter().control == toSend.control) {
-			toSend = midiToSend.remove();
+		MidiEvent toSend = midiToSend.remove();
+
+		switch (toSend.eventType) {
+		case MIDI_NOTE_OFF:
+		case MIDI_NOTE_ON:
+		case MIDI_CONTROL_CHANGE:
+		case MIDI_PITCH_BEND:
+			Serial3.print((unsigned char) (toSend.eventType + toSend.channel));
+			Serial3.print((unsigned char) toSend.value[0]);
+			Serial3.print((unsigned char) toSend.value[1]);
+			break;
+		case MIDI_AFTER_TOUCH:
+		case MIDI_PROGRAM_CHANGE:
+			Serial3.print((unsigned char) (toSend.eventType + toSend.channel));
+			Serial3.print((unsigned char) toSend.value[0]);
+			break;
 		}
-		Serial3.print((unsigned char) (0xb0
-				+ this->synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL]));
-		Serial3.print((unsigned char) toSend.control);
-		Serial3.print((unsigned char) toSend.value);
 	}
 }
