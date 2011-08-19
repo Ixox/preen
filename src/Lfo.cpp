@@ -25,6 +25,20 @@ Lfo::~Lfo() {
 }
 
 void Lfo::init(int number, Matrix *matrix, SourceEnum source) {
+	switch (number) {
+	case 0:
+		this->destination = LFO1_FREQ ;
+		break;
+	case 1:
+		this->destination = LFO2_FREQ ;
+		break;
+	case 2:
+		this->destination = LFO3_FREQ ;
+		break;
+	case 3:
+		this->destination = LFO4_FREQ ;
+		break;
+	}
 	this->matrix = matrix;
 	this->source = source;
     this->ramp = 0;

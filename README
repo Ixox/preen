@@ -10,9 +10,9 @@
 |/       |/   \__/(_______/(_______/|/    )_)|/       |/     \|
 
 -----------------------------------------                                            
-V0.91
+V0.92
 By Xavier Hosxe : xavier dot hosxe {at} gmail dot com
-August 17th 2011
+August 18th 2011
 
 http://www.preenfm.net
 
@@ -32,8 +32,8 @@ Preen Current Features:
 . Oscillator : 5 waveform (4 sin variation + noise), linked to keyb freq or fix, fine tune.
 . Enveloppe : ADSR (A,D and R up to 2 seconds).
 . 4 voices for 3 ops Algos, 3 voices for 4 ops algos, and 2 voices for 6 ops algo
-. 4 LFOs (3 waveform, frequency in Hz, can be synced to new note, ramp up to 4 seconds).
-. 8 rows moldulation matrix
+. 4 LFOs (3 waveform, frequency in Hz, ramp up to 4 seconds resynched on new note).
+. 8 rows moldulation matrix (12 sources, 16 destinations)
 . Glide available when voice set to 1
 
 . Load and save preset to EEPROM.
@@ -69,7 +69,7 @@ Preen Current Features:
 Todo before V1.0 : 
 . Implement all midi events
 . Documentation
-. More matrix destination
+. Matrix multiply as matrix destination
 
 --------------------------------------------
 Hardware (to be detailed)

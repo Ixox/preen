@@ -43,8 +43,9 @@ public:
 
 		// then new value
 		//	index = (index +  ((lfo->freq << 16) / LFO_SAMPLE_RATE_x_8 ))  & 0xffff;
-		//		int jmp = lfo->freq << 3 ; // << 16 >> 13
-		index = (index + (lfo->freq << 3)) & 0xffff;
+		//		int jmp = lfo->freq	<< 3 ; // << 16 >> 13
+	    int realfreq = lfo->freq + (this->matrix->getDestination(destination) >> 7);
+		index = (index + (realfreq << 3)) & 0xffff;
 
 		switch (lfo->shape) {
 		case LFO_RAMP:
@@ -94,6 +95,7 @@ private:
 	LfoType type;
 	LfoParams* lfo ;
     int index, rampIndex, ramp;
+    DestinationEnum destination;
 };
 
 #endif /* LFO_H_ */

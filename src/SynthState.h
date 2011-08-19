@@ -159,6 +159,10 @@ enum DestinationEnum {
     MIX_OSC2,
     MIX_OSC3,
     MIX_OSC4,
+	LFO1_FREQ,
+	LFO2_FREQ,
+	LFO3_FREQ,
+	LFO4_FREQ ,
 	DESTINATION_MAX
 };
 
