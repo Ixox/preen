@@ -58,7 +58,8 @@ public:
     }
 
     inline void computeFutureDestintation(int k) {
-        futurDestinations[(int)rows[k].destination] += sources[(int)rows[k].source] * rows[k].mul;
+    	int mul = rows[k].mul + (currentDestinations[MTX1_MUL + k] >> 7) ;
+        futurDestinations[(int)rows[k].destination] += sources[(int)rows[k].source] * mul;
     }
 
     void setSource(SourceEnum source, int value) {
