@@ -20,7 +20,8 @@
 
 #include "Voice.h"
 #include "Matrix.h"
-#include "Lfo.h"
+#include "LfoOsc.h"
+#include "LfoEnv.h"
 #include "Env.h"
 #include "SynthParamListener.h"
 #include "wirish.h"
@@ -80,10 +81,10 @@ public:
                 break;
             }
         } else if (type == SYNTH_PARAM_TYPE_MATRIX && encoder == ENCODER_MATRIX_DEST) {
-            // Reset all destination
-            matrix.resetAllDestination();
-        } else if (type == SYNTH_PARAM_TYPE_LFO && encoder == ENCODER_LFO_KSYNC) {
-            lfo[currentRow - ROW_LFO1].reloadRamp();
+            // Reset old destination
+            matrix.resetDestination(oldValue);
+        } else if (type == SYNTH_PARAM_TYPE_LFO) {
+            lfo[currentRow - ROW_LFO1]->valueChanged(encoder);
         }
 
     }
@@ -110,7 +111,9 @@ private:
     unsigned int voiceIndex;
     int cpt;
 
-    Lfo lfo[NUMBER_OF_LFOS];
+    LfoOsc lfoOsc[NUMBER_OF_LFOS -1];
+    LfoEnv lfoEnv;
+    Lfo* lfo[NUMBER_OF_LFOS];
 
     // 6 oscillators Max
     Osc<1> osc1;

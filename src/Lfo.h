@@ -33,82 +33,18 @@ extern int randomOsc;
 class Lfo : public SynthStateAware {
 public:
 	Lfo();
-	~Lfo();
-	void init(int number, Matrix* matrix, SourceEnum source);
 
-	void reloadRamp() {
-	    ramp = lfo->keybRamp << 4; // * 16
-	}
+	virtual void init(int number, Matrix* matrix, SourceEnum source, DestinationEnum dest);
+	virtual void valueChanged(int encoder) = 0;
+	virtual void nextValueInMatrix() = 0 ;
+	virtual void noteOn() = 0;
+	virtual void noteOff() = 0;
 
-	void nextValue() {
-	     int lfoValue;
-
-		// then new value
-		//	index = (index +  ((lfo->freq << 16) / LFO_SAMPLE_RATE_x_8 ))  & 0xffff;
-		//		int jmp = lfo->freq	<< 3 ; // << 16 >> 13
-	    int realfreq = lfo->freq + (this->matrix->getDestination(destination) >> 7);
-
-		switch (lfo->shape) {
-		case LFO_RAMP:
-			index = (index + (realfreq << 3)) & 0xffff;
-			lfoValue = (index>>8)-128;
-			break;
-		case LFO_SAW:
-		{
-			index = (index + (realfreq << 3)) & 0xffff;
-			if (index < 32768) {
-			    lfoValue = (index>>7) - 128;
-			} else {
-			    lfoValue = 383 - (index>>7);
-			}
-			break;
-		}
-		case LFO_SQUARE:
-			index = (index + (realfreq << 3)) & 0xffff;
-			if ((index) < 32768) {
-			    lfoValue = -128;
-			} else {
-                lfoValue = 127;
-			}
-			break;
-
-		case LFO_RANDOM:
-			index = (index + (realfreq << 3));
-			if (index > 0xffff) {
-				 index &= 0xffff;
-				 currentRandomValue = (randomOsc >> 8);
-			}
-			lfoValue = currentRandomValue;
-			break;
-		}
-
-		lfoValue += lfo->bias;
-
-		if (rampIndex < ramp) {
-		    lfoValue = lfoValue * rampIndex  / ramp ;
-            rampIndex ++;
-		}
-
-		matrix->setSource(source, lfoValue);
-	}
-
-	void resetRamp() {
-        if (ramp > 0) {
-            index = 0;
-            rampIndex = 0;
-        } else {
-            rampIndex = 1; // greater than 0
-        }
-	}
-
-private:
+protected:
 	Matrix *matrix;
-	SourceEnum source;
-	LfoType type;
-	LfoParams* lfo ;
-    int index, rampIndex, ramp;
     DestinationEnum destination;
-    int currentRandomValue;
+	SourceEnum source;
+	int index;
 };
 
 #endif /* LFO_H_ */

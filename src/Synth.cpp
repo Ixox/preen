@@ -25,6 +25,11 @@ Synth::~Synth(void) {
 
 // Must be call after setSynthState
 void Synth::init() {
+	for (int k=0; k<NUMBER_OF_LFOS - 1; k++) {
+	    lfo[k] = &lfoOsc[k];
+	}
+    lfo[NUMBER_OF_LFOS - 1] = &lfoEnv;
+
 	matrix.setSynthState(this->synthState);
 
 	env1.setSynthState(this->synthState);
@@ -54,8 +59,8 @@ void Synth::init() {
 	osc6.init(&matrix);
 
 	for (int k = 0; k < NUMBER_OF_LFOS; k++) {
-		lfo[k].setSynthState(this->synthState);
-		lfo[k].init(k, &this->matrix, (SourceEnum)(LFO1 + k));
+		lfo[k]->setSynthState(this->synthState);
+		lfo[k]->init(k, &this->matrix, (SourceEnum)(MATRIX_SOURCE_LFO1 + k), (DestinationEnum)(LFO1_FREQ + k));
 	}
 	for (int k = 0; k < MAX_NUMBER_OF_VOICES; k++) {
 		voices[k].setSynthState(this->synthState);
@@ -159,7 +164,7 @@ void Synth::nextSample() {
 	case 1:
 	case 2:
 	case 3:
-		this->lfo[step32].nextValue();
+		this->lfo[step32]->nextValueInMatrix();
 		break;
 	case 4:
 		// Value must be reset because the matrix only add value to destination.
@@ -245,7 +250,7 @@ void Synth::afterNewParamsLoad() {
     env5.reloadADSR();
     env6.reloadADSR();
     for (int k=0; k<NUMBER_OF_LFOS; k++) {
-        lfo[k].reloadRamp();
+        lfo[k]->valueChanged(-1);
     }
 	checkMaxVoice();
 }

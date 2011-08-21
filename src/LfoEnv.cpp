@@ -15,27 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Lfo.h"
+#include "LfoEnv.h"
 
-Lfo::Lfo() {
-}
 
-void Lfo::init(int number, Matrix *matrix, SourceEnum source, DestinationEnum dest) {
-	switch (number) {
-	case 0:
-		this->destination = LFO1_FREQ ;
-		break;
-	case 1:
-		this->destination = LFO2_FREQ ;
-		break;
-	case 2:
-		this->destination = LFO3_FREQ ;
-		break;
-	case 3:
-		this->destination = LFO4_FREQ ;
-		break;
-	}
-	this->matrix = matrix;
-	this->source = source;
-	this->index = 0;
+
+void LfoEnv::init(int number, Matrix *matrix, SourceEnum source, DestinationEnum dest) {
+	Lfo::init(number, matrix, source, dest);
+	this->envParams = (EnvelopeParams *)&this->synthState->params.lfo4;
+	this->valueChanged(-1);
 }

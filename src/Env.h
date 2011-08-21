@@ -52,12 +52,12 @@ public:
 
     void reloadADSR() {
         EnvelopeParams * e = (EnvelopeParams *)&(this->synthState->params.env1);
-        EnvelopeParams* envState = &e[number-1];
+        EnvelopeParams* envParams = &e[number-1];
 
-        adsr[0] = envState->attack * envState->attack +1;
-        adsr[1] = envState->decay * envState->decay+1;
-        adsr[2] = envState->sustain << 7;
-        adsr[3] = envState->release * envState->release+1;
+        adsr[0] = envParams->attack * envParams->attack +1;
+        adsr[1] = envParams->decay * envParams->decay+1;
+        adsr[2] = envParams->sustain << 7;
+        adsr[3] = envParams->release * envParams->release+1;
 
         incA = (32767<<15) / adsr[0];
         incD = ((32767 - adsr[2]) << 15) / adsr[1];
@@ -68,6 +68,7 @@ public:
     void noteOn(struct EnvData& env) {
         env.currentAmp= 0;
         env.currentAmpSpeed = incA;
+        // index is decremented
         env.index = adsr[0] + 1;
         env.envState = ENV_STATE_ON_A;
     }
@@ -189,6 +190,5 @@ private:
     unsigned int adsr[4];
     // Ramp speed Of attack and Decay
     unsigned int incA, incD;
-
 };
 

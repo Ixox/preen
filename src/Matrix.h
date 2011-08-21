@@ -39,7 +39,7 @@ public:
 
 
 	void resetSources() {
-        for (int k=0; k< SOURCE_MAX; k++) {
+        for (int k=0; k< MATRIX_SOURCE_MAX; k++) {
         	setSource((SourceEnum)k, 0);
         }
 	}
@@ -50,6 +50,12 @@ public:
             futurDestinations[k] = 0;
         }
     }
+
+    void resetDestination(int k) {
+    	currentDestinations[k] = 0;
+		futurDestinations[k] = 0;
+    }
+
 
     void resetUsedFuturDestination() {
         for (int k=0; k< MATRIX_SIZE; k++) {
@@ -80,9 +86,9 @@ public:
     }
 
 private:
-    bool sourceUsed[SOURCE_MAX];
+    bool sourceUsed[MATRIX_SOURCE_MAX];
     bool destinationUsed[DESTINATION_MAX];
-    int sources[SOURCE_MAX];
+    int sources[MATRIX_SOURCE_MAX];
     int destinations1[DESTINATION_MAX];
     int destinations2[DESTINATION_MAX];
     int *currentDestinations;

@@ -32,7 +32,9 @@ Preen Current Features:
 . Oscillator : 5 waveform (4 sin variation + noise), linked to keyb freq or fix, fine tune.
 . Enveloppe : ADSR (A,D and R up to 2 seconds).
 . 4 voices for 3 ops Algos, 3 voices for 4 ops algos, and 2 voices for 6 ops algo
-. 4 LFOs - 4 waveform (Saw, ramp, square, random) - frequency in Hz - ramp up to 4 seconds resynched on new note - 
+. 4 LFOs
+    3 LFO oscillators : 4 waveform (Saw, ramp, square, random) - frequency in Hz - ramp up to 4 seconds resynched on new note 	
+    1 LFO enveloppe 
 . 8 rows moldulation matrix (12 sources, 24 destinations)
 . Glide available when voice set to 1
 

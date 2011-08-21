@@ -95,16 +95,16 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 		break;
 	case MIDI_NOTE_ON:
 		this->synth->noteOn(midiEvent.value[0], midiEvent.value[1]);
-		this->synth->getMatrix()->setSource(VELOCITY, midiEvent.value[1]);
+		this->synth->getMatrix()->setSource(MATRIX_SOURCE_VELOCITY, midiEvent.value[1]);
 		break;
 	case MIDI_CONTROL_CHANGE:
 		controlChange(midiEvent);
 		break;
 	case MIDI_AFTER_TOUCH:
-		this->synth->getMatrix()->setSource(AFTERTOUCH, midiEvent.value[0]);
+		this->synth->getMatrix()->setSource(MATRIX_SOURCE_AFTERTOUCH, midiEvent.value[0]);
 		break;
 	case MIDI_PITCH_BEND:
-		this->synth->getMatrix()->setSource(PITCHBEND,
+		this->synth->getMatrix()->setSource(MATRIX_SOURCE_PITCHBEND,
 				(int) ((((int) midiEvent.value[1] << 7) + (int) midiEvent.value[0]
 						- 8192) >> 6));
 		break;
@@ -129,7 +129,7 @@ void MidiDecoder::controlChange(MidiEvent& midiEvent) {
 			}
 			break;
 		case CC_MODWHEEL:
-			this->synth->getMatrix()->setSource(MODWHEEL, midiEvent.value[1]);
+			this->synth->getMatrix()->setSource(MATRIX_SOURCE_MODWHEEL, midiEvent.value[1]);
 			break;
 		case CC_VOICE:
 			if (midiEvent.value[1] >= 1 and midiEvent.value[1] <= 4) {

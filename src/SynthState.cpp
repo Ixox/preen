@@ -83,13 +83,25 @@ struct ParameterRowDisplay envParameterRow = {
         }
 };
 
+struct ParameterRowDisplay lfoEnvParameterRow = {
+        "LFO (Env)",
+        { "Attk", "Deca", "Sust", "Rele" },
+        {
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames }
+        }
+};
+
 const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW", "Velo", "CC1 ", "CC2 ", "CC3 ", "CC4 "} ;
-const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "IM1 ", "IM2 ", "IM3 ", "IM4 ", "Mix1", "Mix2", "Mix3", "Mix4",  "lfo1", "lfo2", "lfo3", "lfo4", "mtx1", "mtx2", "mtx3", "mtx4", "mtx5", "mtx6", "mtx7", "mtx8"} ;
+const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "o6Fr", "o6Fr", "IM1 ", "IM2 ", "IM3 ", "IM4 ", "Mix1", "Mix2", "Mix3", "Mix4",
+		"lfo1", "lfo2", "lfo3", "lfo4", "mtx1", "mtx2", "mtx3", "mtx4", "mtx5", "mtx6", "mtx7", "mtx8" } ;
 struct ParameterRowDisplay matrixParameterRow = {
         "Matrix",
         { "Srce", "Mult", "Dest", "    " },
         {
-                { SOURCE_NONE, SOURCE_MAX-1, DISPLAY_TYPE_STRINGS, matrixSourceNames},
+                { MATRIX_SOURCE_NONE, MATRIX_SOURCE_MAX-1, DISPLAY_TYPE_STRINGS, matrixSourceNames},
                 { (char)-127, 127, DISPLAY_TYPE_SIGNED_CHAR, nullNames },
                 { DESTINATION_NONE, DESTINATION_MAX-1, DISPLAY_TYPE_STRINGS, matrixDestNames},
                 { 0, 0, DISPLAY_TYPE_NONE, nullNames }
@@ -138,7 +150,7 @@ struct AllParameterRowsDisplay allParameterRows = {
                 &lfoParameterRow,
                 &lfoParameterRow,
                 &lfoParameterRow,
-                &lfoParameterRow
+                &lfoEnvParameterRow
         }
 };
 
@@ -184,14 +196,14 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
 
                 // Matrix row
 
-                { MODWHEEL ,   16,   INDEX_MODULATION1, 0 },
-                { PITCHBEND,   64,  OSC1_FREQ,   0 },
-                { LFO1,        0,   OSC1_FREQ, 0 },
-                { SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
-                { SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
-                { SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
-                { SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
-                { SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
+                { MATRIX_SOURCE_MODWHEEL ,   16,   INDEX_MODULATION1, 0 },
+                { MATRIX_SOURCE_PITCHBEND,   64,  OSC1_FREQ,   0 },
+                { MATRIX_SOURCE_LFO1,        0,   OSC1_FREQ, 0 },
+                { MATRIX_SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
+                { MATRIX_SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
+                { MATRIX_SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
+                { MATRIX_SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
+                { MATRIX_SOURCE_NONE, 0,  DESTINATION_NONE, 0 },
 
                 // LFOS
                 { LFO_SAW, 36, 0, 0}, {LFO_SAW, 20, 0, 0 },
@@ -628,10 +640,14 @@ SynthState::SynthState() {
 
 void SynthState::encoderTurned(int encoder, int ticks) {
     if (fullState.synthMode == SYNTH_MODE_EDIT) {
+
         int num = currentRow * NUMBER_OF_ENCODERS + encoder;
         struct ParameterDisplay* param = &(allParameterRows.row[currentRow]->params[encoder]);
         int newValue;
         int oldValue;
+
+        // Store lastAction
+        lastAction = encoder;
 
         if ((param->displayType == DISPLAY_TYPE_SIGNED_CHAR) || (param->displayType == DISPLAY_TYPE_OSC_FREQUENCY && param->minValue<0)) {
             char &value = ((char*)&params)[num];
@@ -766,6 +782,84 @@ void SynthState::resetDisplay() {
 }
 
 
+void SynthState::changeSynthModeRow(int button, int step) {
+	unsigned char lastBecauseOfAlgo;
+
+	switch (button) {
+		case BUTTON_SYNTH:
+			if (showUp[params.engine1.algo].mix == 0) {
+				lastBecauseOfAlgo = ROW_MODULATION;
+			} else {
+				lastBecauseOfAlgo = ROW_ENGINE_LAST;
+			}
+			if (currentRow<ROW_ENGINE_FIRST || currentRow>lastBecauseOfAlgo) {
+				currentRow = engineRow;
+			} else {
+				currentRow += step;
+			}
+			if (currentRow>lastBecauseOfAlgo) {
+				currentRow = ROW_ENGINE_FIRST;
+			} else if (currentRow<ROW_ENGINE_FIRST) {
+				currentRow = lastBecauseOfAlgo;
+			}
+			engineRow = currentRow;
+		break;
+		case BUTTON_OSC:
+			lastBecauseOfAlgo = ROW_OSC_FIRST + showUp[params.engine1.algo].osc - 1;
+			if (currentRow<ROW_OSC_FIRST || currentRow>lastBecauseOfAlgo) {
+				currentRow = oscRow;
+			} else {
+				currentRow += step;
+			}
+			if (currentRow>lastBecauseOfAlgo) {
+				currentRow = ROW_OSC_FIRST;
+			} else if (currentRow<ROW_OSC_FIRST) {
+				currentRow = lastBecauseOfAlgo;
+			}
+			oscRow = currentRow;
+			break;
+			case BUTTON_ENV:
+			lastBecauseOfAlgo = ROW_ENV_FIRST + showUp[params.engine1.algo].osc - 1;
+			if (currentRow<ROW_ENV_FIRST || currentRow>lastBecauseOfAlgo) {
+				currentRow = envRow;
+			} else {
+				currentRow += step;
+			}
+			if (currentRow>lastBecauseOfAlgo) {
+				currentRow = ROW_ENV_FIRST;
+			} else if (currentRow<ROW_ENV_FIRST) {
+				currentRow = lastBecauseOfAlgo;
+			}
+			envRow = currentRow;
+		break;
+		case BUTTON_MATRIX:
+			if (currentRow<ROW_MATRIX_FIRST || currentRow>ROW_MATRIX_LAST) {
+				currentRow = matrixRow;
+			} else {
+				currentRow += step;
+				if (currentRow>ROW_MATRIX_LAST) {
+					currentRow = ROW_MATRIX_FIRST;
+				} else if (currentRow<ROW_MATRIX_FIRST) {
+					currentRow = ROW_MATRIX_LAST;
+				}
+			}
+			matrixRow = currentRow;
+			break;
+		case BUTTON_LFO:
+			if (currentRow<ROW_LFO_FIRST || currentRow>ROW_LFO_LAST) {
+				currentRow = lfoRow;
+			} else {
+				currentRow += step;
+				if (currentRow>ROW_LFO_LAST) {
+					currentRow = ROW_LFO_FIRST;
+				} else if (currentRow<ROW_LFO_FIRST) {
+					currentRow = ROW_LFO_LAST;
+				}
+			}
+			lfoRow = currentRow;
+		break;
+	}
+}
 
 void SynthState::buttonPressed(int button) {
     SynthMode oldSynthMode = fullState.synthMode;
@@ -773,65 +867,16 @@ void SynthState::buttonPressed(int button) {
     // int oldMenuSelect = fullState.menuSelect;
     MenuState oldMenuState = fullState.currentMenuItem->menuState;
 
+
     if (fullState.synthMode == SYNTH_MODE_EDIT)  {
         switch (button) {
         case BUTTON_SYNTH:
-            if (currentRow<ROW_ENGINE_FIRST || currentRow>ROW_ENGINE_LAST) {
-                currentRow = engineRow;
-            } else {
-                currentRow ++;
-                if (currentRow>ROW_ENGINE_LAST) {
-                    currentRow = ROW_ENGINE_FIRST;
-                }
-            }
-            if (currentRow == ROW_OSC_MIX && showUp[params.engine1.algo].mix == 0) {
-                currentRow = ROW_ENGINE_FIRST;
-            }
-            engineRow = currentRow;
-            break;
         case BUTTON_OSC:
-            if (currentRow<ROW_OSC_FIRST || currentRow>ROW_OSC_LAST) {
-                currentRow = oscRow;
-            } else {
-                currentRow ++;
-            }
-            if (currentRow>= (ROW_OSC_FIRST + showUp[params.engine1.algo].osc)) {
-                currentRow = ROW_OSC_FIRST;
-            }
-            oscRow = currentRow;
-            break;
         case BUTTON_ENV:
-            if (currentRow<ROW_ENV_FIRST || currentRow>ROW_ENV_LAST) {
-                currentRow = envRow;
-            } else {
-                currentRow ++;
-            }
-            if (currentRow>= (ROW_ENV_FIRST + showUp[params.engine1.algo].osc)) {
-                currentRow = ROW_ENV_FIRST;
-            }
-            envRow = currentRow;
-            break;
         case BUTTON_MATRIX:
-            if (currentRow<ROW_MATRIX_FIRST || currentRow>ROW_MATRIX_LAST) {
-                currentRow = matrixRow;
-            } else {
-                currentRow ++;
-                if (currentRow>ROW_MATRIX_LAST) {
-                    currentRow = ROW_MATRIX_FIRST;
-                }
-            }
-            matrixRow = currentRow;
-            break;
         case BUTTON_LFO:
-            if (currentRow<ROW_LFO_FIRST || currentRow>ROW_LFO_LAST) {
-                currentRow = lfoRow;
-            } else {
-                currentRow ++;
-                if (currentRow>ROW_LFO_LAST) {
-                    currentRow = ROW_LFO_FIRST;
-                }
-            }
-            lfoRow = currentRow;
+        	lastAction = button + NUMBER_OF_ENCODERS;
+        	changeSynthModeRow(button , 1);
             break;
         case BUTTON_MENUSELECT:
             fullState.synthMode = SYNTH_MODE_MENU;
@@ -840,6 +885,12 @@ void SynthState::buttonPressed(int button) {
             PresetUtil::copyPatch((char*)&params, (char*)&backupParams);
             fullState.currentMenuItem = MenuItemUtil::getMenuItem(MAIN_MENU);
             break;
+        case BUTTON_BACK:
+        	if (this->lastAction < NUMBER_OF_ENCODERS) {
+        		encoderTurned(lastAction, 1);
+        	} else {
+            	changeSynthModeRow(lastAction-NUMBER_OF_ENCODERS , -1);
+        	}
         }
     } else {
     	// MENU MODE
@@ -1094,7 +1145,7 @@ const MenuItem* SynthState::menuBack() {
 
 
 void SynthState::newBankReady() {
-	fullState.synthMode == SYNTH_MODE_MENU;
+	fullState.synthMode = SYNTH_MODE_MENU;
 	fullState.menuSelect = 0;
 	fullState.currentMenuItem = MenuItemUtil::getMenuItem(MENU_SAVE_BANK);
 	propagateNewSynthMode();

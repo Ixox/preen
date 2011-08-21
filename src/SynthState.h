@@ -129,20 +129,20 @@ enum LfoType {
 };
 
 enum SourceEnum {
-	SOURCE_NONE = 0,
-	LFO1,
-	LFO2,
-	LFO3,
-	LFO4,
-	PITCHBEND,
-	AFTERTOUCH,
-	MODWHEEL,
-    VELOCITY,
+	MATRIX_SOURCE_NONE = 0,
+	MATRIX_SOURCE_LFO1,
+	MATRIX_SOURCE_LFO2,
+	MATRIX_SOURCE_LFO3,
+	MATRIX_SOURCE_LFO4,
+	MATRIX_SOURCE_PITCHBEND,
+	MATRIX_SOURCE_AFTERTOUCH,
+	MATRIX_SOURCE_MODWHEEL,
+    MATRIX_SOURCE_VELOCITY,
     MATRIX_SOURCE_CC1,
     MATRIX_SOURCE_CC2,
     MATRIX_SOURCE_CC3,
     MATRIX_SOURCE_CC4,
-	SOURCE_MAX
+	MATRIX_SOURCE_MAX
 };
 
 
@@ -152,6 +152,8 @@ enum DestinationEnum {
 	OSC2_FREQ,
 	OSC3_FREQ,
 	OSC4_FREQ,
+	OSC5_FREQ,
+	OSC6_FREQ,
 	INDEX_MODULATION1,
 	INDEX_MODULATION2,
 	INDEX_MODULATION3,
@@ -313,7 +315,7 @@ struct AllSynthParams {
 	struct LfoParams lfo1;
 	struct LfoParams lfo2;
 	struct LfoParams lfo3;
-	struct LfoParams lfo4;
+	struct EnvelopeParams lfo4;
 	char presetName[13];
 };
 
@@ -363,6 +365,7 @@ public:
 		return SYNTH_PARAM_TYPE_INVALID;
 	}
 
+	void changeSynthModeRow(int button, int step);
 	void buttonPressed(int number);
 	void setNewValue(int row, int number, int newValue);
 
@@ -456,9 +459,9 @@ public:
 	struct FullState fullState;
 
 private:
-	unsigned char engineRow, oscRow, envRow, matrixRow, lfoRow;
-	unsigned char currentRow;
-
+	char engineRow, oscRow, envRow, matrixRow, lfoRow;
+	char currentRow;
+	unsigned char lastAction;
 
 	SynthParamListener* firstParamListener;
 	SynthMenuListener* firstMenuListener;

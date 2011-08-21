@@ -165,7 +165,6 @@ public:
 
 private:
     DestinationEnum destFreq;
-    DestinationEnum destAmp;
     Matrix* matrix;
 };
 
@@ -186,6 +185,12 @@ Osc<number>::Osc()
         break;
     case 3:
         this->destFreq = OSC4_FREQ;
+        break;
+    case 4:
+        this->destFreq = OSC5_FREQ;
+        break;
+    case 5:
+        this->destFreq = OSC6_FREQ;
         break;
     }
 }
