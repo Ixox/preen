@@ -90,7 +90,7 @@ struct ParameterRowDisplay lfoEnvParameterRow = {
                 { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
                 { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
                 { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames }
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR_OR_NONE, nullNames }
         }
 };
 

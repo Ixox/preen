@@ -83,9 +83,11 @@ public:
 	}
 
 	void noteOff() {
-		this->envData.index = adsr[3] ;
-		this->envData.envState = ENV_STATE_ON_R;
-		this->envData.currentAmpSpeed =  this->envData.currentAmp  / adsr[3] ;
+		if (this->envParams->release <255) {
+			this->envData.index = adsr[3] ;
+			this->envData.envState = ENV_STATE_ON_R;
+			this->envData.currentAmpSpeed =  this->envData.currentAmp  / adsr[3] ;
+		}
 	}
 
 

@@ -139,6 +139,12 @@ displayFloat53:
         lcd->print(" ");
         break;
     }
+    case DISPLAY_TYPE_UNSIGNED_CHAR_OR_NONE:
+    	if (newValue == 255) {
+    		lcd->print("None");
+    		break;
+    	}
+    	// else what follows
 	case DISPLAY_TYPE_SIGNED_CHAR:
 displaySignedChar:
 	case DISPLAY_TYPE_UNSIGNED_CHAR:

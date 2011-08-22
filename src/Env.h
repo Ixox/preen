@@ -50,9 +50,15 @@ public:
     ~Env(void) {
     }
 
+	void setSynthState(SynthState* sState) {
+		SynthStateAware::setSynthState(sState);
+	    EnvelopeParams * e = (EnvelopeParams *)&(this->synthState->params.env1);
+	    envParams = &e[number-1];
+	    reloadADSR();
+	}
+
+
     void reloadADSR() {
-        EnvelopeParams * e = (EnvelopeParams *)&(this->synthState->params.env1);
-        EnvelopeParams* envParams = &e[number-1];
 
         adsr[0] = envParams->attack * envParams->attack +1;
         adsr[1] = envParams->decay * envParams->decay+1;
@@ -190,5 +196,6 @@ private:
     unsigned int adsr[4];
     // Ramp speed Of attack and Decay
     unsigned int incA, incD;
+    EnvelopeParams* envParams;
 };
 

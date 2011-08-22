@@ -38,12 +38,6 @@ void Synth::init() {
 	env4.setSynthState(this->synthState);
 	env5.setSynthState(this->synthState);
 	env6.setSynthState(this->synthState);
-	env1.reloadADSR();
-	env2.reloadADSR();
-	env3.reloadADSR();
-	env4.reloadADSR();
-	env5.reloadADSR();
-	env6.reloadADSR();
 
 	osc1.setSynthState(this->synthState);
 	osc2.setSynthState(this->synthState);
