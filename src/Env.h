@@ -125,7 +125,12 @@ public:
                 "    ldm %[env], {r5-r8}\n\t"
                 // index --
                 "    sub r5, #1\n\t"
-                // switch
+        		// Every other time : return - go directly to 6 (end)
+//        		"    tst r5, #1\n\t"
+ //       		"    itt ne"
+   //     		"    cbz r5, 6f\n\t"
+
+        		// switch
                 "    tbb [pc, r7]\n\t"
                 "7:\n\t"
                 "    .byte   (1f-7b)/2\n\t"

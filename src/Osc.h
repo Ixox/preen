@@ -20,16 +20,16 @@
 #include "SynthStateAware.h"
 #include "Matrix.h"
 
-#define SAMPLE_RATE_x_8 264144
 
 
-extern short sinTable[];
-extern int frequenciesx8[];
+extern const short sinTable[];
+extern const int frequenciesX8[];
 extern int randomOsc;
 
 struct OscState {
     int index;
     int frequency;
+    int frequencyMatrixValue;
     int mainFrequency;
     int fromFrequency;
     int nextFrequency;
@@ -46,6 +46,10 @@ public:
     void newNote(struct OscState& oscState, int note);
     void glideToNote(struct OscState& oscState, int note);
     void glideStep(struct OscState& oscState, int step);
+
+    void calculateFrequencyWithMatrix(struct OscState *oscState) {
+		oscState->frequencyMatrixValue = ((oscState->frequency >> 2) * this->matrix->getDestination(destFreq)) >> 14;
+    }
 
     int getNextSample(struct OscState *oscState) __attribute__((always_inline)) {
         int oscValue;
@@ -84,9 +88,12 @@ public:
                 // oscState->index += (this->matrix->getDestination(destFreq) >> 4) + oscState->frequency;
                 // oscState->index &= 0x3ffff;
 
-                // r5 : index, r6 : frequency
-                "    ldm %[osc], {r5-r6}\n\t"
-                "    add r5, r5, %[dest], lsr #4\n\t"
+                // r5 : index
+        		// r6 : frequency,
+        		// r7  : frequencyWithMatrixValue
+
+        		"    ldm %[osc], {r5-r7}\n\t"
+                "    add r5, r5, r7\n\t"
                 "    add r5, r5, r6\n\t"
                 "    mvn r6, #0\n\t"
                 "    lsr r6, r6, #14\n\t"
@@ -101,6 +108,8 @@ public:
                 "    .byte   (3f-7b)/2\n\t"
                 "    .byte   (4f-7b)/2\n\t"
                 "    .byte   (5f-7b)/2\n\t"
+                "    .byte   (9f-7b)/2\n\t"
+                "    .byte   (10f-7b)/2\n\t"
                 "    .byte   (8f-7b)/2\n\t"
                 "    .align  1\n\t"
 
@@ -137,6 +146,21 @@ public:
                 "    rsbmi %[value], %[value], #0\n\t"
                 "    b 6f\n\t"
 
+        		// OSC_SHAPE_SQUARE
+                "9:  \n\t"
+                "    lsr r5, r5, #8\n\t"
+                "    add r5, #2048\n\t"
+                "    ldrsh %[value], [ %[sinTable], r5, lsl #1]\n\t"
+                "    b 6f\n\t"
+
+        		// OSC_SHAPE_SAW
+                "10:  \n\t"
+                "    lsr r5, r5, #8\n\t"
+                "    add r5, #3072\n\t"
+                "    ldrsh %[value], [ %[sinTable], r5, lsl #1]\n\t"
+                "    b 6f\n\t"
+
+
                 // OSC_SHAPE_RAND
                 "8:  \n\t"
                 "    mov %[value], #0\n\t"
@@ -150,7 +174,7 @@ public:
                 "6:\n\t"
                 : [value] "=r"(oscValue), [osc]"+rV" (oscState)
                 : [sinTable]"rV"(sinTable), [shape]"r" (oscillator->shape), [randomOsc]"r"(randomOsc), [dest]"r"(this->matrix->getDestination(destFreq))
-                : "cc", "r5", "r6"
+                : "cc", "r5", "r6", "r7"
         );
 
         return  oscValue;
@@ -213,10 +237,12 @@ void Osc<number>::newNote(struct OscState& oscState, int note) {
     oscState.index = 1; // << number;
     switch (oscillator->frequencyType) {
     case OSC_FT_KEYBOARD:
-        oscState.mainFrequency = ((frequenciesx8[note] * oscillator->frequencyMul) >> 4) + oscillator->detune;
+    	// frequency : 15 bits + oscillator 7 - 4 + 10 - 9
+    	// MAX : 21 bits !
+        oscState.mainFrequency = (((frequenciesX8[note] * oscillator->frequencyMul) >> 4) * (2048 + oscillator->detune)) >> 11;
         break;
     case OSC_FT_FIXE:
-        oscState.mainFrequency = ((oscillator->frequencyMul << 7) + oscillator->detune)<<2;
+        oscState.mainFrequency = ((oscillator->frequencyMul << 7) + oscillator->detune)<<3;
         break;
     }
     oscState.frequency = oscState.mainFrequency;
@@ -227,10 +253,10 @@ template <int number>
 void Osc<number>::glideToNote(struct OscState& oscState, int note) {
     switch (oscillator->frequencyType) {
     case OSC_FT_KEYBOARD:
-        oscState.nextFrequency = ((frequenciesx8[note] * oscillator->frequencyMul) >> 4) + oscillator->detune;
+        oscState.nextFrequency = (((frequenciesX8[note] * oscillator->frequencyMul) >> 4) * (2048 + oscillator->detune)) >> 11;
         break;
     case OSC_FT_FIXE:
-        oscState.nextFrequency = ((oscillator->frequencyMul << 7) + oscillator->detune)<<2;
+        oscState.nextFrequency = ((oscillator->frequencyMul << 7) + oscillator->detune)<<3;
         break;
     }
     oscState.fromFrequency = oscState.mainFrequency;

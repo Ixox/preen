@@ -41,6 +41,17 @@ public:
         return currentSample;
     }
 
+    void calculateFrequencyWithMatrix() {
+    	osc1->calculateFrequencyWithMatrix(&oscState1);
+    	osc2->calculateFrequencyWithMatrix(&oscState2);
+    	osc3->calculateFrequencyWithMatrix(&oscState3);
+    	osc4->calculateFrequencyWithMatrix(&oscState4);
+        if (showUp[this->synthState->params.engine1.algo].osc>4) {
+        	osc5->calculateFrequencyWithMatrix(&oscState5);
+        	osc6->calculateFrequencyWithMatrix(&oscState6);
+        }
+    }
+
 
     void nextSample() {
         if (playing) {
@@ -59,19 +70,21 @@ public:
 
                  */
             {
-                int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-                freq3 >>= 19;
-                freq3 *= oscState3.mainFrequency;
-                freq3 >>= 15;
+            	// Bitshifting to do :
+            	// 31 (32 -1) + 3 (IM)= 34....
+            	int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
+                freq3 >>= 18;
+                freq3 *=  oscState3.frequency;
+                freq3 >>= 8;
 
-                oscState2.frequency =  freq3 * IM3 + oscState2.mainFrequency;
+                oscState2.frequency =  ((freq3 * IM3) >> 8) + oscState2.mainFrequency;
 
                 int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
-                freq2 >>= 19;
-                freq2 *= oscState2.mainFrequency;
-                freq2 >>= 15;
+                freq2 >>= 18;
+                freq2 *= oscState2.frequency;
+                freq2 >>=8;
 
-                oscState1.frequency =  IM1 * freq2 + IM2 * freq3 + oscState1.mainFrequency;
+                oscState1.frequency =  ((IM1 * freq2) >> 8) + ((IM2 * freq3) >> 8) + oscState1.mainFrequency;
                 currentSample =  osc1->getNextSample(&oscState1) * env1->getNextAmp(&envState1);
                 currentSample  >>= 15;
                 currentSample *= velocity;
@@ -98,12 +111,12 @@ public:
                  */
             {
                 int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-                freq3 >>= 19;
-                freq3 *= oscState3.mainFrequency;
-                freq3 >>= 15;
+                freq3 >>= 18;
+                freq3 *=  oscState3.mainFrequency;
+                freq3 >>= 14;
 
-                oscState2.frequency =  freq3*IM2 + oscState2.mainFrequency;
-                oscState1.frequency =  freq3*IM1 + oscState1.mainFrequency;
+                oscState2.frequency =  ((freq3*IM2)>>3) + oscState2.mainFrequency;
+                oscState1.frequency =  ((freq3*IM1)>>3) + oscState1.mainFrequency;
 
                 int currentSample2 = osc2->getNextSample(&oscState2)*env2->getNextAmp(&envState2);
                 currentSample2  >>= 7; //  7 for mixOsc2
@@ -140,25 +153,24 @@ public:
 
 
                 int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
-                freq2 >>= 19;
-                freq2 *= oscState2.mainFrequency;
-                freq2 >>= 15;
-                freq2 *= IM1;
+                freq2 >>= 18;
+                freq2 *=  oscState2.mainFrequency;
+                freq2 >>= 14;
 
                 int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-                freq3 >>= 19;
-                freq3 *= oscState3.mainFrequency;
-                freq3 >>= 15;
-                oscState4.frequency =  freq3 * IM4 + oscState4.mainFrequency;
-                freq3 *= IM2;
+                freq3 >>= 18;
+                freq3 *=  oscState3.mainFrequency;
+                freq3 >>= 14;
+
+                oscState4.frequency =  ((freq3 * IM4) >> 3) + oscState4.mainFrequency;
+
 
                 int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-                freq4 >>= 19;
-                freq4 *= oscState4.mainFrequency;
-                freq4 >>= 15;
-                freq4 *= IM3;
+                freq4 >>= 18;
+                freq4 *=  oscState4.mainFrequency;
+                freq4 >>= 14;
 
-                oscState1.frequency =  freq2 + freq3 + freq4 + oscState1.mainFrequency;
+                oscState1.frequency =  ((freq2 * IM1) >> 3) + ((freq3 * IM2)>> 3) + ((freq4 * IM3) >> 3) + oscState1.mainFrequency;
                 currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
                 currentSample  >>= 15;
                 currentSample *= velocity;
@@ -186,19 +198,18 @@ public:
             {
 
                 int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-                freq4 >>= 19;
-                freq4 *= oscState4.mainFrequency;
-                freq4 >>= 15;
+                freq4 >>= 18;
+                freq4 *=  oscState4.mainFrequency;
+                freq4 >>= 14;
 
                 oscState3.frequency =  freq4 * IM4 + oscState3.mainFrequency;
                 int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-                freq3 >>= 19;
-                freq3 *= oscState3.mainFrequency;
-                freq3 >>= 15;
+                freq3 >>= 18;
+                freq3 *=  oscState3.mainFrequency;
+                freq3 >>= 14;
 
-
-                oscState1.frequency =  freq3*IM1 + oscState1.mainFrequency;
-                oscState2.frequency =  freq4*IM2 +  freq3*IM3 + oscState2.mainFrequency;
+                oscState1.frequency =  ((freq3*IM1)>>3) + oscState1.mainFrequency;
+                oscState2.frequency =  ((freq4*IM2)>>3) +  ((freq3*IM3)>>3) + oscState2.mainFrequency;
 
                 int currentSample2 = osc2->getNextSample(&oscState2)*env2->getNextAmp(&envState2);
                 currentSample2  >>= 7; // 7 for mixOsc2
@@ -241,23 +252,23 @@ public:
                  */
             {
                 int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-                freq4 >>= 19;
-                freq4 *= oscState4.mainFrequency;
-                freq4 >>= 15;
+                freq4 >>= 18;
+                freq4 *=  oscState4.mainFrequency;
+                freq4 >>= 14;
 
-                oscState3.frequency =  freq4 * IM3  + oscState3.mainFrequency;
+                oscState3.frequency =  ((freq4 * IM3)>>3)  + oscState3.mainFrequency;
+
                 int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-                freq3 >>= 19;
-                freq3 *= oscState3.mainFrequency;
-                freq3 >>= 15;
-                freq3 *= IM2;
+                freq3 >>= 18;
+                freq3 *=  oscState3.mainFrequency;
+                freq3 >>= 14;
 
-                oscState2.frequency =  freq3 + freq4*IM4 + oscState2.mainFrequency;
+                oscState2.frequency =  ((freq3 * IM2)>>3) + ((freq4*IM4)>>3) + oscState2.mainFrequency;
+
                 int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
-                freq2 >>= 19;
-                freq2 *= oscState2.mainFrequency; // Convertion in Hertz
-                freq2 >>= 15;
-                freq2 *= IM1;
+                freq2 >>= 18;
+                freq2 *=  oscState2.mainFrequency;
+                freq2 >>= 14;
 
                 oscState1.frequency =  freq2 + oscState1.mainFrequency;
                 currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
@@ -284,13 +295,13 @@ public:
             {
 
                 int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-                freq4 >>= 19;
-                freq4 *= oscState4.mainFrequency;
-                freq4 >>= 15;
+                freq4 >>= 18;
+                freq4 *=  oscState4.mainFrequency;
+                freq4 >>= 14;
 
-                oscState1.frequency =  freq4*IM1 + oscState1.mainFrequency;
-                oscState2.frequency =  freq4*IM2 + oscState2.mainFrequency;
-                oscState3.frequency =  freq4*IM3 + oscState3.mainFrequency;
+                oscState1.frequency =  ((freq4*IM1)>>3) + oscState1.mainFrequency;
+                oscState2.frequency =  ((freq4*IM2)>>3) + oscState2.mainFrequency;
+                oscState3.frequency =  ((freq4*IM3)>>3) + oscState3.mainFrequency;
 
                 int currentSample3 = osc3->getNextSample(&oscState3)*env3->getNextAmp(&envState3);
                 currentSample3  >>= 7; // 7 for mixOsc3
@@ -336,39 +347,36 @@ public:
             {
 
                 int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
-                freq2 >>= 19;
-                freq2 *= oscState2.mainFrequency;
-                freq2 >>= 15;
-                freq2 *= IM1;
-
-                oscState1.frequency =  freq2 + oscState1.mainFrequency;
+                freq2 >>= 18;
+                freq2 *=  oscState2.mainFrequency;
+                freq2 >>= 14;
 
                 int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-                freq4 >>= 19;
-                freq4 *= oscState4.mainFrequency;
-                freq4 >>= 15;
+                freq4 >>= 18;
+                freq4 *=  oscState4.mainFrequency;
+                freq4 >>= 14;
 
-                // Use freq to modulate op6 by IM4.
-                oscState6.frequency =  freq4 * IM4 + oscState6.mainFrequency;
+                // Use freq4 to modulate op6 by IM4.
+                oscState6.frequency =  ((freq4 * IM4)>>3) + oscState6.mainFrequency;
+
                 int freq6 = osc6->getNextSample(&oscState6) * env6->getNextAmp(&envState6);
-                freq6 >>= 19;
-                freq6 *= oscState6.mainFrequency;
-                freq6 >>= 15;
-                freq6 *= IM3;
+                freq4 >>= 18;
+                freq4 *=  oscState4.mainFrequency;
+                freq4 >>= 14;
 
-                oscState5.frequency =  freq6 + oscState5.mainFrequency;
-                oscState3.frequency =  freq4 * IM2 + oscState3.mainFrequency;
-
-
+                oscState5.frequency =  ((freq6 * IM3)>>3)+ oscState5.mainFrequency;
                 int currentSample3 = osc5->getNextSample(&oscState5)*env5->getNextAmp(&envState5);
                 currentSample3  >>= 7; // 7 for mixOsc3
                 currentSample3 *= MIX3;
                 currentSample3  >>= 15;
 
+                oscState3.frequency =  ((freq4 * IM2)>>3) + oscState3.mainFrequency;
                 int currentSample2 = osc3->getNextSample(&oscState3)*env3->getNextAmp(&envState3);
                 currentSample2  >>= 7; // 7 for mixOsc2
                 currentSample2 *= MIX2;
                 currentSample2  >>= 15;
+
+                oscState1.frequency =  ((freq2 *IM1)>>3) + oscState1.mainFrequency;
 
                 currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
                 currentSample  >>= 7; // 7 for mixOsc2
@@ -399,38 +407,32 @@ public:
             {
 
                 int freq6 = osc6->getNextSample(&oscState6) * env6->getNextAmp(&envState6);
-                freq6 >>= 19;
-                freq6 *= oscState6.mainFrequency;
-                freq6 >>= 15;
-                freq6 *= IM4;
+                freq6 >>= 18;
+                freq6 *=  oscState6.mainFrequency;
+                freq6 >>= 14;
 
-                oscState5.frequency =  freq6 + oscState5.mainFrequency;
+                int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
+                freq4 >>= 18;
+                freq4 *=  oscState4.mainFrequency;
+                freq4 >>= 14;
 
+                int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
+                freq3 >>= 18;
+                freq3 *=  oscState3.mainFrequency;
+                freq3 >>= 14;
+
+                int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
+                freq2 >>= 18;
+                freq2 *=  oscState2.mainFrequency;
+                freq2 >>= 14;
+
+                oscState5.frequency =  ((freq6 * IM4)>>3) + oscState5.mainFrequency;
                 int currentSample2 = osc5->getNextSample(&oscState5)*env5->getNextAmp(&envState5);
                 currentSample2  >>= 7; // 7 for mixOsc3
                 currentSample2 *= MIX2;
                 currentSample2  >>= 15;
 
-                int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-                freq4 >>= 19;
-                freq4 *= oscState4.mainFrequency;
-                freq4 >>= 15;
-                freq4 *= IM3;
-
-                int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-                freq3 >>= 19;
-                freq3 *= oscState3.mainFrequency;
-                freq3 >>= 15;
-                freq3 *= IM2;
-
-                int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
-                freq2 >>= 19;
-                freq2 *= oscState2.mainFrequency;
-                freq2 >>= 15;
-                freq2 *= IM1;
-
-                oscState1.frequency =  freq2 + freq3 + freq4 + oscState5.mainFrequency;
-
+                oscState1.frequency =  ((freq2 *IM1)>>3) + ((freq3 *IM2)>>3) + ((freq4 *IM3)>>3) + oscState1.mainFrequency;
                 currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
                 currentSample  >>= 7; // 7 for mixOsc2
                 currentSample *= MIX1;
@@ -465,37 +467,33 @@ public:
                  */
             {
                 int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
-                freq2 >>= 19;
-                freq2 *= oscState2.mainFrequency;
-                freq2 >>= 15;
-                freq2 *= IM1;
+                freq2 >>= 18;
+                freq2 *=  oscState2.mainFrequency;
+                freq2 >>= 14;
 
                 int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-                freq3 >>= 19;
-                freq3 *= oscState3.mainFrequency;
-                freq3 >>= 15;
-                freq3 *= IM2;
+                freq3 >>= 18;
+                freq3 *=  oscState3.mainFrequency;
+                freq3 >>= 14;
 
-                oscState1.frequency =  freq2 + freq3 + oscState1.mainFrequency;
+                oscState1.frequency =  ((freq2*IM1)>>3) + ((freq3*IM2)>>3) + oscState1.mainFrequency;
                 int currentSample2 =  osc1->getNextSample(&oscState1) * env1->getNextAmp(&envState1);
                 currentSample2  >>= 7; // 7 for MIX1
                 currentSample2 *= MIX1;
                 currentSample2  >>= 15;
 
                 int freq6 = osc6->getNextSample(&oscState6) * env6->getNextAmp(&envState6);
-                freq6 >>= 19;
-                freq6 *= oscState6.mainFrequency;
-                freq6 >>= 15;
-                freq6 *= IM4;
+                freq6 >>= 18;
+                freq6 *=  oscState6.mainFrequency;
+                freq6 >>= 14;
 
-                oscState5.frequency =  freq6 + oscState5.mainFrequency;
+                oscState5.frequency =  ((freq6 * IM4)>>3) + oscState5.mainFrequency;
                 int freq5 = osc5->getNextSample(&oscState5) * env5->getNextAmp(&envState5);
-                freq5 >>= 19;
-                freq5 *= oscState5.mainFrequency;
-                freq5 >>= 15;
-                freq5 *= IM3;
+                freq5 >>= 18;
+                freq5 *=  oscState5.mainFrequency;
+                freq5 >>= 14;
 
-                oscState4.frequency =  freq5 +  oscState4.mainFrequency;
+                oscState4.frequency =  ((freq5 * IM3)>>3)+  oscState4.mainFrequency;
 
                 currentSample = osc4->getNextSample(&oscState4)*env4->getNextAmp(&envState4);
                 currentSample  >>= 7; // 7 for mixOsc2
@@ -572,7 +570,7 @@ private:
     int frequency;
     bool released;
     bool playing;
-
+    int  autoModulation;
     unsigned int index;
     char note;
     char velocity;

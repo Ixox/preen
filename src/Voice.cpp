@@ -47,6 +47,7 @@ void Voice::init(Matrix* matrix,  Lfo** lfo, Env<1>*env1, Env<2>*env2, Env<3>*en
     this->playing = false;
     this->newNotePending = false;
     this->lfo = lfo;
+	this->autoModulation = 0;
 }
 
 

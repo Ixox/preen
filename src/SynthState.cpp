@@ -59,7 +59,7 @@ struct ParameterRowDisplay engine3ParameterRow = {
         }
 };
 
-const char* oscShapeNames []=  {"sin ", "s^2 ", "1/2s", "spos", "rand", "off " } ;
+const char* oscShapeNames []=  {"sin ", "s^2 ", "1/2s", "spos", "rand", "squa", "saw ", "off " } ;
 const char* oscTypeNames [] = { "keyb", "fixe"};
 struct ParameterRowDisplay oscParameterRow = {
         "Oscillator",
@@ -122,7 +122,7 @@ struct ParameterRowDisplay lfoParameterRow = {
 };
 
 
-struct AllParameterRowsDisplay allParameterRows = {
+const struct AllParameterRowsDisplay allParameterRows = {
         {
                 &engine1ParameterRow,
                 &engine2ParameterRow,
@@ -155,7 +155,7 @@ struct AllParameterRowsDisplay allParameterRows = {
 };
 
 
-const struct ShowUpAlgo showUp[9] = {
+const struct ShowUpAlgo  showUp[9] = {
         { 3, 3, 0}, // ALGO1
         { 3, 2, 2}, // ALGO2
         { 4, 4, 0}, // ALGO3
@@ -172,7 +172,7 @@ const struct ShowUpAlgo showUp[9] = {
 
 //struct AllSynthParams presets[]  =  {{
 
-const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) = {
+const struct AllSynthParams presets[]  = {
         {
                 // Engine
                 { ALGO1, 14, 4, 6},
@@ -231,7 +231,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 // Matrix row
-                { 7, 16, 5, 0} ,
+                { 7, 16, 7, 0} ,
                 { 5, 64, 1, 0} ,
                 { 1, 0, 1, 0} ,
                 { 0, 0, 0, 0} ,
@@ -266,11 +266,11 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 // Matrix row
-                { 7, 2, 6, 0} ,
+                { 7, 2, 8, 0} ,
                 { 5, 64, 1, 0} ,
                 { 1, 0, 1, 0} ,
-                { 7, 6, 6, 0} ,
-                { 2, 11, 6, 0} ,
+                { 7, 6, 8, 0} ,
+                { 2, 11, 8, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
@@ -301,7 +301,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 // Matrix row
-                { 7, 2, 5, 0} ,
+                { 7, 2, 7, 0} ,
                 { 5, 64, 1, 0} ,
                 { 1, 15, 2, 0} ,
                 { 0, 0, 0, 0} ,
@@ -335,7 +335,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 // Matrix row
-                { 7, 6, 5, 0} ,
+                { 7, 6, 7, 0} ,
                 { 5, 64, 1, 0} ,
                 { 1, 0, 1, 0} ,
                 { 0, 0, 0, 0} ,
@@ -368,8 +368,8 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
 
-                { 7, 8, 5, 0} ,
-                { 7, 24, 6, 0} ,
+                { 7, 8, 7, 0} ,
+                { 7, 24, 8, 0} ,
                 { 1, 9, 1, 0} ,
                 { 5, 40, 2, 0} ,
                 { 5, 6, 4, 0} ,
@@ -402,7 +402,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
 
-                { 7, 16, 5, 0} ,
+                { 7, 16, 7, 0} ,
                 { 5, 64, 1, 0} ,
                 { 1, 0, 1, 0} ,
                 { 0, 0, 0, 0} ,
@@ -436,8 +436,8 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 // Matrix
-                { 7, 16, 10, 0} ,
-                { 7, 13, 5, 0} ,
+                { 7, 16, 12, 0} ,
+                { 7, 13, 7, 0} ,
                 { 1, 0, 1, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
@@ -467,7 +467,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 79, 100, 171, 100} ,
                 { 0, 150, 160, 60} ,
                 { 122, 150, 160, 60} ,
-                { 7, 16, 5, 0} ,
+                { 7, 16, 7, 0} ,
                 { 5, 64, 1, 0} ,
                 { 1, 0, 1, 0} ,
                 { 0, 0, 0, 0} ,
@@ -497,10 +497,10 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 3, 100, 100, 100} ,
                 { 0, 150, 160, 60} ,
                 { 0, 150, 160, 60} ,
-                { 8, 8, 5, 0} ,
+                { 8, 8, 7, 0} ,
                 { 8, 10, 1, 0} ,
                 { 1, 6, 1, 0} ,
-                { 7, 9, 6, 0} ,
+                { 7, 9, 8, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
@@ -527,10 +527,10 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 3, 100, 100, 100} ,
                 { 0, 150, 160, 60} ,
                 { 0, 150, 160, 60} ,
-                { 1, 3, 6, 0} ,
+                { 1, 3, 8, 0} ,
                 { 5, 22, 1, 0} ,
-                { 7, 4, 6, 0} ,
-                { 8, 4, 5, 0} ,
+                { 7, 4, 8, 0} ,
+                { 8, 4, 7, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
@@ -557,7 +557,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 53, 113, 137, 255} ,
                 { 138, 150, 160, 159} ,
                 { 218, 150, 255, 204} ,
-                { 7, 16, 5, 0} ,
+                { 7, 16, 7, 0} ,
                 { 5, 64, 1, 0} ,
                 { 1, 23, 1, 0} ,
                 { 2, 9, 6, 0} ,
@@ -589,7 +589,7 @@ const struct AllSynthParams presets[] __attribute__ ((section (".USER_FLASH"))) 
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
 
-                { 7, 16, 9, 0} ,
+                { 7, 16, 11, 0} ,
                 { 5, 64, 1, 0} ,
                 { 1, 0, 1, 0} ,
                 { 0, 0, 0, 0} ,

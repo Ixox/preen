@@ -117,6 +117,8 @@ enum OscShape {
     OSC_SHAPE_SIN3,
     OSC_SHAPE_SIN4,
     OSC_SHAPE_RAND,
+    OSC_SHAPE_SQUARE,
+    OSC_SHAPE_SAW,
 	OSC_SHAPE_OFF
 };
 
@@ -477,7 +479,7 @@ private:
 };
 
 // Global structure used all over the code
-extern struct AllParameterRowsDisplay allParameterRows;
+extern const struct AllParameterRowsDisplay allParameterRows;
 extern const struct AllSynthParams presets[];
 extern const char* allChars;
 extern const struct ShowUpAlgo showUp[];

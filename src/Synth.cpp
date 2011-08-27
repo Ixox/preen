@@ -68,6 +68,9 @@ void Synth::init() {
 }
 
 void Synth::noteOn(char note, char velocity) {
+	if (note<24 || note >107) {
+		return;
+	}
 	int numberOfNote = this->synthState->params.engine1.numberOfVoice;
 
 	int zeroVelo = (16 - this->synthState->params.engine1.velocity) * 8;
@@ -83,7 +86,7 @@ void Synth::noteOn(char note, char velocity) {
 	if (freeNote >= 0) {
 		voices[freeNote].noteOn(note, velocity, voiceIndex++);
 	} else {
-		unsigned int indexMin = 4294967295;
+		unsigned int indexMin = (unsigned int)4294967295;
 		for (int k = 0; k < numberOfNote; k++) {
 			if (voices[k].getNote() == note || voices[k].isReleased()) {
 				indexMin = 0;
@@ -205,6 +208,13 @@ void Synth::nextSample() {
 	case 22:
 		// glide can happens only on Voice 0
 		this->voices[0].glide();
+		break;
+	case 23:
+	case 24:
+	case 25:
+	case 26:
+		this->voices[step32 - 23].calculateFrequencyWithMatrix();
+		//
 	default:
 		break;
 
