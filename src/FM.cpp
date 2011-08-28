@@ -58,15 +58,14 @@ void IRQSendSample() {
 
 
 inline void fillSoundBuffer() {
-    for (int cpt=0; cpt<20 && !rb.isFull(); cpt++) {
+    for (int cpt=0; cpt<12 && !rb.isFull(); cpt++) {
         synth.nextSample();
         rb.insert((uint16)(synth.getSample()>>5)+1024);
-        cpt++;
     }
 }
 
 inline void fillSoundBufferFull() {
-    while (!rb.isFull()) {
+    for (int cpt=0; cpt<1000 && !rb.isFull(); cpt++) {
         synth.nextSample();
         rb.insert((uint16)(synth.getSample()>>5)+1024);
     }
@@ -216,7 +215,7 @@ void loop() {
     uint32 newMicros = micros();
 
     mainCpt++;
-    fillSoundBuffer();
+    fillSoundBufferFull();
 
     if ((newMicros - midiInMicros) > 200) {
         while (Serial3.available()) {

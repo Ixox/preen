@@ -296,31 +296,31 @@ public:
 
                 int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
                 freq4 >>= 18;
-                freq4 *=  oscState4.mainFrequency;
+                freq4 *=  oscState4.frequency;
                 freq4 >>= 14;
 
-                oscState1.frequency =  ((freq4*IM1)>>3) + oscState1.mainFrequency;
-                oscState2.frequency =  ((freq4*IM2)>>3) + oscState2.mainFrequency;
                 oscState3.frequency =  ((freq4*IM3)>>3) + oscState3.mainFrequency;
 
                 int currentSample3 = osc3->getNextSample(&oscState3)*env3->getNextAmp(&envState3);
-                currentSample3  >>= 7; // 7 for mixOsc3
-                currentSample3 *= MIX3;
                 currentSample3  >>= 15;
+                currentSample3 *= MIX3;
+
+                oscState2.frequency =  ((freq4*IM2)>>3) + oscState2.mainFrequency;
 
                 int currentSample2 = osc2->getNextSample(&oscState2)*env2->getNextAmp(&envState2);
-                currentSample2  >>= 7; // 7 for mixOsc2
-                currentSample2 *= MIX2;
                 currentSample2  >>= 15;
+                currentSample2 *= MIX2;
+
+                oscState1.frequency =  ((freq4*IM1)>>3) + oscState1.mainFrequency;
 
                 currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
-                currentSample  >>= 7; // 7 for mixOsc2
-                currentSample *= MIX1;
                 currentSample  >>= 15;
+                currentSample *= MIX1;
+
                 currentSample += currentSample2 + currentSample3;
 
                 currentSample *= velocity;
-                currentSample >>=7; // >>7
+                currentSample >>=14; // >>7 + 7 (MIX)
                 currentSample /=3; // 3 samples !!
 
                 if (env1->isDead(envState1) && env2->isDead(envState2)&& env3->isDead(envState3)) {

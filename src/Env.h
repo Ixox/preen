@@ -60,10 +60,10 @@ public:
 
     void reloadADSR() {
 
-        adsr[0] = envParams->attack * envParams->attack +1;
-        adsr[1] = envParams->decay * envParams->decay+1;
+        adsr[0] = envParams->attack * envParams->attack + 1;
+        adsr[1] = envParams->decay * envParams->decay + 1;
         adsr[2] = envParams->sustain << 7;
-        adsr[3] = envParams->release * envParams->release+1;
+        adsr[3] = envParams->release * envParams->release + 1;
 
         incA = (32767<<15) / adsr[0];
         incD = ((32767 - adsr[2]) << 15) / adsr[1];
@@ -120,15 +120,11 @@ public:
 
     inline int getNextAmp(struct EnvData* env)  __attribute__((always_inline))  {
 
-        asm volatile(
+    	asm volatile(
                 // r5 : index, r6 : currentAmp, r7 : envState, r8 : currentAmpSpeed
                 "    ldm %[env], {r5-r8}\n\t"
                 // index --
                 "    sub r5, #1\n\t"
-        		// Every other time : return - go directly to 6 (end)
-//        		"    tst r5, #1\n\t"
- //       		"    itt ne"
-   //     		"    cbz r5, 6f\n\t"
 
         		// switch
                 "    tbb [pc, r7]\n\t"

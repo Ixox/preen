@@ -22,9 +22,12 @@
 
 
 
-extern const short sinTable[];
+extern short sinTable[];
+
+#define RANDOM sinTable[2048]
+
+extern const short waveforms[];
 extern const int frequenciesX8[];
-extern int randomOsc;
 
 struct OscState {
     int index;
@@ -60,20 +63,20 @@ public:
 
         switch(oscillator->shape) {
         case OSC_SHAPE_SIN:
-            return  sinTable[index >> 7]; // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
+            return  waveforms[index >> 7]; // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
             break;
         case OSC_SHAPE_SIN2:
         {
-            int s = sinTable[index >> 7];
+            int s = waveforms[index >> 7];
             return   (s*s) >> 16;
             break;
         }
         case OSC_SHAPE_SIN3:
-            return  sinTable[index >> 7] * (index<0x1ffff); // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
+            return  waveforms[index >> 7] * (index<0x1ffff); // * ((1024 + this->matrix->getDestination(destAmp)) >> 10) ;
             break;
         case OSC_SHAPE_SIN4:
             index &= 0x1ffff;
-            return  sinTable[index >> 7];
+            return  waveforms[index >> 7];
             break;
         case OSC_SHAPE_RAND:
             return  (randomOsc * index) & 0x7fff;
@@ -122,8 +125,8 @@ public:
                 "2:  \n\t"
                 "    lsr r5, r5, #7\n\t"
                 "    ldrsh %[value], [ %[sinTable], r5, lsl #1]\n\t"
-                "    mul %[value], %[value]\n\t"
-                "    lsr %[value], #16\n\t"
+                "    mul %[value], %[value], %[value]\n\t"
+                "    lsr %[value], #14\n\t"
                 "    b 6f\n\t"
 
                 // OSC_SHAPE_SIN3
@@ -148,16 +151,15 @@ public:
 
         		// OSC_SHAPE_SQUARE
                 "9:  \n\t"
-                "    lsr r5, r5, #8\n\t"
-                "    add r5, #2048\n\t"
-                "    ldrsh %[value], [ %[sinTable], r5, lsl #1]\n\t"
+                "    lsr r5, r5, #7\n\t"
+                "    ldrsh %[value], [ %[waveforms], r5, lsl #1]\n\t"
                 "    b 6f\n\t"
 
         		// OSC_SHAPE_SAW
                 "10:  \n\t"
-                "    lsr r5, r5, #8\n\t"
-                "    add r5, #3072\n\t"
-                "    ldrsh %[value], [ %[sinTable], r5, lsl #1]\n\t"
+                "    lsr r5, r5, #7\n\t"
+                "    add r5, #2048\n\t"
+                "    ldrsh %[value], [ %[waveforms], r5, lsl #1]\n\t"
                 "    b 6f\n\t"
 
 
@@ -168,12 +170,13 @@ public:
 
                 // OSC_SHAPE_RAND
                 "5:  \n\t"
-                "    mov %[value], %[randomOsc]\n\t"
+                "    mov r5, #2048\n\t"
+                "    ldrsh %[value], [ %[sinTable], r5, lsl #1]\n\t"
 
                 // BREAK
                 "6:\n\t"
                 : [value] "=r"(oscValue), [osc]"+rV" (oscState)
-                : [sinTable]"rV"(sinTable), [shape]"r" (oscillator->shape), [randomOsc]"r"(randomOsc), [dest]"r"(this->matrix->getDestination(destFreq))
+                : [sinTable]"rV"(sinTable), [waveforms]"rV"(waveforms), [shape]"r" (oscillator->shape), [dest]"r"(this->matrix->getDestination(destFreq))
                 : "cc", "r5", "r6", "r7"
         );
 
@@ -183,7 +186,7 @@ public:
 
 
     static void updateRandomNumber() __attribute__((always_inline)) {
-        randomOsc = random(65535) - 32768;
+    	RANDOM = random(65535) - 32768;
     }
     OscillatorParams* oscillator;
 

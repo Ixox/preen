@@ -64,7 +64,7 @@ void Synth::init() {
 				&this->osc5, &this->osc6);
 	}
 
-
+	cpt = 0;
 }
 
 void Synth::noteOn(char note, char velocity) {
@@ -220,16 +220,16 @@ void Synth::nextSample() {
 
 	}
 
-	// Compute samples
 	this->voices[0].nextSample();
 	this->voices[1].nextSample();
 	this->voices[2].nextSample();
 	this->voices[3].nextSample();
+
 	cpt++;
 }
 
 void Synth::checkMaxVoice() {
-	int voiceMax = 4;
+	int voiceMax = MAX_NUMBER_OF_VOICES;
 	switch (showUp[this->synthState->params.engine1.algo].osc) {
 	case 4:
 		voiceMax = 3;

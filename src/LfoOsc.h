@@ -19,6 +19,7 @@
 #define LFOOSC_H_
 
 #include "Lfo.h"
+#include "Osc.h"
 
 class LfoOsc: public Lfo {
 public:
@@ -65,7 +66,7 @@ public:
 			index = (index + (realfreq << 3));
 			if (index > 0xffff) {
 				 index &= 0xffff;
-				 currentRandomValue = (randomOsc >> 8);
+				 currentRandomValue = (RANDOM >> 8);
 			}
 			lfoValue = currentRandomValue;
 			break;

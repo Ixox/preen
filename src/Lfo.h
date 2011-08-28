@@ -21,14 +21,8 @@
 #include "SynthStateAware.h"
 #include "Matrix.h"
 
-extern int randomOsc;
-
-// LFo sample rate is 32 times slower than the rest
-// SAMPLE_RATE_x_8 / 32 =
-#define LFO_SAMPLE_RATE_x_8 8192
 
 #define NUMBER_OF_LFOS 4
-
 
 class Lfo : public SynthStateAware {
 public:
