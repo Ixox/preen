@@ -126,7 +126,7 @@ public:
                 "    lsr r5, r5, #7\n\t"
                 "    ldrsh %[value], [ %[sinTable], r5, lsl #1]\n\t"
                 "    mul %[value], %[value], %[value]\n\t"
-                "    lsr %[value], #14\n\t"
+                "    lsr %[value], #15\n\t"
                 "    b 6f\n\t"
 
                 // OSC_SHAPE_SIN3
@@ -245,7 +245,7 @@ void Osc<number>::newNote(struct OscState& oscState, int note) {
         oscState.mainFrequency = (((frequenciesX8[note] * oscillator->frequencyMul) >> 4) * (2048 + oscillator->detune)) >> 11;
         break;
     case OSC_FT_FIXE:
-        oscState.mainFrequency = ((oscillator->frequencyMul << 7) + oscillator->detune)<<3;
+        oscState.mainFrequency = ((oscillator->frequencyMul << 7) + oscillator->detune)<<2;
         break;
     }
     oscState.frequency = oscState.mainFrequency;
@@ -259,7 +259,7 @@ void Osc<number>::glideToNote(struct OscState& oscState, int note) {
         oscState.nextFrequency = (((frequenciesX8[note] * oscillator->frequencyMul) >> 4) * (2048 + oscillator->detune)) >> 11;
         break;
     case OSC_FT_FIXE:
-        oscState.nextFrequency = ((oscillator->frequencyMul << 7) + oscillator->detune)<<3;
+        oscState.nextFrequency = ((oscillator->frequencyMul << 7) + oscillator->detune)<<2;
         break;
     }
     oscState.fromFrequency = oscState.mainFrequency;

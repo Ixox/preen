@@ -43,7 +43,7 @@ public:
 
 
     static void dumpPatch();
-    static void dumpLine(int a, int b, int c, int d);
+    static void dumpLine(const char *enums1[], int a, const char *enums2[], int b, const char *enums3[], int c, const char *enums4[], int d) ;
 
     static void readFromEEPROM(uint8 bankNumber, uint8 preset, char* params);
     static char* readPresetNameFromEEPROM(int bankNumber, int preset);

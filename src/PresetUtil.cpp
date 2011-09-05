@@ -59,51 +59,120 @@ int PresetUtil::getAddress(int bankNumber, int preset) {
 }
 
 
-void PresetUtil::dumpLine(int a, int b, int c, int d) {
+const char* engineEnums [] = { "ALGO1", "ALGO2", "ALGO3", "ALGO4", "ALGO5", "ALGO6", "ALGO7", "ALGO8", "ALGO9" };
+
+
+void PresetUtil::dumpLine(const char *enums1[], int a, const char *enums2[], int b, const char *enums3[], int c, const char *enums4[], int d) {
+
 	SerialUSB.print("{ ");
-	SerialUSB.print(a);
+	if (enums1 == NULL) {
+		SerialUSB.print(a);
+	} else {
+		SerialUSB.print(enums1[a]);
+	}
 	SerialUSB.print(", ");
-	SerialUSB.print(b);
+	if (enums2 == NULL) {
+		SerialUSB.print(b);
+	} else {
+		SerialUSB.print(enums2[b]);
+	}
 	SerialUSB.print(", ");
-	SerialUSB.print(c);
+	if (enums3 == NULL) {
+		SerialUSB.print(c);
+	} else {
+		SerialUSB.print(enums3[c]);
+	}
 	SerialUSB.print(", ");
-	SerialUSB.print(d);
+	if (enums4 == NULL) {
+		SerialUSB.print(d);
+	} else {
+		SerialUSB.print(enums4[d]);
+	}
 	SerialUSB.print("} ");
 	SerialUSB.println(", ");
 }
 
 void PresetUtil::dumpPatch() {
-	dumpLine(PresetUtil::synthState->params.engine1.algo,
+	SerialUSB.print("// patch name : '");
+	SerialUSB.print(PresetUtil::synthState->params.presetName);
+	SerialUSB.println("'");
+	SerialUSB.print("// Engin");
+	dumpLine(engineEnums,
+			PresetUtil::synthState->params.engine1.algo,
+			NULL,
 			PresetUtil::synthState->params.engine1.velocity,
+			NULL,
 			PresetUtil::synthState->params.engine1.numberOfVoice,
+			NULL,
 			PresetUtil::synthState->params.engine1.glide);
-	dumpLine(PresetUtil::synthState->params.engine2.modulationIndex1,
+	dumpLine(NULL,
+			PresetUtil::synthState->params.engine2.modulationIndex1,
+			NULL,
 			PresetUtil::synthState->params.engine2.modulationIndex2,
+			NULL,
 			PresetUtil::synthState->params.engine2.modulationIndex3,
+			NULL,
 			PresetUtil::synthState->params.engine2.modulationIndex4);
-	dumpLine(PresetUtil::synthState->params.engine3.mixOsc1,
+	dumpLine(NULL,
+			PresetUtil::synthState->params.engine3.mixOsc1,
+			NULL,
 			PresetUtil::synthState->params.engine3.mixOsc2,
+			NULL,
 			PresetUtil::synthState->params.engine3.mixOsc3,
+			NULL,
 			PresetUtil::synthState->params.engine3.mixOsc4);
+	SerialUSB.print("// Oscillator");
 	OscillatorParams * o =
 			(OscillatorParams *) (&(PresetUtil::synthState->params.osc1));
 	for (int k = 0; k < 6; k++) {
-		dumpLine(o[k].shape, o[k].frequencyType, o[k].frequencyMul, o[k].detune);
+		dumpLine(NULL,
+				o[k].shape,
+				NULL,
+				o[k].frequencyType,
+				NULL,
+				o[k].frequencyMul,
+				NULL,
+				o[k].detune);
 	}
+	SerialUSB.print("// Enveloppe");
 	EnvelopeParams * e =
 			(EnvelopeParams*) (&(PresetUtil::synthState->params.env1));
 	for (int k = 0; k < 6; k++) {
-		dumpLine(e[k].attack, e[k].decay, e[k].sustain, e[k].release);
+		dumpLine(
+				NULL,
+				e[k].attack,
+				NULL,
+				e[k].decay,
+				NULL,
+				e[k].sustain,
+				NULL,
+				e[k].release);
 	}
-	MatrixRowParams
-			* m =
-					(MatrixRowParams*) (&(PresetUtil::synthState->params.matrixRowState1));
+	SerialUSB.print("// Modulation matrix");
+	MatrixRowParams	* m = (MatrixRowParams*) (&(PresetUtil::synthState->params.matrixRowState1));
 	for (int k = 0; k < 8; k++) {
-		dumpLine(m[k].source, m[k].mul, m[k].destination, 0);
+		dumpLine(
+				NULL,
+				m[k].source,
+				NULL,
+				m[k].mul,
+				NULL,
+				m[k].destination,
+				NULL,
+				0);
 	}
+	SerialUSB.print("// LFOs");
 	LfoParams* l = (LfoParams*) (&(PresetUtil::synthState->params.lfo1));
 	for (int k = 0; k < 4; k++) {
-		dumpLine(l[k].shape, l[k].freq, l[k].bias, l[k].keybRamp);
+		dumpLine(
+				NULL,
+				l[k].shape,
+				NULL,
+				l[k].freq,
+				NULL,
+				l[k].bias,
+				NULL,
+				l[k].keybRamp);
 	}
 	SerialUSB.println(PresetUtil::synthState->params.presetName);
 }

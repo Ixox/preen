@@ -114,9 +114,9 @@ void setup()
 
     lcd.begin(20, 4);
     lcd.setCursor(0,0);
-    lcd.print("PreenFM V0.1");
+    lcd.print("PreenFM V0.93");
     lcd.setCursor(0,1);
-    lcd.print("          By Ixox");
+    lcd.print("            By Ixox");
     lcd.setCursor(0,3);
     lcd.print("Powered by Leaflabs");
 
@@ -229,7 +229,7 @@ void loop() {
         }
 
         if (midiReceive>0) {
-            if (midiReceive == 1) {
+            if (midiReceive == 1 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
                 fillSoundBuffer();
                 lcd.setCursor(0,0);
                 lcd.print(' ');
@@ -255,7 +255,7 @@ void loop() {
         }
 
         if (midiSent>0) {
-            if (midiSent == 1) {
+            if (midiSent == 1  && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
                 fillSoundBuffer();
                 lcd.setCursor(1,0);
                 lcd.print(' ');

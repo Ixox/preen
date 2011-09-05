@@ -199,6 +199,9 @@ void FMDisplay::refreshAllScreenByStep() {
     case 10:
 		lcd->setCursor(3,1);
 		lcd->print("               ");
+		// erase the "dot" of fixed frequency
+		lcd->setCursor(14,3);
+		lcd->print(" ");
 		break;
     case 9:
     {
