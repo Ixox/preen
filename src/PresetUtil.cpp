@@ -59,7 +59,13 @@ int PresetUtil::getAddress(int bankNumber, int preset) {
 }
 
 
+
 const char* engineEnums [] = { "ALGO1", "ALGO2", "ALGO3", "ALGO4", "ALGO5", "ALGO6", "ALGO7", "ALGO8", "ALGO9" };
+const char* oscTypeEnums [] = { "OSC_FT_KEYBOARD ", "OSC_FT_FIXE" };
+const char* mixOscShapeEnums [] = { "OSC_SHAPE_SIN", "OSC_SHAPE_SIN2", "OSC_SHAPE_SIN3", "OSC_SHAPE_SIN4", "OSC_SHAPE_RAND", "OSC_SHAPE_SQUARE", "OSC_SHAPE_SAW", "OSC_SHAPE_OFF" };
+const char* lfoShapeEnums [] = { "LFO_SAW", "LFO_RAMP", "LFO_SQUARE", "LFO_RANDOM", "LFO_TYPE_MAX" };
+const char* matrixSourceEnums [] = { "MATRIX_SOURCE_NONE", "MATRIX_SOURCE_LFO1", "MATRIX_SOURCE_LFO2", "MATRIX_SOURCE_LFO3", "MATRIX_SOURCE_LFO4", "MATRIX_SOURCE_PITCHBEND", "MATRIX_SOURCE_AFTERTOUCH", "MATRIX_SOURCE_MODWHEEL", "MATRIX_SOURCE_VELOCITY", "MATRIX_SOURCE_CC1", "MATRIX_SOURCE_CC2", "MATRIX_SOURCE_CC3", "MATRIX_SOURCE_CC4", "MATRIX_SOURCE_MAX" };
+const char* matrixDestEnums [] = { "DESTINATION_NONE", "OSC1_FREQ", "OSC2_FREQ", "OSC3_FREQ", "OSC4_FREQ", "OSC5_FREQ", "OSC6_FREQ", "INDEX_MODULATION1", "INDEX_MODULATION2", "INDEX_MODULATION3", "INDEX_MODULATION4", "MIX_OSC1", "MIX_OSC2", "MIX_OSC3", "MIX_OSC4", "LFO1_FREQ", "LFO2_FREQ", "LFO3_FREQ", "LFO4_FREQ", "MTX1_MUL", "MTX2_MUL", "MTX3_MUL", "MTX4_MUL", "MTX5_MUL", "MTX6_MUL", "MTX7_MUL", "MTX8_MUL", "DESTINATION_MAX" };
 
 
 void PresetUtil::dumpLine(const char *enums1[], int a, const char *enums2[], int b, const char *enums3[], int c, const char *enums4[], int d) {
@@ -96,7 +102,7 @@ void PresetUtil::dumpPatch() {
 	SerialUSB.print("// patch name : '");
 	SerialUSB.print(PresetUtil::synthState->params.presetName);
 	SerialUSB.println("'");
-	SerialUSB.print("// Engin");
+	SerialUSB.println("// Engine ");
 	dumpLine(engineEnums,
 			PresetUtil::synthState->params.engine1.algo,
 			NULL,
@@ -121,20 +127,20 @@ void PresetUtil::dumpPatch() {
 			PresetUtil::synthState->params.engine3.mixOsc3,
 			NULL,
 			PresetUtil::synthState->params.engine3.mixOsc4);
-	SerialUSB.print("// Oscillator");
+	SerialUSB.println("// Oscillator");
 	OscillatorParams * o =
 			(OscillatorParams *) (&(PresetUtil::synthState->params.osc1));
 	for (int k = 0; k < 6; k++) {
-		dumpLine(NULL,
+		dumpLine(mixOscShapeEnums,
 				o[k].shape,
-				NULL,
+				oscTypeEnums,
 				o[k].frequencyType,
 				NULL,
 				o[k].frequencyMul,
 				NULL,
 				o[k].detune);
 	}
-	SerialUSB.print("// Enveloppe");
+	SerialUSB.println("// Enveloppe");
 	EnvelopeParams * e =
 			(EnvelopeParams*) (&(PresetUtil::synthState->params.env1));
 	for (int k = 0; k < 6; k++) {
@@ -148,24 +154,24 @@ void PresetUtil::dumpPatch() {
 				NULL,
 				e[k].release);
 	}
-	SerialUSB.print("// Modulation matrix");
+	SerialUSB.println("// Modulation matrix");
 	MatrixRowParams	* m = (MatrixRowParams*) (&(PresetUtil::synthState->params.matrixRowState1));
 	for (int k = 0; k < 8; k++) {
 		dumpLine(
-				NULL,
+				matrixSourceEnums,
 				m[k].source,
 				NULL,
 				m[k].mul,
-				NULL,
+				matrixDestEnums,
 				m[k].destination,
 				NULL,
 				0);
 	}
-	SerialUSB.print("// LFOs");
+	SerialUSB.println("// LFOs");
 	LfoParams* l = (LfoParams*) (&(PresetUtil::synthState->params.lfo1));
-	for (int k = 0; k < 4; k++) {
+	for (int k = 0; k < 3; k++) {
 		dumpLine(
-				NULL,
+				lfoShapeEnums,
 				l[k].shape,
 				NULL,
 				l[k].freq,
@@ -174,7 +180,18 @@ void PresetUtil::dumpPatch() {
 				NULL,
 				l[k].keybRamp);
 	}
-	SerialUSB.println(PresetUtil::synthState->params.presetName);
+	dumpLine(
+			NULL,
+			l[3].shape,
+			NULL,
+			l[3].freq,
+			NULL,
+			l[3].bias,
+			NULL,
+			l[3].keybRamp);
+	SerialUSB.print("\"");
+	SerialUSB.print(PresetUtil::synthState->params.presetName);
+	SerialUSB.println("\"");
 }
 
 void PresetUtil::readFromEEPROM(uint8 bankNumber, uint8 preset, char* params) {

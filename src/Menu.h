@@ -19,7 +19,7 @@
 #ifndef MENU_H_
 #define MENU_H_
 
-#define INTERNAL_LAST_BANK 12
+#define INTERNAL_LAST_BANK 18
 
 
 enum SynthMode {

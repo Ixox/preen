@@ -419,6 +419,224 @@ const struct AllSynthParams presets[]  = {
                 "Space Wave"
         },
         {
+        		// patch name : 'Power'
+        		// Engine
+        		{ ALGO8, 14, 2, 0} ,
+        		{ 32, 44, 156, 56} ,
+        		{ 128, 128, 128, 0} ,
+        		// Oscillator
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 48, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 80, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SQUARE, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 4, 0} ,
+        		// Enveloppe
+        		{ 0, 90, 209, 90} ,
+        		{ 94, 75, 174, 77} ,
+        		{ 0, 179, 0, 173} ,
+        		{ 3, 100, 118, 100} ,
+        		{ 15, 91, 188, 111} ,
+        		{ 0, 130, 87, 108} ,
+        		// Modulation matrix
+        		{ MATRIX_SOURCE_MODWHEEL, 10, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_PITCHBEND, 12, OSC2_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 1, INDEX_MODULATION2, 0} ,
+        		{ MATRIX_SOURCE_LFO2, 13, INDEX_MODULATION3, 0} ,
+        		{ MATRIX_SOURCE_LFO4, 14, LFO2_FREQ, 0} ,
+        		{ MATRIX_SOURCE_MODWHEEL, 11, INDEX_MODULATION3, 0} ,
+        		{ MATRIX_SOURCE_NONE, 49, INDEX_MODULATION4, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		// LFOs
+        		{ LFO_SAW, 36, 0, 0} ,
+        		{ LFO_SAW, 36, 127, 255} ,
+        		{ LFO_SAW, 3, 0, 0} ,
+        		{ 255, 4, -1, 255} ,
+        		"Power"
+        },
+        {
+        		// patch name : 'Armonica'
+        		// Engine
+        		{ ALGO1, 14, 4, 6} ,
+        		{ 16, 0, 47, 0} ,
+        		{ 128, 128, 128, 0} ,
+        		// Oscillator
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		// Enveloppe
+        		{ 60, 180, 160, 71} ,
+        		{ 100, 65, 150, 100} ,
+        		{ 50, 100, 255, 100} ,
+        		{ 3, 100, 100, 100} ,
+        		{ 0, 150, 160, 60} ,
+        		{ 0, 150, 160, 60} ,
+        		// Modulation matrix
+        		{ MATRIX_SOURCE_MODWHEEL, 16, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_PITCHBEND, 64, OSC1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 1, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		// LFOs
+        		{ LFO_SAW, 37, 96, 214} ,
+        		{ LFO_SAW, 20, 0, 0} ,
+        		{ LFO_SAW, 3, 0, 0} ,
+        		{ 0, 4, 0, 0} ,
+        		"Armonica"
+
+        },
+        {
+        		// patch name : 'Drum 0'
+        		// Engine
+        		{ ALGO3, 14, 1, 6} ,
+        		{ 82, 0, 116, 197} ,
+        		{ 128, 128, 128, 0} ,
+        		// Oscillator
+        		{ OSC_SHAPE_SIN, OSC_FT_FIXE, 1, -28} ,
+        		{ OSC_SHAPE_SQUARE, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_RAND, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		// Enveloppe
+        		{ 0, 127, 0, 65} ,
+        		{ 47, 65, 128, 100} ,
+        		{ 0, 0, 255, 90} ,
+        		{ 0, 120, 0, 64} ,
+        		{ 0, 150, 160, 60} ,
+        		{ 0, 150, 160, 60} ,
+        		// Modulation matrix
+        		{ MATRIX_SOURCE_MODWHEEL, 16, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_PITCHBEND, 64, OSC1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO4, 0, INDEX_MODULATION2, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		// LFOs
+        		{ LFO_SAW, 36, 0, 0} ,
+        		{ LFO_SAW, 20, 0, 0} ,
+        		{ LFO_SAW, 3, 0, 0} ,
+        		{ 115, 12, -1, 255} ,
+        		"Drum 0"
+        },
+        {
+        		// patch name : 'Frrrr'
+        		// Engine
+        		{ ALGO1, 14, 2, 7} ,
+        		{ 61, 39, 0, 6} ,
+        		{ 128, 128, 128, 0} ,
+        		// Oscillator
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 64, 27} ,
+        		{ OSC_SHAPE_RAND, OSC_FT_FIXE, 3, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, -88} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		// Enveloppe
+        		{ 41, 11, 120, 97} ,
+        		{ 7, 108, 43, 113} ,
+        		{ 50, 100, 255, 100} ,
+        		{ 3, 100, 100, 100} ,
+        		{ 0, 150, 160, 60} ,
+        		{ 0, 150, 160, 60} ,
+        		// Modulation matrix
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_LFO4, 76, OSC1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO2, 23, OSC3_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO2, 13, OSC1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		// LFOs
+        		{ LFO_SAW, 36, 0, 158} ,
+        		{ LFO_SAW, 37, 0, 114} ,
+        		{ LFO_SAW, 3, 0, 0} ,
+        		{ 58, 93, 0, 255} ,
+        		"Frrrrrrr"
+        },
+        {
+        		// patch name : 'Vibes'
+        		// Engine
+        		{ ALGO1, 14, 4, 6} ,
+        		{ 0, 16, 0, 0} ,
+        		{ 128, 128, 128, 0} ,
+        		// Oscillator
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		// Enveloppe
+        		{ 28, 150, 160, 244} ,
+        		{ 69, 65, 171, 244} ,
+        		{ 80, 0, 255, 100} ,
+        		{ 3, 100, 100, 100} ,
+        		{ 0, 150, 160, 60} ,
+        		{ 0, 150, 160, 60} ,
+        		// Modulation matrix
+        		{ MATRIX_SOURCE_LFO4, 35, LFO1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 16, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 0, OSC1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_MODWHEEL, -20, LFO1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		// LFOs
+        		{ LFO_SAW, 11, 0, 113} ,
+        		{ LFO_RAMP, 20, 0, 0} ,
+        		{ LFO_SAW, 3, 0, 0} ,
+        		{ 245, 12, -1, 255} ,
+        		"Vibes"
+
+        },
+        {
+        		// patch name : 'Vibrato Accel'
+        		// Engine
+        		{ ALGO1, 14, 4, 6} ,
+        		{ 0, 25, 24, 0} ,
+        		{ 128, 128, 128, 0} ,
+        		// Oscillator
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 24, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		// Enveloppe
+        		{ 58, 150, 160, 157} ,
+        		{ 61, 51, 255, 244} ,
+        		{ 61, 0, 255, 255} ,
+        		{ 3, 100, 100, 100} ,
+        		{ 0, 150, 160, 60} ,
+        		{ 0, 150, 160, 60} ,
+        		// Modulation matrix
+        		{ MATRIX_SOURCE_LFO4, 52, LFO1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 7, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 8, INDEX_MODULATION2, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		// LFOs
+        		{ LFO_SAW, 2, 127, 107} ,
+        		{ LFO_RAMP, 20, 0, 0} ,
+        		{ LFO_SAW, 3, 0, 0} ,
+        		{ 183, 0, -1, 255} ,
+        		"Vibrato Acc"
+        },
+        {
                 { 0,0,0,0} ,
                 { 5, 14, 0, 0},
                 { 128, 128, 128,0 },
