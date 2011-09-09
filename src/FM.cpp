@@ -275,23 +275,10 @@ void loop() {
     }
 
 
-    if ((newMicros - encoderMicros) > 1900) {
+    if ((newMicros - encoderMicros) > 4000) {
         fillSoundBuffer();
         encoders.checkStatus();
         encoderMicros = newMicros;
-
-        /*
-         * interesting informations
-            if ((mainCpt&0x3f)==0) {
-                fillSoundBuffer();
-                lcd.setCursor(4,0);
-                lcd.print(mainCpt-cptTmp);
-                lcd.print(" ");
-            }
-
-            cptTmp = mainCpt;
-         */
-
     }
 
 }

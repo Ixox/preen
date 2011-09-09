@@ -95,7 +95,7 @@ struct ParameterRowDisplay lfoEnvParameterRow = {
 };
 
 const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW", "Velo", "CC1 ", "CC2 ", "CC3 ", "CC4 "} ;
-const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "o6Fr", "o6Fr", "IM1 ", "IM2 ", "IM3 ", "IM4 ", "Mix1", "Mix2", "Mix3", "Mix4",
+const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "o5Fr", "o6Fr", "IM1 ", "IM2 ", "IM3 ", "IM4 ", "Mix1", "Mix2", "Mix3", "Mix4",
 		"lfo1", "lfo2", "lfo3", "lfo4", "mtx1", "mtx2", "mtx3", "mtx4", "mtx5", "mtx6", "mtx7", "mtx8" } ;
 struct ParameterRowDisplay matrixParameterRow = {
         "Matrix",
