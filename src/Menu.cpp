@@ -30,7 +30,7 @@ const struct MidiConfig midiConfig[]  = {
 			midiChannels
 		},
 		{
-			"Fwd other chnls: ",
+			"Fwd other chls: ",
 			2,
 			yesNo
 		},
