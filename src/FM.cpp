@@ -74,8 +74,8 @@ inline void fillSoundBufferFull() {
 
 void setup()
 {
-	// SerialUSB.end();
-	// nvic_irq_disable(NVIC_USB_LP_CAN_RX0);
+	SerialUSB.end();
+	nvic_irq_disable(NVIC_USB_LP_CAN_RX0);
     // systick_disable();
 
     byte midiIn[8] = {
@@ -114,7 +114,7 @@ void setup()
 
     lcd.begin(20, 4);
     lcd.setCursor(0,0);
-    lcd.print("PreenFM V0.93");
+    lcd.print("PreenFM V0.94");
     lcd.setCursor(0,1);
     lcd.print("            By Ixox");
     lcd.setCursor(0,3);
@@ -275,7 +275,7 @@ void loop() {
     }
 
 
-    if ((newMicros - encoderMicros) > 4000) {
+    if ((newMicros - encoderMicros) > 2600) {
         fillSoundBuffer();
         encoders.checkStatus();
         encoderMicros = newMicros;
