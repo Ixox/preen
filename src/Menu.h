@@ -105,7 +105,7 @@ struct MidiConfig {
 
 
 extern const struct MenuItem allMenus[];
-extern struct MidiConfig midiConfig[];
+extern const struct MidiConfig midiConfig[];
 
 class MenuItemUtil {
 public:

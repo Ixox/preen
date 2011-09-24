@@ -23,14 +23,14 @@ const char* yesNo [] = { "No", "Yes" };
 const char* midiReceives[] = { "None", "CC", "NRPN", "CC & NRPN" };
 const char* midiSends [] = { "None", "CC", "NRPN" };
 
-struct MidiConfig midiConfig[]  = {
+const struct MidiConfig midiConfig[]  = {
 		{
 			"Midi channel: ",
 			17,
 			midiChannels
 		},
 		{
-			"Forward: ",
+			"Fwd other chnls: ",
 			2,
 			yesNo
 		},
