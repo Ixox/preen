@@ -57,43 +57,7 @@ const struct AllSynthParams presets[]  = {
         		"Preen"
         } ,
         {
-        		// patch name : 'Organ'
-        		// Engine
-        		{ ALGO2, 14, 4, 0} ,
-        		{ 3, 2, 0, 0} ,
-        		{ 128, 128, 128, 0} ,
-        		// Oscillator
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
-        		{ OSC_SHAPE_SIN2, OSC_FT_KEYBOARD , 3, 0} ,
-        		{ OSC_SHAPE_OFF, OSC_FT_KEYBOARD , 0, 0} ,
-        		{ OSC_SHAPE_OFF, OSC_FT_KEYBOARD , 0, 0} ,
-        		// Enveloppe
-        		{ 72, 150, 160, 60} ,
-        		{ 81, 66, 196, 77} ,
-        		{ 50, 100, 255, 100} ,
-        		{ 3, 100, 100, 100} ,
-        		{ 0, 0, 0, 0} ,
-        		{ 0, 0, 0, 0} ,
-        		// Modulation matrix
-        		{ MATRIX_SOURCE_MODWHEEL, 16, INDEX_MODULATION1, 0} ,
-        		{ MATRIX_SOURCE_PITCHBEND, 64, OSC1_FREQ, 0} ,
-        		{ MATRIX_SOURCE_LFO1, 0, OSC1_FREQ, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-        		// LFOs
-        		{ LFO_SAW, 36, 0, 0} ,
-        		{ LFO_SAW, 20, 0, 0} ,
-        		{ LFO_SAW, 3, 0, 0} ,
-        		{ 0, 4, 0, 0} ,
-        		"Organ"
-        },
-        {
-        		// patch name : 'Weird Bubble'
+        		// patch name : 'Bubble mw'
         		// Engine
         		{ ALGO1, 0, 4, 0} ,
         		{ 20, 28, 0, 0} ,
@@ -126,12 +90,12 @@ const struct AllSynthParams presets[]  = {
         		{ LFO_SQUARE, 97, 0, 0} ,
         		{ LFO_SQUARE, 96, 0, 0} ,
         		{ 0, 12, 0, 0} ,
-        		"Weird Bubble"
+        		"Bubble  mw"
         },
         {
         		// patch name : 'Old and Sad'
         		// Engine
-        		{ ALGO1, 14, 4, 0} ,
+        		{ ALGO1, 0, 4, 0} ,
         		{ 15, 3, 0, 0} ,
         		{ 128, 128, 128, 0} ,
         		// Oscillator
@@ -142,7 +106,7 @@ const struct AllSynthParams presets[]  = {
         		{ OSC_SHAPE_OFF, OSC_FT_KEYBOARD , 0, 0} ,
         		{ OSC_SHAPE_OFF, OSC_FT_KEYBOARD , 0, 0} ,
         		// Enveloppe
-        		{ 100, 150, 63, 11} ,
+        		{ 100, 150, 111, 11} ,
         		{ 0, 122, 125, 253} ,
         		{ 50, 100, 255, 100} ,
         		{ 3, 100, 100, 100} ,
@@ -165,40 +129,76 @@ const struct AllSynthParams presets[]  = {
         		"Old and Sad"
         },
         {
-        		// patch name : 'Medieval'
+        		// patch name : 'Power'
         		// Engine
-        		{ ALGO1, 14, 4, 0} ,
-        		{ 27, 28, 0, 0} ,
+        		{ ALGO8, 14, 2, 0} ,
+        		{ 32, 44, 156, 56} ,
         		{ 128, 128, 128, 0} ,
         		// Oscillator
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 12, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
-        		{ OSC_SHAPE_SIN2, OSC_FT_KEYBOARD , 3, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 48, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 80, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SQUARE, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 4, 0} ,
+        		// Enveloppe
+        		{ 0, 90, 209, 90} ,
+        		{ 94, 75, 174, 77} ,
+        		{ 0, 179, 0, 173} ,
+        		{ 3, 100, 118, 100} ,
+        		{ 15, 91, 188, 111} ,
+        		{ 0, 130, 87, 108} ,
+        		// Modulation matrix
+        		{ MATRIX_SOURCE_MODWHEEL, 10, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_PITCHBEND, 12, OSC2_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 1, INDEX_MODULATION2, 0} ,
+        		{ MATRIX_SOURCE_LFO2, 13, INDEX_MODULATION3, 0} ,
+        		{ MATRIX_SOURCE_LFO4, 14, LFO2_FREQ, 0} ,
+        		{ MATRIX_SOURCE_MODWHEEL, 11, INDEX_MODULATION3, 0} ,
+        		{ MATRIX_SOURCE_NONE, 49, INDEX_MODULATION4, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		// LFOs
+        		{ LFO_SAW, 36, 0, 0} ,
+        		{ LFO_SAW, 36, 127, 255} ,
+        		{ LFO_SAW, 3, 0, 0} ,
+        		{ 255, 4, -1, 255} ,
+        		"Power"
+        },
+        {
+        		// patch name : 'Organ'
+        		// Engine
+        		{ ALGO6, 0, 3, 0} ,
+        		{ 8, 13, 19, 0} ,
+        		{ 128, 128, 128, 0} ,
+        		// Oscillator
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_OFF, OSC_FT_KEYBOARD , 0, 0} ,
         		{ OSC_SHAPE_OFF, OSC_FT_KEYBOARD , 0, 0} ,
         		// Enveloppe
-        		{ 0, 0, 255, 175} ,
-        		{ 0, 66, 196, 132} ,
-        		{ 50, 100, 255, 210} ,
-        		{ 3, 100, 100, 100} ,
+        		{ 70, 89, 145, 60} ,
+        		{ 84, 66, 194, 60} ,
+        		{ 90, 87, 150, 60} ,
+        		{ 0, 0, 255, 255} ,
         		{ 0, 0, 0, 0} ,
         		{ 0, 0, 0, 0} ,
         		// Modulation matrix
-        		{ MATRIX_SOURCE_MODWHEEL, 6, INDEX_MODULATION1, 0} ,
-        		{ MATRIX_SOURCE_PITCHBEND, 3, OSC1_FREQ, 0} ,
-        		{ MATRIX_SOURCE_LFO1, 2, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_MODWHEEL, 16, INDEX_MODULATION3, 0} ,
+        		{ MATRIX_SOURCE_PITCHBEND, 64, OSC1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 0, OSC1_FREQ, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		// LFOs
-        		{ LFO_SAW, 38, 0, 117} ,
+        		{ LFO_SAW, 36, 0, 0} ,
         		{ LFO_SAW, 20, 0, 0} ,
         		{ LFO_SAW, 3, 0, 0} ,
-        		{ 0, 0, 0, 0} ,
-        		"Medieval"
+        		{ 0, 4, 0, 0} ,
+        		"Organ"
         },
         {
         		// patch name : 'Klong'
@@ -271,6 +271,42 @@ const struct AllSynthParams presets[]  = {
         		{ LFO_SAW, 3, 0, 0} ,
         		{ 0, 4, 0, 0} ,
         		"Simple Bass"
+        },
+        {
+        		// patch name : 'Medieval'
+        		// Engine
+        		{ ALGO1, 14, 4, 0} ,
+        		{ 27, 28, 0, 0} ,
+        		{ 128, 128, 128, 0} ,
+        		// Oscillator
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 12, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
+        		{ OSC_SHAPE_SIN2, OSC_FT_KEYBOARD , 3, 0} ,
+        		{ OSC_SHAPE_OFF, OSC_FT_KEYBOARD , 0, 0} ,
+        		{ OSC_SHAPE_OFF, OSC_FT_KEYBOARD , 0, 0} ,
+        		// Enveloppe
+        		{ 0, 0, 255, 175} ,
+        		{ 0, 66, 196, 132} ,
+        		{ 50, 100, 255, 210} ,
+        		{ 3, 100, 100, 100} ,
+        		{ 0, 0, 0, 0} ,
+        		{ 0, 0, 0, 0} ,
+        		// Modulation matrix
+        		{ MATRIX_SOURCE_MODWHEEL, 6, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_PITCHBEND, 3, OSC1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 2, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		// LFOs
+        		{ LFO_SAW, 38, 0, 117} ,
+        		{ LFO_SAW, 20, 0, 0} ,
+        		{ LFO_SAW, 3, 0, 0} ,
+        		{ 0, 0, 0, 0} ,
+        		"Medieval"
         },
         {
         		// patch name : 'Crystal Blow'
@@ -403,7 +439,7 @@ const struct AllSynthParams presets[]  = {
         		// Modulation matrix
         		{ MATRIX_SOURCE_LFO1, 3, INDEX_MODULATION2, 0} ,
         		{ MATRIX_SOURCE_PITCHBEND, 22, OSC1_FREQ, 0} ,
-        		{ MATRIX_SOURCE_MODWHEEL, 4, INDEX_MODULATION2, 0} ,
+        		{ MATRIX_SOURCE_MODWHEEL, 8, INDEX_MODULATION2, 0} ,
         		{ MATRIX_SOURCE_VELOCITY, 4, INDEX_MODULATION1, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
@@ -437,13 +473,13 @@ const struct AllSynthParams presets[]  = {
         		{ 138, 150, 160, 159} ,
         		{ 218, 150, 255, 204} ,
         		// Modulation matrix
-        		{ MATRIX_SOURCE_MODWHEEL, 16, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_MODWHEEL, 5, INDEX_MODULATION3, 0} ,
         		{ MATRIX_SOURCE_PITCHBEND, 64, OSC1_FREQ, 0} ,
         		{ MATRIX_SOURCE_LFO1, 23, OSC1_FREQ, 0} ,
         		{ MATRIX_SOURCE_LFO2, 9, OSC6_FREQ, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-        		{ MATRIX_SOURCE_NONE, -128, DESTINATION_NONE, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_MODWHEEL, 92, MTX3_MUL, 0} ,
+        		{ MATRIX_SOURCE_MODWHEEL, 35, MTX4_MUL, 0} ,
+        		{ MATRIX_SOURCE_MODWHEEL, 127, LFO2_FREQ, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		// LFOs
         		{ LFO_SAW, 36, 0, 128} ,
@@ -451,42 +487,6 @@ const struct AllSynthParams presets[]  = {
         		{ LFO_SAW, 3, 0, 0} ,
         		{ 0, 4, 0, 0} ,
         		"Space Wave"
-        },
-        {
-        		// patch name : 'Power'
-        		// Engine
-        		{ ALGO8, 14, 2, 0} ,
-        		{ 32, 44, 156, 56} ,
-        		{ 128, 128, 128, 0} ,
-        		// Oscillator
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 48, 0} ,
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 80, 0} ,
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
-        		{ OSC_SHAPE_SQUARE, OSC_FT_KEYBOARD , 8, 0} ,
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 4, 0} ,
-        		// Enveloppe
-        		{ 0, 90, 209, 90} ,
-        		{ 94, 75, 174, 77} ,
-        		{ 0, 179, 0, 173} ,
-        		{ 3, 100, 118, 100} ,
-        		{ 15, 91, 188, 111} ,
-        		{ 0, 130, 87, 108} ,
-        		// Modulation matrix
-        		{ MATRIX_SOURCE_MODWHEEL, 10, INDEX_MODULATION1, 0} ,
-        		{ MATRIX_SOURCE_PITCHBEND, 12, OSC2_FREQ, 0} ,
-        		{ MATRIX_SOURCE_LFO1, 1, INDEX_MODULATION2, 0} ,
-        		{ MATRIX_SOURCE_LFO2, 13, INDEX_MODULATION3, 0} ,
-        		{ MATRIX_SOURCE_LFO4, 14, LFO2_FREQ, 0} ,
-        		{ MATRIX_SOURCE_MODWHEEL, 11, INDEX_MODULATION3, 0} ,
-        		{ MATRIX_SOURCE_NONE, 49, INDEX_MODULATION4, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-        		// LFOs
-        		{ LFO_SAW, 36, 0, 0} ,
-        		{ LFO_SAW, 36, 127, 255} ,
-        		{ LFO_SAW, 3, 0, 0} ,
-        		{ 255, 4, -1, 255} ,
-        		"Power"
         },
         {
         		// patch name : 'Armonica'
