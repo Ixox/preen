@@ -72,9 +72,12 @@ public:
 	}
 
 private:
-	bool encoderOldBit1[NUMBER_OF_ENCODERS];
+	int action[16];
 	int encoderBit1[NUMBER_OF_ENCODERS];
 	int encoderBit2[NUMBER_OF_ENCODERS];
+	int encoderState[NUMBER_OF_ENCODERS];
+	int timerAction[NUMBER_OF_ENCODERS];
+
 	LastEncoderMove lastMove[NUMBER_OF_ENCODERS];
     int tickSpeed[NUMBER_OF_ENCODERS];
 
