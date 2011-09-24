@@ -212,6 +212,11 @@ void SynthState::encoderTurned(int encoder, int ticks) {
         // Store lastAction
         lastAction = encoder;
 
+		if (param->displayType == DISPLAY_TYPE_STRINGS) {
+			// Do not use encoder acceleration
+			ticks = ticks>0? 1 : -1;
+		}
+
         if ((param->displayType == DISPLAY_TYPE_SIGNED_CHAR) || (param->displayType == DISPLAY_TYPE_OSC_FREQUENCY && param->minValue<0)) {
             char &value = ((char*)&params)[num];
             oldValue = value;
