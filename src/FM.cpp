@@ -76,7 +76,6 @@ void setup()
 {
 	SerialUSB.end();
 	nvic_irq_disable(NVIC_USB_LP_CAN_RX0);
-    // systick_disable();
 
     byte midiIn[8] = {
             B01100,
@@ -275,8 +274,8 @@ void loop() {
     }
 
 
-    if ((newMicros - encoderMicros) > 2600) {
-        fillSoundBuffer();
+    if ((newMicros - encoderMicros) > 2500) {
+    	fillSoundBufferFull();
         encoders.checkStatus();
         encoderMicros = newMicros;
     }

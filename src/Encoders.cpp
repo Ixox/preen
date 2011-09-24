@@ -27,7 +27,7 @@ Encoders::Encoders() {
 
 	/*
 			0: 0000 = 00 ; No change
-			1: 0001 = 00 ; A 0>1, count up
+			1: 0001 = 01 ; A 0>1, count up
 			2: 0010 = 00; B 0>1, count down
 			3: 0011 = 00 ; Both changed, invalid
 			4: 0100 = 02 ; A 1>0, Down
@@ -44,7 +44,7 @@ Encoders::Encoders() {
 			F: 1111 = 00
 	*/
 
-    int actionToCopy[] = { 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0};
+    int actionToCopy[] = { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0};
     for (int i=0; i<16; i++) {
     	action[i] = actionToCopy[i];
     }
