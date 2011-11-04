@@ -44,7 +44,12 @@ MidiDecoder        midiDecoder;
 Encoders		   encoders;
 RingBuffer<uint16, 50> rb;
 FMDisplay          fmDisplay;
-LiquidCrystal      lcd(2, 8, 3, 4, 5, 6, 7, 31, 30, 29, 28);
+// R1
+// LiquidCrystal      lcd(2,8,3,4,5,6,7, 27,26,25, 22);
+// R2
+//LiquidCrystal      lcd(2, 8, 3, 4, 5, 6, 7, 31, 30, 29, 28);
+// R3
+LiquidCrystal      lcd(31, 30, 29, 28, 2, 3, 4, 5, 6, 7);
 
 HardwareTimer mainTimer(TIME_NUMBER);
 
@@ -194,6 +199,7 @@ void setup()
         delayMicroseconds(30);
     }
 
+    // Load default patch
     synthState.propagateBeforeNewParamsLoad();
     PresetUtil::loadDefaultPatchIfAny();
     synthState.propagateAfterNewParamsLoad();
