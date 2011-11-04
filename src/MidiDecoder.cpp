@@ -344,17 +344,31 @@ void MidiDecoder::controlChange(MidiEvent& midiEvent) {
 			break;
 		case 96:
 			// nrpn increment
-			// incNrpn();
+			if (this->currentNrpn.valueLSB == 127) {
+				this->currentNrpn.valueLSB = 0;
+				this->currentNrpn.valueMSB ++;
+			} else {
+				this->currentNrpn.valueLSB ++;
+			}
+			this->currentNrpn.readyToSend = true;
 			break;
 		case 97:
 			// nrpn decremenet
-			//decNrpn();
+			if (this->currentNrpn.valueLSB == 0) {
+				this->currentNrpn.valueLSB = 127;
+				this->currentNrpn.valueMSB --;
+			} else {
+				this->currentNrpn.valueLSB --;
+			}
+			this->currentNrpn.readyToSend = true;
 			break;
 		default:
-			if (this->currentNrpn.readyToSend) {
-				this->currentNrpn.readyToSend = false;
-				decodeNrpn();
-			}
+			break;
+		}
+
+		if (this->currentNrpn.readyToSend) {
+			decodeNrpn();
+			this->currentNrpn.readyToSend = false;
 		}
 	}
 }
@@ -371,7 +385,6 @@ void MidiDecoder::decodeNrpn() {
 				allParameterRows.row[row]->params[encoder];
 		this->synthState->setNewValue(row, encoder, param.minValue + value);
 	}
-	this->currentNrpn.readyToSend = false;
 }
 
 void MidiDecoder::newParamValueFromExternal(SynthParamType type,
@@ -429,6 +442,9 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
 			}
 			break;
 		case ROW_MODULATION:
+			// We only send even value so that we're not stick we receving the host midi loopback
+			if ((newValue & 0x1) >0)
+				break;
 			cc.value[0] = CC_IM1 + encoder;
 			cc.value[1] = newValue >> 1;
 			break;
@@ -437,6 +453,8 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
 			cc.value[1] = newValue;
 			break;
 		case ROW_OSC_FIRST ... ROW_OSC_LAST:
+			if ((newValue & 0x1) >0)
+				break;
 			if (encoder == ENCODER_OSC_FREQ) {
 				cc.value[0] = CC_OSC1_FREQ + (currentrow - ROW_OSC_FIRST);
 				cc.value[1] = newValue >> 1;
@@ -446,6 +464,8 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
 			}
 			break;
 		case ROW_ENV_FIRST ... ROW_ENV_LAST:
+			if ((newValue & 0x1) >0)
+				break;
 			if (encoder == ENCODER_ENV_A) {
 				cc.value[0] = CC_ENV1_ATTACK + (currentrow - ROW_ENV_FIRST);
 				cc.value[1] = newValue >> 1;
@@ -455,12 +475,16 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
 			}
 			break;
 		case ROW_MATRIX_FIRST ... ROW_MATRIX_LAST:
+			if ((newValue & 0x1) >0)
+				break;
 			if (encoder == ENCODER_MATRIX_MUL) {
 				cc.value[0] = CC_MATRIXROW1_MUL + currentrow - ROW_MATRIX_FIRST;
 				cc.value[1] = (newValue >> 1) + 64;
 			}
 			break;
 		case ROW_LFO_FIRST ... ROW_LFO_LAST:
+			if ((newValue & 0x1) >0)
+				break;
 			if (encoder == ENCODER_LFO_FREQ) {
 				cc.value[0] = CC_MATRIXROW1_MUL + currentrow - ROW_LFO_FIRST;
 				cc.value[1] = (newValue >> 1);
