@@ -10,9 +10,9 @@
 |/       |/   \__/(_______/(_______/|/    )_)|/       |/     \|
 
 -----------------------------------------                                            
-V0.93
+version 0.95
 By Xavier Hosxe : x a v i e r <dot> h o s x e {at} gmail <dot> com
-August 26th 2011
+November 8th 2011
 
 http://www.preenfm.net
 
@@ -25,71 +25,50 @@ as published by the Free Software Foundation version 3.
 
 -----------------------------------------
 
-Preen Current Features:
+Preen Current Features
 
-. 9 FM algorithms available from 3 to 6 operators (1 operator = 1 oscillator + 1 enveloppe)
-. Polyphonic : 12 operators in realtime
-. Oscillator : 7 waveform (4 sin variation + noise + band limited sqare and sawtooth), linked to keyb freq or fix, fine tune.
-. Enveloppe : ADSR (A,D and R up to 2 seconds).
-. 4 voices for 3 ops Algos, 3 voices for 4 ops algos, and 2 voices for 6 ops algo
-. 4 LFOs
-    3 LFO oscillators : 4 waveform (Saw, ramp, square, random) - frequency in Hz - ramp up to 4 seconds resynched on new note 	
-    1 LFO enveloppe - Release removable
-. 8 rows moldulation matrix (12 sources, 24 destinations)
+. 9 different FM alogorithms with up to 6 operators
+  Each operator includes a pair of oscillator and ADSR enveloppe
+  Oscillator : 7 waveforms (4 sin variation + noise + square + sawtooth), 
+  linked to keyb freq or fix, fine tune
+
+. Up to 4 voice polyphony with 3 operators FM algoriyhm
+  Up to 3 voice polyphony with 4 operators FM algoriyhm 
+  and up to 2 with 6 operators FM algoriyhm.
+
 . Glide available when voice set to 1
 
-. EEPROM.
-  . 4 banks of 128 user preset
-  . Default preset (the one when you switch on)
-  . midi config (midi channel, receive nrpn etc...)
+. 3 standard LFOs (4 waveforms (saw, ramp, square, random), 
+  frequency in Hz, ramp up to 4 seconds, reset on new note).
+  1 Enveloppe type LFO 
 
-. System exclusive to exchange patch and bank with a computer.
+. 8 rows modulation matrix - 12 different sources and 24 destinations
 
-. Midi control
-  . Control change : 44 CC linked to parameters.
-  . 4 CC + modwheel + after touch + velocity assignable as source in the modulation matrix.
-  . Nrpn : allow access to ALL parameters
-  . Midi channel selectable. Midi for other channels can be forwarded.
+. 4 banks of 128 user presets
 
-. LCD 4x20 
-  . updated in realtime showing the parameter you modify.
-  . Consistency display of each parameters (signed, unsigned, strings, float...)
+. System exclusive to exchange patches and banks with a computer
 
-. Surface Control
-  . 4 encoders + 7 buttons
-  . The full synth state is easily updated
+. Midi control : 44 control input/output control changes linked to parameters
+  Nrpn : input/ouput of all paremeters
+  Midi channel selectable : Midi for other channges can be forwarded to plug several PreenFM in serial
 
-. Sampling rate : 
-  . 32768 Hz (makes division faster ;-) for audio. Pseudo 11 bits.
-  . 1024 Hz for LFO and Modulation Matrix.
+. Large readable 4x20 LCD 
 
-. Analog filter
-  . 6th order active low pass bessel filter to get rid (as much as possible) of the aliasing
-  . Volume pot
+. Friendly surface controle : You always clearly see on the screen what you're currently editing
 
-. Mostly C++ class modifiable
+. Sampling rate : 32768 Hz (Makes integer division faster ;-). Pseudo 11 bits.
+  1024 Hz for LFO and modulation matrix
+
+. 6th order butterworth analog filter to convert the 1 bit output into a nice waveform
+
+. Transparent case that allows you to see every day your nice work
 
 --------------------------------------------
 
-
 Todo before V1.0 : 
-. nrpn inc and dec
-. Implement more midi events
 . Documentation
 
 --------------------------------------------
-Hardware (to be detailed)
-. LCD LiquidCrystal compatible 4x20 + variable resistance for contrast
-. 2 74HC165 to plug buttons and rotary encoders  (I used the DIN schema from midibox.org).
-. 4 rotary encoders + 7 buttons
-. condensators and resistors to make the 6nd order Low pass filter.
-. Chimical condo to remove the constant voltage bias in filter chain + noise filtering.
-. 1 chip of 4 omp amps (MC32204): 1 for virtual ground + 3 2nd order filter
-. Midi Jack + optocoupler 6N137 + diodes
-. 2 x 24lc512 to save the presets and the configuration state
-.... Full schema soon... 
-
----------------------------------------------
 
 Xavier
 
