@@ -44,12 +44,18 @@ MidiDecoder        midiDecoder;
 Encoders		   encoders;
 RingBuffer<uint16, 50> rb;
 FMDisplay          fmDisplay;
-// R1
-// LiquidCrystal      lcd(2,8,3,4,5,6,7, 27,26,25, 22);
-// R2
-//LiquidCrystal      lcd(2, 8, 3, 4, 5, 6, 7, 31, 30, 29, 28);
-// R3
+
+#ifdef PCB_R1
+LiquidCrystal      lcd(2, 8, 3, 4, 5, 6, 7, 27, 26, 25, 22);
+#endif
+
+ #ifdef PCB_R2
+LiquidCrystal      lcd(2, 8, 3, 4, 5, 6, 7, 31, 30, 29, 28);
+#endif
+
+#ifdef PCB_R3
 LiquidCrystal      lcd(31, 30, 29, 28, 2, 3, 4, 5, 6, 7);
+#endif
 
 HardwareTimer mainTimer(TIME_NUMBER);
 
@@ -118,7 +124,7 @@ void setup()
 
     lcd.begin(20, 4);
     lcd.setCursor(0,0);
-    lcd.print("PreenFM V0.94");
+    lcd.print("PreenFM "PREENFM_VERSION);
     lcd.setCursor(0,1);
     lcd.print("            By Ixox");
     lcd.setCursor(0,3);

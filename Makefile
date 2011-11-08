@@ -1,4 +1,6 @@
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := r3
+
+PREENFM_VERSION=\"0.95\"
 
 LIB_MAPLE_HOME=/home/xhosxe/libmaple
 
@@ -44,9 +46,9 @@ GLOBAL_CFLAGS   := -O3 -g -mcpu=cortex-m3 -mthumb -march=armv7-m -nostdlib \
                    -ffunction-sections -fdata-sections -Wl,--gc-sections   \
                    -DBOARD_$(BOARD) -DMCU_$(MCU) -fsigned-char -DSTM32_MEDIUM_DENSITY -I/home/xhosxe/libmaple/libraries/LiquidCrystal -I/home/xhosxe/libmaple/libraries/Wire
 
-GLOBAL_CXXFLAGS := -fno-rtti -fno-exceptions -Wall -DBOARD_$(BOARD) -DMCU_$(MCU)
+GLOBAL_CXXFLAGS := -fno-rtti -fno-exceptions -Wall -DBOARD_$(BOARD) -DMCU_$(MCU) -DPCB_$(PCB_VERSION) -DPREENFM_VERSION=$(PREENFM_VERSION)
 GLOBAL_ASFLAGS  := -mcpu=cortex-m3 -march=armv7-m -mthumb -DBOARD_$(BOARD) \
-                   -DMCU_$(MCU) -x assembler-with-cpp
+                   -DMCU_$(MCU) -x assembler-with-cpp 
 
 LDDIR    := $(SUPPORT_PATH)/ld
 LDFLAGS  = -T$(LDDIR)/$(LDSCRIPT) -L$(LDDIR)    \
@@ -106,6 +108,15 @@ ifneq ($(PREV_BUILD_TYPE), $(MEMORY_TARGET))
 endif
 
 all: MSG_INFO $(PROJECT_BUILD_PATH)/$(BOARD).bin
+
+r3:
+	@$(MAKE) PCB_VERSION=R3 all
+
+r2:
+	@$(MAKE) PCB_VERSION=R2 all
+
+r1:
+	@$(MAKE) PCB_VERSION=R2 all
 
 clean:
 	rm -rf build/*

@@ -19,12 +19,17 @@
 
 
 Encoders::Encoders() {
-	//char encoderPins[] = { 2,3,0,1,10,11, 8,9 };
-	// PCB R2
-	// char encoderPins[] = { 9, 8, 11, 10, 2,3, 0,1};
+#ifdef PCB_R1
+	char encoderPins[] = { 2,3,0,1,10,11, 8,9 };
+#endif
 
-	// PCB R3
+#ifdef PCB_R2
+	char encoderPins[] = { 9, 8, 11, 10, 2,3, 0,1};
+#endif
+
+#ifdef PCB_R3
 	char encoderPins[] = { 9, 8, 11, 10, 1,0, 3, 2};
+#endif
 
     char buttonPins[] = { 12, 13, 14, 15, 7, 5, 6};
 
