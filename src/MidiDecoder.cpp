@@ -335,10 +335,10 @@ void MidiDecoder::controlChange(MidiEvent& midiEvent) {
 		case 98:
 			this->currentNrpn.paramLSB = midiEvent.value[1];
 			break;
-		case 38:
+		case 6:
 			this->currentNrpn.valueMSB = midiEvent.value[1];
 			break;
-		case 6:
+		case 38:
 			this->currentNrpn.valueLSB = midiEvent.value[1];
 			this->currentNrpn.readyToSend = true;
 			break;
@@ -418,10 +418,10 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
 		cc.value[0] = 98;
 		cc.value[1] = (uint8) currentrow * NUMBER_OF_ENCODERS + encoder;
 		midiToSend.insert(cc);
-		cc.value[0] = 38;
+		cc.value[0] = 6;
 		cc.value[1] = (uint8) (valueToSend >> 7);
 		midiToSend.insert(cc);
-		cc.value[0] = 6;
+		cc.value[0] = 38;
 		cc.value[1] = (uint8) (valueToSend & 127);
 		midiToSend.insert(cc);
 	}
