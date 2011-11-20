@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := r3
 
-PREENFM_VERSION=\"0.95\"
+PREENFM_VERSION=\"0.96\"
 
 LIB_MAPLE_HOME=/home/xhosxe/libmaple
 
