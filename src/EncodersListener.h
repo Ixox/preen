@@ -23,6 +23,7 @@ class EncodersListener {
 public:
 	virtual void encoderTurned(int num, int ticks) = 0;
 	virtual void buttonPressed(int number) = 0;
+	virtual void buttonLongPressed(int number) = 0;
 	EncodersListener* nextListener;
 
 };

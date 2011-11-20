@@ -22,6 +22,14 @@
 #define INTERNAL_LAST_BANK 18
 
 
+// Eclipse bug can not be in an enum.... ??????
+#define	MIDICONFIG_CHANNEL  0
+#define MIDICONFIG_THROUGH 1
+#define	MIDICONFIG_RECEIVES 2
+#define	MIDICONFIG_SENDS  3
+#define	MIDICONFIG_REALTIME_SYSEX 4
+#define	MIDICONFIG_SIZE  5
+
 enum SynthMode {
 	SYNTH_MODE_EDIT = 0,
 	SYNTH_MODE_MENU
@@ -52,7 +60,6 @@ enum MenuState {
 	MENU_DONE,
 	MENU_IN_PROGRESS,
     MENU_CONFIG,
-    MENU_CONFIG_SAVE,
 	MENU_FORMAT_BANK,
 	MENU_SAVE_BANK,
 	MENU_SAVE_BANK_CONFIRM,
@@ -70,14 +77,6 @@ struct MenuItem {
 	MenuState subMenu[4];
 };
 
-enum {
-	MIDICONFIG_CHANNEL = 0,
-	MIDICONFIG_THROUGH = 1,
-	MIDICONFIG_RECEIVES= 2,
-	MIDICONFIG_SENDS = 3,
-	MIDICONFIG_REALTIME_SYSEX = 4,
-	MIDICONFIG_SIZE = 5
-};
 
 
 struct FullState {

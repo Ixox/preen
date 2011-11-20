@@ -71,6 +71,12 @@ public:
 		}
 	}
 
+	void buttonLongPressed(int num) {
+		for (EncodersListener* listener = firstListener; listener !=0; listener = listener->nextListener) {
+			listener->buttonLongPressed(num);
+		}
+	}
+
 private:
 	int action[16];
 	int encoderBit1[NUMBER_OF_ENCODERS];
@@ -83,6 +89,7 @@ private:
 
 	int buttonBit[NUMBER_OF_BUTTONS];
 	bool buttonOldState[NUMBER_OF_BUTTONS];
+	int buttonTimer[NUMBER_OF_BUTTONS];
 
 	int encoderTimer;
 	EncodersListener* firstListener;

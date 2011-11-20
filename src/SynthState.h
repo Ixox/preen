@@ -369,6 +369,7 @@ public:
 
 	void changeSynthModeRow(int button, int step);
 	void buttonPressed(int number);
+	void buttonLongPressed(int number);
 	void setNewValue(int row, int number, int newValue);
 
 	const MenuItem* afterButtonPressed();
@@ -461,9 +462,9 @@ public:
 	struct FullState fullState;
 
 private:
-	char engineRow, oscRow, envRow, matrixRow, lfoRow;
+	char engineRow, operatorRow, matrixRow, lfoRow;
 	char currentRow;
-	unsigned char lastAction;
+	unsigned char lastButtonSelected;
 
 	SynthParamListener* firstParamListener;
 	SynthMenuListener* firstMenuListener;

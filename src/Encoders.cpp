@@ -76,7 +76,8 @@ Encoders::Encoders() {
 
 	for (int k=0; k<NUMBER_OF_BUTTONS; k++) {
 		buttonBit[k] = 1 << buttonPins[k];
-		buttonOldState[k] = true;
+		buttonOldState[k] = false;
+		buttonTimer[k] = -1;
 	}
 
 	encoderTimer = 0;
@@ -88,9 +89,7 @@ Encoders::~Encoders() {
 
 void Encoders::checkStatus() {
 
-
-
-    // Copy the values in the HC165 registers
+	// Copy the values in the HC165 registers
 	digitalWrite(HC165_LOAD, 0);
 	digitalWrite(HC165_LOAD, 1);
 
@@ -145,8 +144,19 @@ void Encoders::checkStatus() {
 		bool b1 = ((registerBits & buttonBit[k]) == 0);
 
 		if (!buttonOldState[k] && b1) {
-			buttonPressed(k);
+			buttonTimer[k] = 1;
+		} else if (buttonOldState[k] && !b1) {
+			if (buttonTimer[k] < 100) {
+				buttonPressed(k);
+			} else {
+				buttonLongPressed(k);
+			}
+			buttonTimer[k] = 0;
+		} else if (buttonTimer[k] > 0 ){
+			buttonTimer[k] ++;
 		}
+
+
 		buttonOldState[k] = b1;
 	}
 	encoderTimer++;

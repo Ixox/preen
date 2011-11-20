@@ -16,7 +16,9 @@
  */
 
 
-#include "Menu.h"
+#include "./Menu.h"
+
+
 
 const char* midiChannels [] = { "All", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
 const char* yesNo [] = { "No", "Yes" };
@@ -184,8 +186,8 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
         MENU_CONFIG,
         "Conf",
         true,
-        3,
-        {MENU_CONFIG_MIDI, MENU_CONFIG_SAVE, MENU_FORMAT_BANK}
+        2,
+        {MENU_CONFIG_MIDI, MENU_FORMAT_BANK}
     },
     {
         MENU_CONFIG_MIDI,
@@ -201,18 +203,11 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
         MENU_CONFIG_MIDI,
         {MENU_DONE}
     },
-    {
-        MENU_CONFIG_SAVE,
-        "Save",
-        false,
-        0,
-        {MENU_DONE}
-    },
 	{
 		MENU_FORMAT_BANK,
 		"Format",
-		true,
-		1,
+		false,
+		27,
 		{MENU_DONE}
 	},
 	// ==================== SAVE BANK

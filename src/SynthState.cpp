@@ -172,8 +172,8 @@ const struct ShowUpAlgo  showUp[9] = {
 
 SynthState::SynthState() {
     engineRow =  ROW_ENGINE;
-    oscRow    = ROW_OSC1;
-    envRow    = ROW_ENV1;
+    // operator works for both osc and env
+    operatorRow  = 0;
     matrixRow = ROW_MATRIX1;
     lfoRow    = ROW_LFO1;
 
@@ -209,8 +209,6 @@ void SynthState::encoderTurned(int encoder, int ticks) {
         int newValue;
         int oldValue;
 
-        // Store lastAction
-        lastAction = encoder;
 
 		if (param->displayType == DISPLAY_TYPE_STRINGS) {
 			// Do not use encoder acceleration
@@ -375,7 +373,7 @@ void SynthState::changeSynthModeRow(int button, int step) {
 		case BUTTON_OSC:
 			lastBecauseOfAlgo = ROW_OSC_FIRST + showUp[params.engine1.algo].osc - 1;
 			if (currentRow<ROW_OSC_FIRST || currentRow>lastBecauseOfAlgo) {
-				currentRow = oscRow;
+				currentRow = ROW_OSC_FIRST + operatorRow;
 			} else {
 				currentRow += step;
 			}
@@ -384,12 +382,12 @@ void SynthState::changeSynthModeRow(int button, int step) {
 			} else if (currentRow<ROW_OSC_FIRST) {
 				currentRow = lastBecauseOfAlgo;
 			}
-			oscRow = currentRow;
+			operatorRow = currentRow - ROW_OSC_FIRST;
 			break;
-			case BUTTON_ENV:
+		case BUTTON_ENV:
 			lastBecauseOfAlgo = ROW_ENV_FIRST + showUp[params.engine1.algo].osc - 1;
 			if (currentRow<ROW_ENV_FIRST || currentRow>lastBecauseOfAlgo) {
-				currentRow = envRow;
+				currentRow = ROW_ENV_FIRST + operatorRow;
 			} else {
 				currentRow += step;
 			}
@@ -398,7 +396,7 @@ void SynthState::changeSynthModeRow(int button, int step) {
 			} else if (currentRow<ROW_ENV_FIRST) {
 				currentRow = lastBecauseOfAlgo;
 			}
-			envRow = currentRow;
+			operatorRow = currentRow - ROW_ENV_FIRST;
 		break;
 		case BUTTON_MATRIX:
 			if (currentRow<ROW_MATRIX_FIRST || currentRow>ROW_MATRIX_LAST) {
@@ -443,7 +441,7 @@ void SynthState::buttonPressed(int button) {
         case BUTTON_ENV:
         case BUTTON_MATRIX:
         case BUTTON_LFO:
-        	lastAction = button + NUMBER_OF_ENCODERS;
+        	lastButtonSelected = button ;
         	changeSynthModeRow(button , 1);
             break;
         case BUTTON_MENUSELECT:
@@ -454,11 +452,7 @@ void SynthState::buttonPressed(int button) {
             fullState.currentMenuItem = MenuItemUtil::getMenuItem(MAIN_MENU);
             break;
         case BUTTON_BACK:
-        	if (this->lastAction < NUMBER_OF_ENCODERS) {
-        		encoderTurned(lastAction, 1);
-        	} else {
-            	changeSynthModeRow(lastAction-NUMBER_OF_ENCODERS , -1);
-        	}
+			changeSynthModeRow(lastButtonSelected, -1);
         }
     } else {
     	// MENU MODE
@@ -522,6 +516,27 @@ void SynthState::buttonPressed(int button) {
         propagateNewMenuState();
     }
 }
+
+void SynthState::buttonLongPressed(int button) {
+    int oldCurrentRow = currentRow;
+
+    if (fullState.synthMode == SYNTH_MODE_EDIT)  {
+        switch (button) {
+        case BUTTON_SYNTH:
+        case BUTTON_OSC:
+        case BUTTON_ENV:
+        case BUTTON_MATRIX:
+        case BUTTON_LFO:
+        	lastButtonSelected = button ;
+        	changeSynthModeRow(button , -1);
+            break;
+        }
+    }
+    if (oldCurrentRow != currentRow) {
+        propagateNewCurrentRow(currentRow);
+    }
+}
+
 
 void SynthState::setNewValue(int row, int number, int newValue) {
     int index = row * NUMBER_OF_ENCODERS + number;
@@ -611,7 +626,16 @@ const MenuItem* SynthState::afterButtonPressed() {
         fullState.synthMode = SYNTH_MODE_EDIT;
         break;
     case MENU_FORMAT_BANK:
-        PresetUtil::formatEEPROM();
+    	if (fullState.menuSelect == 25) {
+        	const MenuItem *cmi = fullState.currentMenuItem;
+        	// Update display while formating
+        	fullState.currentMenuItem = MenuItemUtil::getMenuItem(MENU_IN_PROGRESS);
+        	propagateNewMenuState();
+            PresetUtil::formatEEPROM();
+            fullState.currentMenuItem = cmi;
+    	} else {
+    		return fullState.currentMenuItem;
+    	}
         break;
     case MENU_CONFIG_MIDI_SAVE:
         PresetUtil::saveConfigToEEPROM();

@@ -350,7 +350,10 @@ void FMDisplay::newMenuState(FullState* fullState) {
 			break;
 		case MENU_FORMAT_BANK:
 			lcd->setCursor(1, menuRow-1);
-			lcd->print("Confirm Format ?");
+			lcd->print("Y to format:");
+			fullState->menuSelect = 14;
+			lcd->setCursor(14, menuRow-1);
+			lcd->print(allChars[fullState->menuSelect]);
 			break;
 		case MENU_SAVE_DEFAULT:
 			lcd->setCursor(1, menuRow-1);
@@ -426,6 +429,10 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 		lcd->print(allChars[(int)fullState->name[fullState->menuSelect]]);
 		lcd->setCursor(6+fullState->menuSelect, menuRow-2);
 		lcd->cursor();
+		break;
+	case MENU_FORMAT_BANK:
+		lcd->setCursor(14, menuRow-1);
+		lcd->print(allChars[fullState->menuSelect]);
 		break;
 	case MENU_CONFIG_MIDI:
 		eraseRow(menuRow-1);
