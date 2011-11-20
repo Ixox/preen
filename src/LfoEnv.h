@@ -78,7 +78,7 @@ public:
 
 	void noteOn() {
 		this->envData.currentAmp= 0;
-		this->envData.index = adsr[0] + 1;
+		this->envData.index = adsr[0];
         this->envData.envState = ENV_STATE_ON_A;
 	}
 
