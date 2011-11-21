@@ -19,7 +19,7 @@
 #ifndef MATRIX_H_
 #define MATRIX_H_
 
-#define MATRIX_SIZE 6
+#define MATRIX_SIZE 8
 
 #include "SynthStateAware.h"
 #include "SynthParamListener.h"
