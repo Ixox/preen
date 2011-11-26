@@ -453,6 +453,7 @@ void SynthState::buttonPressed(int button) {
             break;
         case BUTTON_BACK:
 			changeSynthModeRow(lastButtonSelected, -1);
+			break;
         }
     } else {
     	// MENU MODE
@@ -633,6 +634,8 @@ const MenuItem* SynthState::afterButtonPressed() {
         	propagateNewMenuState();
             PresetUtil::formatEEPROM();
             fullState.currentMenuItem = cmi;
+    	} else if (fullState.menuSelect == 1) {
+			PresetUtil::checkReadEEPROM();
     	} else {
     		return fullState.currentMenuItem;
     	}

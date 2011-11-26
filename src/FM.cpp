@@ -124,11 +124,11 @@ void setup()
 
     lcd.begin(20, 4);
     lcd.setCursor(0,0);
-    lcd.print("PreenFM "PREENFM_VERSION);
+    lcd.print("        PreenFM "PREENFM_VERSION);
     lcd.setCursor(0,1);
-    lcd.print("            By Ixox");
+    lcd.print("     By Xavier Hosxe");
     lcd.setCursor(0,3);
-    lcd.print("Powered by Leaflabs");
+    lcd.print(" Powered by LeafLabs");
 
     // ---------------------------------------
     // Dependencies Injection

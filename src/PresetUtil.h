@@ -41,7 +41,6 @@ public:
 
     static void setSynthState(SynthState* synthState);
 
-
     static void dumpPatch();
     static void dumpLine(const char *enums1[], int a, const char *enums2[], int b, const char *enums3[], int c, const char *enums4[], int d) ;
 
@@ -52,6 +51,7 @@ public:
     static void formatEEPROM();
     static void saveConfigToEEPROM();
     static void loadConfigFromEEPROM();
+    static void checkReadEEPROM();
 
     static void sendBankToSysex(int bankNumber);
     static void sendCurrentPatchToSysex();

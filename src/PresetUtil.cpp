@@ -32,11 +32,13 @@ PresetUtil::PresetUtil() {
 PresetUtil::~PresetUtil() {
 }
 
+
+
 void PresetUtil::setSynthState(SynthState* synthState) {
 	// init
 	PresetUtil::synthState = synthState;
 	// enable the i2c bus
-	i2c_master_enable(I2C1, 0);
+	i2c_master_enable(I2C1, I2C_FAST_MODE & I2C_BUS_RESET);
 }
 
 uint8 PresetUtil::getDeviceId(int bankNumber) {
@@ -215,8 +217,7 @@ void PresetUtil::readFromEEPROM(uint8 bankNumber, uint8 preset, char* params) {
 	msgsRead[1].data = (uint8*)params; // (uint8*)&PresetUtil::synthState->params;
 
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
-
-	delay(100);
+	delay(1);
 
 	int block2Size = sizeof(struct AllSynthParams) - block1Size;
 
@@ -235,7 +236,7 @@ void PresetUtil::readFromEEPROM(uint8 bankNumber, uint8 preset, char* params) {
 	msgsRead[1].data = (uint8 *)&params[block1Size];
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
 
-	delay(20);
+	delay(1);
 }
 
 char* PresetUtil::readPresetNameFromEEPROM(int bankNumber, int preset) {
@@ -243,6 +244,7 @@ char* PresetUtil::readPresetNameFromEEPROM(int bankNumber, int preset) {
 	int address = PresetUtil::getAddress(bankNumber, preset) + 108;
 	uint8 bufReadAddress[2];
 	i2c_msg msgsRead[2];
+
 
 	bufReadAddress[0] = (uint8) ((int) address >> 8);
 	bufReadAddress[1] = (uint8) ((int) address & 0xff);
@@ -258,8 +260,7 @@ char* PresetUtil::readPresetNameFromEEPROM(int bankNumber, int preset) {
 	msgsRead[1].data = (uint8*) readName;
 
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
-
-	delay(20);
+	delay(1);
 
 	return readName;
 }
@@ -299,7 +300,7 @@ void PresetUtil::savePatchToEEPROM(uint8* params, int bankNumber, int preset) {
 	msgWrite2.length = block2Size + 2;
 	msgWrite2.data = bufWrite2;
 	i2c_master_xfer(I2C1, &msgWrite2, 1, 500);
-	delay(5);
+	delay(1);
 }
 
 void PresetUtil::saveCurrentPatchToEEPROM(int bankNumber, int preset) {
@@ -330,6 +331,7 @@ void PresetUtil::loadConfigFromEEPROM() {
 	msgsRead[1].data = (uint8*) eeprom;
 
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
+	delay(1);
 
 	if (eeprom[0] == EEPROM_CONFIG_CHECK) {
 		for (int k = 0; k < MIDICONFIG_SIZE; k++) {
@@ -337,7 +339,6 @@ void PresetUtil::loadConfigFromEEPROM() {
 		}
 	}
 
-	delay(20);
 }
 
 void PresetUtil::saveConfigToEEPROM() {
@@ -364,13 +365,20 @@ void PresetUtil::saveConfigToEEPROM() {
 	msgWrite1.length = block1Size + 2;
 	msgWrite1.data = bufWrite1;
 	i2c_master_xfer(I2C1, &msgWrite1, 1, 500);
-	delay(50);
 
+	delay(1);
 }
 
 void PresetUtil::formatEEPROM() {
+
 	for (int bankNumber = 0; bankNumber < 4; bankNumber++) {
+		lcd.setCursor(3,2);
+		lcd.print((char)('A'+bankNumber));
 		for (int preset = 0; preset < 128; preset++) {
+
+			lcd.setCursor(5,2);
+			lcd.print(preset);
+
 			uint8 deviceaddress = PresetUtil::getDeviceId(bankNumber);
 			int address = PresetUtil::getAddress(bankNumber, preset);
 
@@ -388,8 +396,9 @@ void PresetUtil::formatEEPROM() {
 			msgWrite1.flags = 0;
 			msgWrite1.length = block1Size + 2;
 			msgWrite1.data = bufWrite1;
+
 			i2c_master_xfer(I2C1, &msgWrite1, 1, 500);
-			delay(5);
+			delay(1);
 
 			int block2Size = sizeof(struct AllSynthParams) - block1Size;
 			uint8 bufWrite2[block2Size + 2];
@@ -404,8 +413,9 @@ void PresetUtil::formatEEPROM() {
 			msgWrite2.flags = 0;
 			msgWrite2.length = block2Size + 2;
 			msgWrite2.data = bufWrite2;
+
 			i2c_master_xfer(I2C1, &msgWrite2, 1, 500);
-			delay(5);
+			delay(1);
 		}
 	}
 }
@@ -421,20 +431,38 @@ void PresetUtil::sendBankToSysex(int bankNumber) {
 	for (int preset = 0; preset < 128; preset++) {
 		lcd.setCursor(3,2);
 		lcd.print(preset);
-		lcd.setCursor(10,2);
-		lcd.print(0);
+		lcd.print(" / 128");
 		PresetUtil::readFromEEPROM(bankNumber, preset, params);
-		lcd.setCursor(10,2);
-		lcd.print(1);
 		PresetUtil::sendParamsToSysex(params, sizeof(struct AllSynthParams));
-		lcd.setCursor(10,2);
-		lcd.print(2);
 	}
 
 	Serial3.print((uint8) 0xf7);
-	lcd.setCursor(3,3);
-	lcd.print("Fin...");
+
 }
+
+
+void PresetUtil::checkReadEEPROM() {
+	char params[sizeof(struct AllSynthParams)];
+
+	lcd.clear();
+	lcd.setCursor(3,0);
+	lcd.print("Check EEPROM");
+
+	for (int bank = 0; bank<4; bank++) {
+		lcd.setCursor(3,1);
+		lcd.print("Bank ");
+		lcd.print((char)('A'+bank));
+
+		for (int test = 0; test< 1000; test++) {
+			int preset = test%128;
+			lcd.setCursor(3,2);
+			lcd.print(preset);
+			lcd.print(" ");
+			PresetUtil::readFromEEPROM(bank, preset, params);
+		}
+	}
+}
+
 
 void PresetUtil::sendCurrentPatchToSysex() {
 	uint8 newPatch[] = { 0xf0, 0x7d, 0x01 };
@@ -598,11 +626,19 @@ void PresetUtil::copyPatch(char* source, char* dest) {
 int PresetUtil::readSysexBank() {
 	char params[sizeof(struct AllSynthParams)];
 	int errorCode = 0;
-	for (int preset = 0; preset<128; preset++) {
+
+	lcd.setCursor(1,3);
+	lcd.print("Bank:");
+
+	for (int preset = 0; preset<128 && errorCode>=0; preset++) {
 		if ((errorCode = PresetUtil::readSysexPatch(params)) <0) {
 			errorCode = -500 - preset;
 			break;
 		}
+
+		lcd.setCursor(7,3);
+		lcd.print(preset);
+
 		PresetUtil::savePatchToEEPROM((uint8*)params, 4, preset);
 	}
 
@@ -613,10 +649,12 @@ int PresetUtil::readSysexBank() {
 
 void PresetUtil::copyBank(int source, int dest) {
 	char params[sizeof(struct AllSynthParams)];
+	lcd.setCursor(1,3);
+	lcd.print("Save:");
 	for (int preset=0; preset<127; preset++) {
-		lcd.setCursor(3,2);
-		lcd.print(preset);
 		PresetUtil::readFromEEPROM(source, preset, params);
+		lcd.setCursor(7,3);
+		lcd.print(preset);
 		PresetUtil::savePatchToEEPROM((uint8 *)params, dest, preset);
 	}
 }
