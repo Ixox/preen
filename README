@@ -9,26 +9,28 @@
 | )      | ) \ \__| (____/\| (____/\| )  \  || )      | )   ( |
 |/       |/   \__/(_______/(_______/|/    )_)|/       |/     \|
 
+
 -----------------------------------------                                            
-version 0.95
-By Xavier Hosxe : x a v i e r <dot> h o s x e {at} gmail <dot> com
-November 8th 2011
+
+version V1.0
+By Xavier Hosxe 
+PreenFM contact : p r e e n f m 1 <at> g m a i l  <dot> com
+November 26th 2011
 
 http://www.preenfm.net
 
 -----------------------------------------
-Frequency modulation synth for the Maple :
+Frequency modulation synth for the Maple mini
 http://leaflabs.com/
-
+-----------------------------------------
 Distributed under the terms of the GNU General Public License 
 as published by the Free Software Foundation version 3.
-
 -----------------------------------------
 
 Preen Current Features
 
 . 9 different FM alogorithms with up to 6 operators
-  Each operator includes a pair of oscillator and ADSR enveloppe
+  Each operator includes an oscillator and ADSR enveloppe
   Oscillator : 7 waveforms (4 sin variation + noise + square + sawtooth), 
   linked to keyb freq or fix, fine tune
 
@@ -62,11 +64,6 @@ Preen Current Features
 . 6th order butterworth analog filter to convert the 1 bit output into a nice waveform
 
 . Transparent case that allows you to see every day your nice work
-
---------------------------------------------
-
-Todo before V1.0 : 
-. Documentation
 
 --------------------------------------------
 
