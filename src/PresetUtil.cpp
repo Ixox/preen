@@ -300,7 +300,7 @@ void PresetUtil::savePatchToEEPROM(uint8* params, int bankNumber, int preset) {
 	msgWrite2.length = block2Size + 2;
 	msgWrite2.data = bufWrite2;
 	i2c_master_xfer(I2C1, &msgWrite2, 1, 500);
-	delay(1);
+	delay(5);
 }
 
 void PresetUtil::saveCurrentPatchToEEPROM(int bankNumber, int preset) {
