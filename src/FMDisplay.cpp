@@ -403,7 +403,7 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 	case MENU_LOAD_INTERNAL:
 		eraseRow(menuRow-1);
 		lcd->setCursor(2, menuRow-1);
-		lcd->print(fullState->menuSelect);
+		lcd->print(fullState->menuSelect + 1);
 		lcd->print(" - ");
 		lcd->print(this->synthState->params.presetName);
 		break;
@@ -420,7 +420,7 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 	case MENU_SAVE_SELECT_PRESET:
 		eraseRow(menuRow-1);
 		lcd->setCursor(2, menuRow-1);
-		lcd->print(fullState->menuSelect);
+		lcd->print(fullState->menuSelect + 1);
         lcd->print(" - ");
         lcd->print(PresetUtil::readPresetNameFromEEPROM(fullState->bankNumber, fullState->menuSelect));
 		break;
