@@ -232,9 +232,12 @@ void Synth::checkMaxVoice() {
 	int voiceMax = MAX_NUMBER_OF_VOICES;
 	switch (showUp[this->synthState->params.engine1.algo].osc) {
 	case 4:
+		voices[3].killNow();
 		voiceMax = 3;
 		break;
 	case 6:
+		voices[2].killNow();
+		voices[3].killNow();
 		voiceMax = 2;
 		break;
 	}

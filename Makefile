@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := r3
 
-PREENFM_VERSION=\"1.00\"
+PREENFM_VERSION_NUMBER=1.01
+PREENFM_VERSION=\"$(PREENFM_VERSION_NUMBER)\"
 
 LIB_MAPLE_HOME=/home/xhosxe/libmaple
 
@@ -108,7 +109,9 @@ ifneq ($(PREV_BUILD_TYPE), $(MEMORY_TARGET))
 endif
 
 all: MSG_INFO $(PROJECT_BUILD_PATH)/$(BOARD).bin
-
+	
+	cp $(PROJECT_BUILD_PATH)/$(BOARD).bin firmware/PreenFM_$(PCB_VERSION)_v$(PREENFM_VERSION_NUMBER).bin
+	echo "dfu-util.exe -a1 -d 0x1EAF:0x0003 -D PreenFM_$(PCB_VERSION)_v$(PREENFM_VERSION_NUMBER).bin -R" > firmware/PreenFM_$(PCB_VERSION)_v$(PREENFM_VERSION_NUMBER).cmd
 r3:
 	@$(MAKE) PCB_VERSION=R3 all
 
@@ -123,19 +126,16 @@ clean:
 
 help:
 	@echo ""
-	@echo "  libmaple Makefile help"
+	@echo "  PreenFM Makefile help"
 	@echo "  ----------------------"
-	@echo "  Compile targets (default MEMORY_TARGET=flash):"
-	@echo "      ram:    Compile sketch code to ram"
-	@echo "      flash:  Compile sketch code to flash"
-	@echo "      jtag:   Compile sketch code to jtag"
-	@echo "      sketch: Compile sketch code to target MEMORY_TARGET"
+	@echo "  Compile targets :"
+	@echo "      r3 (default) : for PCB R3b and R3c"
+	@echo "      r2 (default) : for PCB R2"
 	@echo "  "
 	@echo "  Programming targets:"
-	@echo "      install:  Upload code to target"
+	@echo "      install:  Upload code to PreenFM"
 	@echo "  "
 	@echo "  Other targets:"
-	@echo "      debug:  Start an openocd gdb server, port 3333"
 	@echo "      clean: Remove all build and object files"
 	@echo "      help: Show this message"
 	@echo "  "
