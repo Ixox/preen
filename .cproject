@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?>
+
+<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.release.62408280">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.release.62408280" moduleId="org.eclipse.cdt.core.settings" name="Build">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="preen.maple_mini.elf" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.CWDLocator;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.config.gnu.cross.exe.release.62408280" name="Build" parent="cdt.managedbuild.config.gnu.cross.exe.release" postannouncebuildStep="" postbuildStep="arm-none-eabi-objcopy -v -Obinary preen.maple_mini.elf  preen.maple_mini.bin" preannouncebuildStep="" prebuildStep="">
+					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.release.62408280." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.1943686431" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.2037306175" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1134259452" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.1387613111" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<builder buildPath="${workspace_loc:/preen/Build}" id="cdt.managedbuild.builder.gnu.cross.1971658978" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.813014987" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
+								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.option.optimization.level.159252222" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.1470785507" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.638671021" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool command="/home/xhosxe/preen/arm/bin/arm-none-eabi-g++ " id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.397420263" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+								<option id="gnu.cpp.compiler.option.optimization.level.990883603" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.207663164" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.default" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.179882344" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="BOARD_maple_mini"/>
+									<listOptionValue builtIn="false" value="STM32_MEDIUM_DENSITY"/>
+									<listOptionValue builtIn="false" value="MCU_STM32F103CB "/>
+								</option>
+								<option id="gnu.cpp.compiler.option.include.paths.1627025183" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/libmaple}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/wirish}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/wirish/boards}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/wirish/comm}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/libmaple/usb}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/arm/arm-none-eabi/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/arm/lib/gcc/arm-none-eabi/4.4.1/include}&quot;"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.other.other.1312277052" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-fsigned-char -nostdlib -mcpu=cortex-m3 -mthumb -march=armv7-m -ffunction-sections -fdata-sections -Wl,--gc-sections -fno-rtti -fno-exceptions  -c" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.nostdinc.844371674" name="Do not search system directories (-nostdinc)" superClass="gnu.cpp.compiler.option.preprocessor.nostdinc" value="true" valueType="boolean"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.222318469" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1394662783" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
+							<tool command="/home/xhosxe/preen/arm/bin/arm-none-eabi-g++ " commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} preen.maple_mini.elf ${INPUTS}" id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1323393888" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
+								<option id="gnu.cpp.link.option.nostdlibs.1392552723" name="No startup or default libs (-nostdlib)" superClass="gnu.cpp.link.option.nostdlibs" value="false" valueType="boolean"/>
+								<option id="gnu.cpp.link.option.libs.1477063185" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs"/>
+								<option id="gnu.cpp.link.option.paths.1789075296" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths"/>
+								<option id="gnu.cpp.link.option.other.199694732" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" valueType="stringList">
+									<listOptionValue builtIn="false" value="--gc-sections --print-gc-sections --march=armv7-m"/>
+								</option>
+								<option id="gnu.cpp.link.option.userobjs.1191891518" name="Other objects" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_lib/usb_core.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libraries/LiquidCrystal/LiquidCrystal.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/boards/maple_mini.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/comm/HardwareSerial.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/comm/HardwareSPI.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/boards.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/cxxabi-compat.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/ext_interrupts.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/HardwareTimer.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/Print.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/pwm.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/usb_serial.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/wirish_analog.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/wirish_digital.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/wirish_math.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/wirish_shift.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/wirish_time.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_lib/usb_init.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_lib/usb_int.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_lib/usb_mem.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_lib/usb_regs.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/descriptors.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_callbacks.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_hardware.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/adc.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/bkp.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/dac.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/dma.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/exc.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/exti.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/flash.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/fsmc.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/gpio.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/i2c.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/iwdg.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/nvic.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/pwr.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/rcc.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/spi.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/syscalls.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/systick.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/timer.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usart.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/util.o}&quot;"/>
+								</option>
+								<option id="gnu.cpp.link.option.flags.964380117" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="-T/home/xhosxe/libmaple/support/ld/maple_mini/flash.ld -L/home/xhosxe/libmaple/support/ld " valueType="string"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.828435149" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.release.62408280.1194228151">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.release.62408280.1194228151" moduleId="org.eclipse.cdt.core.settings" name="Install">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="Upload preenFM to the maple" errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.CWDLocator;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.config.gnu.cross.exe.release.62408280.1194228151" name="Install" parent="cdt.managedbuild.config.gnu.cross.exe.release" postannouncebuildStep="" postbuildStep="arm-none-eabi-objcopy -v -Obinary preen.maple_mini.elf  preen.maple_mini.bin; /home/xhosxe/libmaple/support/scripts/reset.py ; sleep 1  ; dfu-util -a1 -d 0x1EAF:0x0003 -D preen.maple_mini.bin   -R" preannouncebuildStep="" prebuildStep="">
+					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.release.62408280.1194228151." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.base.1515726199" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.base">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.1941540934" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.2017515420" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.2050893892" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<builder buildPath="${workspace_loc:/preen/Build}" id="cdt.managedbuild.builder.gnu.cross.1191678641" keepEnvironmentInBuildfile="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.144218811" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
+								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.option.optimization.level.1470192766" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.1425909870" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1728590074" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool command="/home/xhosxe/preen/arm/bin/arm-none-eabi-g++ " id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.802117100" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+								<option id="gnu.cpp.compiler.option.optimization.level.1189319529" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.1263078073" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.default" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1725962565" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="BOARD_maple_mini"/>
+									<listOptionValue builtIn="false" value="STM32_MEDIUM_DENSITY"/>
+									<listOptionValue builtIn="false" value="MCU_STM32F103CB "/>
+								</option>
+								<option id="gnu.cpp.compiler.option.include.paths.1125990150" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/libmaple}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/wirish}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/wirish/boards}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/wirish/comm}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/libmaple/usb}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/arm/arm-none-eabi/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/arm/lib/gcc/arm-none-eabi/4.4.1/include}&quot;"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.other.other.1737533596" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-fsigned-char -nostdlib -mcpu=cortex-m3 -mthumb -march=armv7-m -ffunction-sections -fdata-sections -Wl,--gc-sections -fno-rtti -fno-exceptions  -c" valueType="string"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.61072421" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1259423340" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
+							<tool command="/home/xhosxe/preen/arm/bin/arm-none-eabi-g++ " commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} preen.maple_mini.elf ${INPUTS}" id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1014222695" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
+								<option id="gnu.cpp.link.option.nostdlibs.1253817721" name="No startup or default libs (-nostdlib)" superClass="gnu.cpp.link.option.nostdlibs" value="false" valueType="boolean"/>
+								<option id="gnu.cpp.link.option.libs.116119168" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs"/>
+								<option id="gnu.cpp.link.option.paths.1822765120" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths"/>
+								<option id="gnu.cpp.link.option.other.425959617" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" valueType="stringList">
+									<listOptionValue builtIn="false" value="--gc-sections --print-gc-sections --march=armv7-m"/>
+								</option>
+								<option id="gnu.cpp.link.option.userobjs.1617359479" name="Other objects" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_lib/usb_core.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libraries/LiquidCrystal/LiquidCrystal.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/boards/maple_mini.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/comm/HardwareSerial.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/comm/HardwareSPI.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/boards.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/cxxabi-compat.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/ext_interrupts.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/HardwareTimer.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/Print.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/pwm.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/usb_serial.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/wirish_analog.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/wirish_digital.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/wirish_math.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/wirish_shift.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/wirish/wirish_time.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_lib/usb_init.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_lib/usb_int.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_lib/usb_mem.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_lib/usb_regs.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/descriptors.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_callbacks.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb_hardware.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usb/usb.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/adc.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/bkp.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/dac.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/dma.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/exc.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/exti.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/flash.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/fsmc.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/gpio.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/i2c.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/iwdg.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/nvic.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/pwr.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/rcc.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/spi.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/syscalls.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/systick.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/timer.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/usart.o}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libmaple/build/libmaple/util.o}&quot;"/>
+								</option>
+								<option id="gnu.cpp.link.option.flags.1214938307" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="-T/home/xhosxe/libmaple/support/ld/maple_mini/flash.ld -L/home/xhosxe/libmaple/support/ld " valueType="string"/>
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1865745367" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="preen.cdt.managedbuild.target.gnu.cross.exe.2088510160" name="Executable" projectType="cdt.managedbuild.target.gnu.cross.exe"/>
+	</storageModule>
+	<storageModule moduleId="refreshScope" versionNumber="1">
+		<resource resourceType="PROJECT" workspacePath="/preen"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+		<buildTargets/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.62408280;cdt.managedbuild.config.gnu.cross.exe.release.62408280.;cdt.managedbuild.tool.gnu.cross.c.compiler.1169933842;cdt.managedbuild.tool.gnu.c.compiler.input.1912062594">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.62408280.1194228151;cdt.managedbuild.config.gnu.cross.exe.release.62408280.1194228151.;cdt.managedbuild.tool.gnu.cross.c.compiler.144218811;cdt.managedbuild.tool.gnu.c.compiler.input.1728590074">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1107614599;cdt.managedbuild.config.gnu.cross.exe.debug.1107614599.;cdt.managedbuild.tool.gnu.cross.c.compiler.1847665469;cdt.managedbuild.tool.gnu.c.compiler.input.1094349549">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.62408280;cdt.managedbuild.config.gnu.cross.exe.release.62408280.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.397420263;cdt.managedbuild.tool.gnu.cpp.compiler.input.222318469">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+			<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP">
+				<buildOutputProvider>
+					<openAction enabled="true" filePath=""/>
+					<parser enabled="true"/>
+				</buildOutputProvider>
+				<scannerInfoProvider id="specsFile">
+					<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+					<parser enabled="false"/>
+				</scannerInfoProvider>
+			</profile>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1107614599;cdt.managedbuild.config.gnu.cross.exe.debug.1107614599.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.878845769;cdt.managedbuild.tool.gnu.cpp.compiler.input.331667404">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+			<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP">
+				<buildOutputProvider>
+					<openAction enabled="true" filePath=""/>
+					<parser enabled="true"/>
+				</buildOutputProvider>
+				<scannerInfoProvider id="specsFile">
+					<runAction arguments="-O3  -mcpu=cortex-m3 -mthumb -march=armv7-m -nostdlib -ffunction-sections -fdata-sections -Wl,--gc-sections -fno-rtti -fno-exceptions -Wall" command="/home/xhosxe/preen/arm/bin/arm-none-eabi-g++" useDefault="true"/>
+					<parser enabled="true"/>
+				</scannerInfoProvider>
+			</profile>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.62408280;cdt.managedbuild.config.gnu.cross.exe.release.62408280.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1444632167;cdt.managedbuild.tool.gnu.cpp.compiler.input.439757820">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.62408280.1194228151;cdt.managedbuild.config.gnu.cross.exe.release.62408280.1194228151.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.802117100;cdt.managedbuild.tool.gnu.cpp.compiler.input.61072421">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.62408280;cdt.managedbuild.config.gnu.cross.exe.release.62408280.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1140961682;cdt.managedbuild.tool.gnu.cpp.compiler.input.1222332309">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
+			<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP">
+				<buildOutputProvider>
+					<openAction enabled="true" filePath=""/>
+					<parser enabled="true"/>
+				</buildOutputProvider>
+				<scannerInfoProvider id="specsFile">
+					<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
+					<parser enabled="false"/>
+				</scannerInfoProvider>
+			</profile>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.62408280;cdt.managedbuild.config.gnu.cross.exe.release.62408280.;cdt.managedbuild.tool.gnu.cross.c.compiler.813014987;cdt.managedbuild.tool.gnu.c.compiler.input.638671021">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+			<profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC">
+				<buildOutputProvider>
+					<openAction enabled="true" filePath=""/>
+					<parser enabled="true"/>
+				</buildOutputProvider>
+				<scannerInfoProvider id="specsFile">
+					<runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
+					<parser enabled="false"/>
+				</scannerInfoProvider>
+			</profile>
+		</scannerConfigBuildInfo>
+	</storageModule>
+</cproject>
