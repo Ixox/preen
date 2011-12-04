@@ -94,8 +94,13 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 		this->synth->noteOff(midiEvent.value[0]);
 		break;
 	case MIDI_NOTE_ON:
-		this->synth->noteOn(midiEvent.value[0], midiEvent.value[1]);
-		this->synth->getMatrix()->setSource(MATRIX_SOURCE_VELOCITY, midiEvent.value[1]);
+		if (midiEvent.value[1] == 0) {
+			// Some keyboards send note-off this way
+			this->synth->noteOff(midiEvent.value[0]);
+		} else {
+			this->synth->noteOn(midiEvent.value[0], midiEvent.value[1]);
+			this->synth->getMatrix()->setSource(MATRIX_SOURCE_VELOCITY, midiEvent.value[1]);
+		}
 		break;
 	case MIDI_CONTROL_CHANGE:
 		controlChange(midiEvent);
