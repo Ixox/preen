@@ -144,6 +144,8 @@ enum SourceEnum {
     MATRIX_SOURCE_CC2,
     MATRIX_SOURCE_CC3,
     MATRIX_SOURCE_CC4,
+	MATRIX_SOURCE_LFO5,
+	MATRIX_SOURCE_LFO6,
 	MATRIX_SOURCE_MAX
 };
 
@@ -233,6 +235,12 @@ struct MatrixRowParams {
 	char not_used;
 };
 
+struct StepSequencerParams {
+	uchar bpm;
+	uchar gate;
+	char steps[16];
+};
+
 
 enum {
     ROW_ENGINE_FIRST = 0,
@@ -284,7 +292,9 @@ enum {
     ROW_LFO2 ,
     ROW_LFO3 ,
     ROW_LFO4 ,
-    ROW_LFO_LAST = ROW_LFO4
+    ROW_LFO5 ,
+    ROW_LFO6 ,
+    ROW_LFO_LAST = ROW_LFO6
 };
 
 #define NUMBER_OF_ROWS ROW_LFO_LAST+1
@@ -319,6 +329,8 @@ struct AllSynthParams {
 	struct LfoParams lfo3;
 	struct EnvelopeParams lfo4;
 	char presetName[13];
+	struct StepSequencerParams lfo5;
+	struct StepSequencerParams lfo6;
 };
 
 
@@ -351,6 +363,7 @@ public:
 
 
 	void encoderTurned(int num, int ticks);
+	void encoderTurnedForStepSequencer(int row, int num, int ticks);
 
 	static SynthParamType getListenerType(int row) {
 		if (row>= ROW_ENGINE_FIRST && row<=ROW_ENGINE_LAST) {
@@ -444,11 +457,7 @@ public:
         }
     }
 
-    void propagateAfterNewParamsLoad() {
-        for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
-            listener->afterNewParamsLoad();
-        }
-    }
+    void propagateAfterNewParamsLoad();
 
     SynthMode getSynthMode() {
 		return fullState.synthMode;
@@ -460,6 +469,7 @@ public:
 	struct AllSynthParams params;
     struct AllSynthParams backupParams;
 	struct FullState fullState;
+	char stepSelect[2];
 
 private:
 	char engineRow, operatorRow, matrixRow, lfoRow;

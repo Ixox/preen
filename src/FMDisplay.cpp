@@ -18,6 +18,7 @@
 #include "FMDisplay.h"
 
 
+const char* stepChars  = "_123456789ABCDEF";
 
 FMDisplay::FMDisplay() {
 	refreshStatus = 10;
@@ -37,7 +38,7 @@ void FMDisplay::printValueWithSpace(int value) {
     lcd->print(value);
 
 	if (value>99) {
-		lcd->print(" ");
+		lcd->print(' ');
 	} else if (value>9) {
 		lcd->print("  ");
 	} else if (value>-1) {
@@ -45,7 +46,7 @@ void FMDisplay::printValueWithSpace(int value) {
 	} else if (value>-10) {
 		lcd->print("  ");
 	} else if (value>-100) {
-		lcd->print(" ");
+		lcd->print(' ');
 	}
 }
 
@@ -99,7 +100,7 @@ displayFloat44:
 				lcd->print(v);
 			}
 		}
-        lcd->print(" ");
+        lcd->print(' ');
 		break;
 	case DISPLAY_TYPE_FLOAT_5_3:
 displayFloat53:
@@ -123,7 +124,7 @@ displayFloat53:
 				lcd->print(v);
 			}
 		}
-        lcd->print(" ");
+        lcd->print(' ');
 		break;
     case DISPLAY_TYPE_FLOAT_1_7:
     {
@@ -136,7 +137,7 @@ displayFloat53:
             lcd->print("0");
             lcd->print(v);
         }
-        lcd->print(" ");
+        lcd->print(' ');
         break;
     }
     case DISPLAY_TYPE_UNSIGNED_CHAR_OR_NONE:
@@ -181,6 +182,67 @@ displaySignedChar:
             updateEncoderName(row, ENCODER_ENGINE_GLIDE);
         }
         break;
+    case DISPLAY_TYPE_STEP_SEQ1:
+    {
+    		struct StepSequencerParams *stepSeq;
+    		int whichStepSeq;
+    		if (row == ROW_LFO5) {
+    			stepSeq = &this->synthState->params.lfo5;
+    			whichStepSeq = 0;
+    		} else {
+    			stepSeq = &this->synthState->params.lfo6;
+    			whichStepSeq = 1;
+    		}
+
+    		int pos = this->synthState->stepSelect[whichStepSeq];
+    		int decal = (this->synthState->stepSelect[whichStepSeq] >> 3 ) * 8;
+    		lcd->setCursor(12, 3);
+			for (int k=0; k<4; k++) {
+				lcd->print(stepChars[stepSeq->steps[k + decal] ] );
+			}
+
+			lcd->setCursor(10, 2);
+			lcd->print("  ");
+			lcd->setCursor(10, 3);
+			lcd->print(' ');
+			if (decal != 0) {
+				lcd->print(':');
+			} else {
+				lcd->print('.');
+			}
+
+			lcd->setCursor(12 + this->synthState->stepSelect[whichStepSeq] - decal, 2);
+			if ((this->synthState->stepSelect[whichStepSeq] & 3) == 0) {
+				lcd->print((char)3);
+			} else {
+				lcd->print('v');
+			}
+    	}
+    	break;
+    case DISPLAY_TYPE_STEP_SEQ2:
+    {
+			struct StepSequencerParams *stepSeq;
+			int whichStepSeq;
+			if (row == ROW_LFO5) {
+				stepSeq = &this->synthState->params.lfo5;
+				whichStepSeq = 0;
+			} else {
+				stepSeq = &this->synthState->params.lfo6;
+				whichStepSeq = 1;
+			}
+			int pos = this->synthState->stepSelect[whichStepSeq];
+			int decal = (this->synthState->stepSelect[whichStepSeq] >> 3 ) * 8;
+
+			lcd->setCursor(16, 3);
+			for (int k=4; k<8; k++) {
+				lcd->print(stepChars[stepSeq->steps[k + decal]] );
+			}
+			lcd->setCursor(12, 2);
+			lcd->print('|');
+			lcd->setCursor(16, 2);
+			lcd->print('|');
+    }
+    break;
 	}
 }
 
@@ -196,12 +258,23 @@ void FMDisplay::updateEncoderName(int row, int encoder) {
 
 void FMDisplay::refreshAllScreenByStep() {
     switch (refreshStatus) {
-    case 10:
+    case 12:
 		lcd->setCursor(3,1);
 		lcd->print("               ");
-		// erase the "dot" of fixed frequency
-		lcd->setCursor(14,3);
-		lcd->print(" ");
+		break;
+    case 11:
+		// erase the caracters between
+		for (int k=0; k<4; k++) {
+			lcd->setCursor(4+k*5,2);
+			lcd->print(' ');
+		}
+		break;
+    case 10:
+		// erase the caracters between
+		for (int k=0; k<4; k++) {
+			lcd->setCursor(4+k*5,3);
+			lcd->print(' ');
+		}
 		break;
     case 9:
     {
@@ -209,7 +282,7 @@ void FMDisplay::refreshAllScreenByStep() {
 		lcd->setCursor(0,1);
 		lcd->print(allParameterRows.row[row]->rowName);
 		if (row> ROW_ENGINE_LAST) {
-            lcd->print(" ");
+            lcd->print(' ');
             lcd->print(getRowNumberRelative(row));
 		}
         break;
@@ -231,11 +304,18 @@ void FMDisplay::refreshAllScreenByStep() {
     int row = this->synthState->getCurrentRow();
     struct ParameterDisplay param = allParameterRows.row[row]->params[refreshStatus -1];
     int newValue;
-    if (param.displayType == DISPLAY_TYPE_SIGNED_CHAR) {
-        newValue = ((char*)&this->synthState->params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
-    } else {
-        newValue = ((unsigned char*)&this->synthState->params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
+    if (row < ROW_LFO5) {
+        if (param.displayType == DISPLAY_TYPE_SIGNED_CHAR) {
+            newValue = ((char*)&this->synthState->params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
+        } else {
+            newValue = ((unsigned char*)&this->synthState->params)[row*NUMBER_OF_ENCODERS+refreshStatus -1];
+        }
+    } else if (row == ROW_LFO5) {
+        newValue = ((unsigned char*)&this->synthState->params.lfo5)[refreshStatus -1];
+    } else if (row == ROW_LFO6) {
+        newValue = ((unsigned char*)&this->synthState->params.lfo6)[refreshStatus -1];
     }
+
     updateEncoderValue(this->synthState->getCurrentRow(), refreshStatus -1, &param, newValue);
 }
 
@@ -270,6 +350,40 @@ void FMDisplay::newParamValueFromExternal(SynthParamType type, int currentRow, i
 	}
 }
 
+
+void FMDisplay::updateStepSequencer(int currentRow, int encoder, int oldValue, int newValue) {
+	int whichStepSeq = (currentRow == ROW_LFO5 ? 0 : 1);
+	int decal = (this->synthState->stepSelect[whichStepSeq] >> 3 ) * 8;
+
+	if (encoder == 3) {
+		// new value to display
+		lcd->setCursor(12 + this->synthState->stepSelect[whichStepSeq] - decal, 3);
+		lcd->print(stepChars[newValue]);
+	} else if (encoder == 2) {
+		int oldDecal = (oldValue >> 3 ) * 8;
+		// Change cursor
+		lcd->setCursor(12 + oldValue - oldDecal, 2);
+		if ((oldValue & 3) == 0) {
+	    	lcd->print('|');
+		} else {
+			lcd->print(' ');
+		}
+		// if new part 0-7 or 8-15 let's redraw all value
+		if (oldDecal != decal) {
+			refreshStatus = 4;
+			return;
+		}
+
+		lcd->setCursor(12 + newValue - decal, 2);
+		if ((newValue & 3) == 0) {
+			lcd->print((char)3);
+		} else {
+			lcd->print('v');
+		}
+
+	}
+}
+
 void FMDisplay::newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param,  int oldValue, int newValue) {
     checkPresetModified();
 	if (this->synthState->getSynthMode() == SYNTH_MODE_EDIT) {
@@ -277,7 +391,13 @@ void FMDisplay::newParamValue(SynthParamType type, int currentRow, int encoder, 
 			newcurrentRow(currentRow);
 			return;
 		}
-		// If we change frequency type of OScillator rows, it's a bit special....
+		// if we change ROW_LFO5 it's a bit special
+		if (currentRow >= ROW_LFO5 && encoder>1) {
+			updateStepSequencer(currentRow, encoder, oldValue, newValue);
+			return;
+		}
+
+		// If we change frequency type of OScillator rows, it's a bit special too....
 		if (SynthState::getListenerType(currentRow)==SYNTH_PARAM_TYPE_OSC && encoder == ENCODER_OSC_FTYPE) {
 			refreshStatus = 4;
 			return;
@@ -288,7 +408,7 @@ void FMDisplay::newParamValue(SynthParamType type, int currentRow, int encoder, 
 }
 
 void FMDisplay::newcurrentRow(int newcurrentRow) {
-	refreshStatus = 10;
+	refreshStatus = 12;
 	this->displayedRow = newcurrentRow;
 }
 
@@ -301,7 +421,7 @@ void FMDisplay::newSynthMode(FullState* fullState)  {
 	lcd->clear();
 	if (fullState->synthMode == SYNTH_MODE_EDIT) {
 		displayPreset();
-		refreshStatus = 10;
+		refreshStatus = 12;
 	} else {
 		menuRow = 0;
 		newMenuState(fullState);
@@ -394,7 +514,7 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 	case MENU_SAVE_BANK:
 		for (int k=0; k<fullState->currentMenuItem->maxValue; k++) {
 			lcd->setCursor(fullState->menuPosition[k], menuRow-1);
-			lcd->print(" ");
+			lcd->print(' ');
 		}
 		lcd->setCursor(fullState->menuPosition[fullState->menuSelect], menuRow-1);
 		lcd->print(">");

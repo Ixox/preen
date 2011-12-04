@@ -78,6 +78,7 @@ Encoders::Encoders() {
 		buttonBit[k] = 1 << buttonPins[k];
 		buttonOldState[k] = false;
 		buttonTimer[k] = -1;
+		buttonLongPress[k] = false;
 	}
 
 	encoderTimer = 0;
@@ -143,19 +144,35 @@ void Encoders::checkStatus() {
 	for (int k=0; k<NUMBER_OF_BUTTONS; k++) {
 		bool b1 = ((registerBits & buttonBit[k]) == 0);
 
-		if (!buttonOldState[k] && b1) {
-			buttonTimer[k] = 1;
-		} else if (buttonOldState[k] && !b1) {
-			if (buttonTimer[k] < 100) {
-				buttonPressed(k);
+		// button is pressed
+		if (b1) {
+			if (!buttonOldState[k]) {
+				// New press
+				buttonTimer[k] = 1;
+				buttonLongPress[k] = false;
 			} else {
-				buttonLongPressed(k);
+				// still pressing
+				if (buttonTimer[k] > 200) {
+					buttonTimer[k] = 1;
+					buttonLongPress[k] = true;
+					buttonLongPressed(k);
+				}
+				if (buttonTimer[k]>0) {
+					buttonTimer[k] ++;
+				}
 			}
-			buttonTimer[k] = 0;
-		} else if (buttonTimer[k] > 0 ){
-			buttonTimer[k] ++;
-		}
 
+		} else {
+		// Button is not pressed
+			if (buttonOldState[k]) {
+				// Just released
+				if (!buttonLongPress[k]) {
+					// short press
+					buttonPressed(k);
+				}
+				buttonTimer[k] = 0;
+			}
+		}
 
 		buttonOldState[k] = b1;
 	}

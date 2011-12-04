@@ -135,7 +135,7 @@ void Voice::noteOn(short newNote, char velocity, unsigned int index) {
     this->index = index;
     this->velocity = velocity;
 
-    for (int k=0; k<NUMBER_OF_LFOS; k++) {
+    for (int k=0; k<NUMBER_OF_LFO; k++) {
         lfo[k]->noteOn();
     }
 }
@@ -156,7 +156,7 @@ void Voice::noteOff() {
     env4->noteOff(&envState4);
     env5->noteOff(&envState5);
     env6->noteOff(&envState6);
-    for (int k=0; k<NUMBER_OF_LFOS; k++) {
+    for (int k=0; k<NUMBER_OF_LFO; k++) {
         lfo[k]->noteOff();
     }
 }

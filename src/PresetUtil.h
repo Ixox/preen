@@ -28,8 +28,18 @@
 #define EEPROM2_ID 0b1010001;
 
 
+#define BANKSIZE 16384
+#define BLOCKSIZE 4096
+
+#define PART1_SIZE 128
+#define PART2_SIZE 64
+
+
 
 class SynthState;
+struct AllSynthParams;
+
+
 
 // is included by SynthState so cannot be SynthStateAware...
 // have to implement its own get/set synthState
@@ -44,9 +54,9 @@ public:
     static void dumpPatch();
     static void dumpLine(const char *enums1[], int a, const char *enums2[], int b, const char *enums3[], int c, const char *enums4[], int d) ;
 
-    static void readFromEEPROM(uint8 bankNumber, uint8 preset, char* params);
+    static void readFromEEPROM(uint8 bankNumber, uint8 preset, AllSynthParams* params);
     static char* readPresetNameFromEEPROM(int bankNumber, int preset);
-    static void savePatchToEEPROM(uint8* params, int bankNumber, int preset);
+    static void savePatchToEEPROM(AllSynthParams* synthParams, int bankNumber, int preset);
     static void saveCurrentPatchToEEPROM(int bankNumber, int preset);
     static void formatEEPROM();
     static void saveConfigToEEPROM();
@@ -67,15 +77,18 @@ public:
 
     static void loadDefaultPatchIfAny();
     static void saveCurrentPatchAsDefault();
+    static void convertSynthStateToCharArray(AllSynthParams* params, uint8* chars);
+    static void convertCharArrayToSynthState(uint8* chars, AllSynthParams* params);
+
 
 private:
     static char readName[13];
     static SynthState * synthState;
 
-    static uint8 getDeviceId(int bankNumber);
-    static int getAddress(int bankNumber, int preset);
-
-
+    static uint8 getDeviceId1(int bankNumber);
+    static int getAddress1(int bankNumber, int preset);
+    static uint8 getDeviceId2(int bankNumber);
+    static int getAddress2(int bankNumber, int preset);
 
 };
 

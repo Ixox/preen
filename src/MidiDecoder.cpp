@@ -111,7 +111,7 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 	case MIDI_PROGRAM_CHANGE:
 		// Programm change
 		this->synth->allSoundOff();
-		PresetUtil::readFromEEPROM(this->synthState->fullState.bankNumber, midiEvent.value[0],(char*)&this->synthState->params);
+		PresetUtil::readFromEEPROM(this->synthState->fullState.bankNumber, midiEvent.value[0], &this->synthState->params);
 		this->synthState->propagateAfterNewParamsLoad();
 		this->synthState->resetDisplay();
 

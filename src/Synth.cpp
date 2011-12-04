@@ -25,10 +25,12 @@ Synth::~Synth(void) {
 
 // Must be call after setSynthState
 void Synth::init() {
-	for (int k=0; k<NUMBER_OF_LFOS - 1; k++) {
-	    lfo[k] = &lfoOsc[k];
-	}
-    lfo[NUMBER_OF_LFOS - 1] = &lfoEnv;
+    lfo[0] = &lfoOsc[0];
+    lfo[1] = &lfoOsc[1];
+    lfo[2] = &lfoOsc[2];
+    lfo[3] = &lfoEnv[0];
+    lfo[4] = &lfoStepSeq[0];
+    lfo[5] = &lfoStepSeq[1];
 
 	matrix.setSynthState(this->synthState);
 
@@ -52,10 +54,19 @@ void Synth::init() {
 	osc5.init(&matrix);
 	osc6.init(&matrix);
 
-	for (int k = 0; k < NUMBER_OF_LFOS; k++) {
+	// OSC + ENV
+	for (int k = 0; k < NUMBER_OF_LFO_OSC + NUMBER_OF_LFO_ENV; k++) {
 		lfo[k]->setSynthState(this->synthState);
 		lfo[k]->init(k, &this->matrix, (SourceEnum)(MATRIX_SOURCE_LFO1 + k), (DestinationEnum)(LFO1_FREQ + k));
 	}
+	// Step sequencer
+	for (int k = 0; k< NUMBER_OF_LFO_STEP; k++) {
+		int index = NUMBER_OF_LFO_OSC + NUMBER_OF_LFO_ENV+k;
+		lfo[index]->setSynthState(this->synthState);
+		lfo[index]->init(index, &this->matrix, (SourceEnum)(MATRIX_SOURCE_LFO5+k), (DestinationEnum)0);
+	}
+
+
 	for (int k = 0; k < MAX_NUMBER_OF_VOICES; k++) {
 		voices[k].setSynthState(this->synthState);
 		voices[k].init(&this->matrix, this->lfo, &this->env1, &this->env2,
@@ -214,16 +225,20 @@ void Synth::nextSample() {
 	case 25:
 	case 26:
 		this->voices[step32 - 23].calculateFrequencyWithMatrix();
+		break;
 		//
+	case 27:
+		// update step sequencer
+		this->lfo[4]->nextValueInMatrix();
+		break;
 	default:
 		break;
 
 	}
 
-	this->voices[0].nextSample();
-	this->voices[1].nextSample();
-	this->voices[2].nextSample();
-	this->voices[3].nextSample();
+	for (int k=0; k<4; k++) {
+		this->voices[k].nextSample();
+	}
 
 	cpt++;
 }
@@ -256,9 +271,43 @@ void Synth::afterNewParamsLoad() {
     env4.reloadADSR();
     env5.reloadADSR();
     env6.reloadADSR();
-    for (int k=0; k<NUMBER_OF_LFOS; k++) {
+    for (int k=0; k<NUMBER_OF_LFO; k++) {
         lfo[k]->valueChanged(-1);
     }
 	checkMaxVoice();
+}
+
+
+void Synth::newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+	if (type == SYNTH_PARAM_TYPE_ENGINE && encoder == ENCODER_ENGINE_ALGO) {
+		checkMaxVoice();
+	} else if (type == SYNTH_PARAM_TYPE_ENV) {
+        switch (currentRow) {
+        case ROW_ENV1:
+            env1.reloadADSR();
+            break;
+        case ROW_ENV2:
+            env2.reloadADSR();
+            break;
+        case ROW_ENV3:
+            env3.reloadADSR();
+            break;
+        case ROW_ENV4:
+            env4.reloadADSR();
+            break;
+        case ROW_ENV5:
+            env5.reloadADSR();
+            break;
+        case ROW_ENV6:
+            env6.reloadADSR();
+            break;
+        }
+    } else if (type == SYNTH_PARAM_TYPE_MATRIX && encoder == ENCODER_MATRIX_DEST) {
+        // Reset old destination
+        matrix.resetDestination(oldValue);
+    } else if (type == SYNTH_PARAM_TYPE_LFO) {
+        lfo[currentRow - ROW_LFO1]->valueChanged(encoder);
+    }
+
 }
 

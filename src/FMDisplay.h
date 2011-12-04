@@ -62,6 +62,7 @@ public:
 	}
 
 	boolean needRefresh() { return refreshStatus != 0; }
+
 	void refreshAllScreenByStep();
 	void displayPreset();
     void checkPresetModified();
@@ -76,6 +77,8 @@ public:
     void newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newcurrentRow(int newcurrentRow);
+    void updateStepSequencer(int currentRow, int encoder, int oldValue, int newValue);
+
     void beforeNewParamsLoad() { };
     void afterNewParamsLoad() {
         presetModifed = false;

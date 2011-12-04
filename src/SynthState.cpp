@@ -94,7 +94,7 @@ struct ParameterRowDisplay lfoEnvParameterRow = {
         }
 };
 
-const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW", "Velo", "CC1 ", "CC2 ", "CC3 ", "CC4 "} ;
+const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW", "Velo", "CC1 ", "CC2 ", "CC3 ", "CC4 ", "lfo5", "lfo6"} ;
 const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "o5Fr", "o6Fr", "IM1 ", "IM2 ", "IM3 ", "IM4 ", "Mix1", "Mix2", "Mix3", "Mix4",
 		"lfo1", "lfo2", "lfo3", "lfo4", "mtx1", "mtx2", "mtx3", "mtx4", "mtx5", "mtx6", "mtx7", "mtx8" } ;
 struct ParameterRowDisplay matrixParameterRow = {
@@ -121,6 +121,17 @@ struct ParameterRowDisplay lfoParameterRow = {
         }
 };
 
+
+struct ParameterRowDisplay lfoStepParameterRow = {
+        "LFO (Step)",
+        { "Bpm ", "Gate", "    ", "    " },
+        {
+                { 0 ,255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames},
+                { 0 ,32, DISPLAY_TYPE_FLOAT_4_4, nullNames},
+                { 0, 0, DISPLAY_TYPE_STEP_SEQ1, nullNames },
+                { 0, 0, DISPLAY_TYPE_STEP_SEQ2, nullNames }
+        }
+};
 
 const struct AllParameterRowsDisplay allParameterRows = {
         {
@@ -150,7 +161,9 @@ const struct AllParameterRowsDisplay allParameterRows = {
                 &lfoParameterRow,
                 &lfoParameterRow,
                 &lfoParameterRow,
-                &lfoEnvParameterRow
+                &lfoEnvParameterRow,
+                &lfoStepParameterRow,
+                &lfoStepParameterRow
         }
 };
 
@@ -199,12 +212,72 @@ SynthState::SynthState() {
     for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
         ((char*)&params)[k] = ((char*)presets)[k];
     }
+
+    stepSelect[0] = 0;
+    stepSelect[1] = 0;
 }
+
+
+void SynthState::encoderTurnedForStepSequencer(int row, int encoder, int ticks) {
+
+	if (encoder == 2) {
+		int whichStepSelect = row - ROW_LFO5;
+		int oldPos = stepSelect[whichStepSelect];
+		stepSelect[whichStepSelect] += (ticks>0? 1 : -1);
+
+		if (stepSelect[whichStepSelect]>15) {
+			stepSelect[whichStepSelect] = 0;
+		} else if (stepSelect[whichStepSelect]<0) {
+			stepSelect[whichStepSelect] = 15;
+		}
+
+        propagateNewParamValue(row, encoder, (ParameterDisplay*)NULL, oldPos, stepSelect[whichStepSelect]);
+
+	} else if (encoder == 3) {
+		char *step;
+		if (row == ROW_LFO5) {
+			step = &params.lfo5.steps[stepSelect[0]];
+		} else {
+			step = &params.lfo6.steps[stepSelect[0]];
+		}
+		int oldValue = (int)(*step);
+
+		(*step) += ticks;
+
+		if ((*step)>15) {
+			(*step) = 15;
+		} else if ((*step)<0) {
+			(*step) = 0;
+		}
+
+        propagateNewParamValue(row, encoder, (ParameterDisplay*)NULL, oldValue, (int)(*step));
+
+
+	}
+}
+
 
 void SynthState::encoderTurned(int encoder, int ticks) {
     if (fullState.synthMode == SYNTH_MODE_EDIT) {
 
-        int num = currentRow * NUMBER_OF_ENCODERS + encoder;
+        int num = encoder + currentRow * NUMBER_OF_ENCODERS;
+    	// We have the name
+        if (currentRow >= ROW_LFO5) {
+    		if (encoder >= 2) {
+    			encoderTurnedForStepSequencer(currentRow, encoder, ticks);
+    			return;
+    		}
+
+    		// We have the title between this row and the other (13 cars)
+    		if (currentRow == ROW_LFO5) {
+        		num += 13;
+    		} else {
+    			// + 14 because of step size.
+    			num += 13 + 14;
+    		}
+    	};
+
+
         struct ParameterDisplay* param = &(allParameterRows.row[currentRow]->params[encoder]);
         int newValue;
         int oldValue;
@@ -330,7 +403,7 @@ void SynthState::encoderTurned(int encoder, int ticks) {
                 fullState.internalPresetNumber = fullState.menuSelect;
             } else if (fullState.currentMenuItem->menuState == MENU_LOAD_USER_SELECT_PRESET) {
                 propagateBeforeNewParamsLoad();
-                PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect, (char*)&params);
+                PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect, &params);
                 propagateAfterNewParamsLoad();
                 fullState.presetNumber = fullState.menuSelect;
             }
@@ -465,11 +538,13 @@ void SynthState::buttonPressed(int button) {
             fullState.currentMenuItem = menuBack();
             propagateMenuBack();
             break;
+#ifdef DEBUG
         case BUTTON_DUMP:
         {
             PresetUtil::dumpPatch();
             break;
         }
+#endif
         case BUTTON_LFO:
         {
             if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
@@ -584,7 +659,7 @@ const MenuItem* SynthState::afterButtonPressed() {
         break;
     case MENU_LOAD_USER_SELECT_PRESET:
         propagateBeforeNewParamsLoad();
-        PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect, (char*)&params);
+        PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect, &params);
         PresetUtil::copyPatch((char*)&params, (char*)&backupParams);
         propagateAfterNewParamsLoad();
         fullState.presetModified = false;
@@ -665,7 +740,7 @@ const MenuItem* SynthState::afterButtonPressed() {
         break;
     case MENU_LOAD_USER_SELECT_PRESET:
         propagateBeforeNewParamsLoad();
-        PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.presetNumber, (char*)&params);
+        PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.presetNumber, &params);
         propagateAfterNewParamsLoad();
         fullState.menuSelect = fullState.presetNumber;
         break;
@@ -746,4 +821,11 @@ void SynthState::newBankReady() {
 	propagateNewSynthMode();
 }
 
+
+
+void SynthState::propagateAfterNewParamsLoad() {
+       for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
+           listener->afterNewParamsLoad();
+       }
+   }
 

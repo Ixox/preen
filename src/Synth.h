@@ -22,6 +22,7 @@
 #include "Matrix.h"
 #include "LfoOsc.h"
 #include "LfoEnv.h"
+#include "LfoStepSeq.h"
 #include "Env.h"
 #include "SynthParamListener.h"
 #include "wirish.h"
@@ -56,39 +57,7 @@ public:
         newParamValue(type, currentRow, encoder, param, oldValue, newValue);
     }
 
-    void newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
-    	if (type == SYNTH_PARAM_TYPE_ENGINE && encoder == ENCODER_ENGINE_ALGO) {
-    		checkMaxVoice();
-		} else if (type == SYNTH_PARAM_TYPE_ENV) {
-            switch (currentRow) {
-            case ROW_ENV1:
-                env1.reloadADSR();
-                break;
-            case ROW_ENV2:
-                env2.reloadADSR();
-                break;
-            case ROW_ENV3:
-                env3.reloadADSR();
-                break;
-            case ROW_ENV4:
-                env4.reloadADSR();
-                break;
-            case ROW_ENV5:
-                env5.reloadADSR();
-                break;
-            case ROW_ENV6:
-                env6.reloadADSR();
-                break;
-            }
-        } else if (type == SYNTH_PARAM_TYPE_MATRIX && encoder == ENCODER_MATRIX_DEST) {
-            // Reset old destination
-            matrix.resetDestination(oldValue);
-        } else if (type == SYNTH_PARAM_TYPE_LFO) {
-            lfo[currentRow - ROW_LFO1]->valueChanged(encoder);
-        }
-
-    }
-
+    void newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void checkMaxVoice();
 
     void newcurrentRow(int newcurrentRow)  {
@@ -111,9 +80,11 @@ private:
     unsigned int voiceIndex;
     int cpt;
 
-    LfoOsc lfoOsc[NUMBER_OF_LFOS -1];
-    LfoEnv lfoEnv;
-    Lfo* lfo[NUMBER_OF_LFOS];
+    LfoOsc lfoOsc[NUMBER_OF_LFO_OSC];
+    LfoEnv lfoEnv[NUMBER_OF_LFO_ENV];
+    LfoStepSeq lfoStepSeq[NUMBER_OF_LFO_STEP];
+
+    Lfo* lfo[NUMBER_OF_LFO];
 
     // 6 oscillators Max
     Osc<1> osc1;

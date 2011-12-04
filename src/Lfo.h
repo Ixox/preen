@@ -22,7 +22,13 @@
 #include "Matrix.h"
 
 
-#define NUMBER_OF_LFOS 4
+
+
+#define NUMBER_OF_LFO_OSC 3
+#define NUMBER_OF_LFO_ENV 1
+#define NUMBER_OF_LFO_STEP 2
+
+#define NUMBER_OF_LFO NUMBER_OF_LFO_OSC+NUMBER_OF_LFO_ENV+NUMBER_OF_LFO_STEP
 
 class Lfo : public SynthStateAware {
 public:

@@ -54,7 +54,9 @@ const struct AllSynthParams presets[]  = {
         		{ LFO_SAW, 20, 0, 0} ,
         		{ LFO_SAW, 3, 0, 0} ,
         		{ 0, 4, 0, 0} ,
-        		"Preen"
+        		"Preen",
+        		{ 86, 8,  { 15, 4, 2, 0, 15, 2, 0, 8, 15, 0, 12, 0, 8, 0, 15 , 0} },
+        		{ 86, 8, { 15, 4, 2, 0, 15, 2, 0, 8, 15, 0, 12, 0, 8, 0, 15 , 0} }
         } ,
         {
         		// patch name : 'Bubble mw'
@@ -90,7 +92,8 @@ const struct AllSynthParams presets[]  = {
         		{ LFO_SQUARE, 97, 0, 0} ,
         		{ LFO_SQUARE, 96, 0, 0} ,
         		{ 0, 12, 0, 0} ,
-        		"Bubble  mw"
+        		"Bubble  mw",
+
         },
         {
         		// patch name : 'Old and Sad'

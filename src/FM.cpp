@@ -96,6 +96,7 @@ void setup()
             B00000,
             B00000,
             B00000,
+            B00000
     };
 
     byte midiOut[8] = {
@@ -106,6 +107,7 @@ void setup()
             B00000,
             B00000,
             B00000,
+            B00000
     };
 
     byte modified[8] = {
@@ -115,6 +117,18 @@ void setup()
             B00000,
             B00000,
             B00000,
+            B00000,
+            B00000
+    };
+
+    byte bottomArrow[8] = {
+            B00100,
+            B00100,
+            B00100,
+            B10101,
+            B10101,
+            B01110,
+            B00100,
             B00000,
     };
 
@@ -155,8 +169,6 @@ void setup()
     synthState.insertParamListener(&midiDecoder);
     synthState.insertMenuListener(&fmDisplay);
 
-
-
     // Timer init
     mainTimer.pause();
     mainTimer.setOverflow(2197);
@@ -173,6 +185,7 @@ void setup()
     lcd.createChar(0, midiIn);
     lcd.createChar(1, midiOut);
     lcd.createChar(2, modified);
+    lcd.createChar(3, bottomArrow);
 
     // Load config from EEPROM if has been saved...
     PresetUtil::loadConfigFromEEPROM();

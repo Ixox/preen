@@ -90,6 +90,7 @@ private:
 	int buttonBit[NUMBER_OF_BUTTONS];
 	bool buttonOldState[NUMBER_OF_BUTTONS];
 	int buttonTimer[NUMBER_OF_BUTTONS];
+	bool buttonLongPress[NUMBER_OF_BUTTONS];
 
 	int encoderTimer;
 	EncodersListener* firstListener;
