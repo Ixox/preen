@@ -219,9 +219,9 @@ SynthState::SynthState() {
 
 
 void SynthState::encoderTurnedForStepSequencer(int row, int encoder, int ticks) {
+	int whichStepSelect = row - ROW_LFO5;
 
 	if (encoder == 2) {
-		int whichStepSelect = row - ROW_LFO5;
 		int oldPos = stepSelect[whichStepSelect];
 		stepSelect[whichStepSelect] += (ticks>0? 1 : -1);
 
@@ -236,9 +236,9 @@ void SynthState::encoderTurnedForStepSequencer(int row, int encoder, int ticks) 
 	} else if (encoder == 3) {
 		char *step;
 		if (row == ROW_LFO5) {
-			step = &params.lfo5.steps[stepSelect[0]];
+			step = &params.lfo5.steps[stepSelect[whichStepSelect]];
 		} else {
-			step = &params.lfo6.steps[stepSelect[0]];
+			step = &params.lfo6.steps[stepSelect[whichStepSelect]];
 		}
 		int oldValue = (int)(*step);
 

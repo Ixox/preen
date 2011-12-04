@@ -21,5 +21,9 @@
 
 void LfoStepSeq::init(int number, Matrix *matrix, SourceEnum source, DestinationEnum dest) {
 	Lfo::init(number, matrix, source, dest);
-	this->stepParams = (StepSequencerParams *)&this->synthState->params.lfo5;
+	if (source == MATRIX_SOURCE_LFO5) {
+		this->stepParams = (StepSequencerParams *)&this->synthState->params.lfo5;
+	} else {
+		this->stepParams = (StepSequencerParams *)&this->synthState->params.lfo6;
+	}
 }

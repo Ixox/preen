@@ -229,7 +229,11 @@ void Synth::nextSample() {
 		//
 	case 27:
 		// update step sequencer
-		this->lfo[4]->nextValueInMatrix();
+		this->lfoStepSeq[0].nextValueInMatrix();
+		break;
+	case 28:
+		// update step sequencer
+		this->lfoStepSeq[1].nextValueInMatrix();
 		break;
 	default:
 		break;
