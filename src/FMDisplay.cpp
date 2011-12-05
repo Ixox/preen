@@ -205,18 +205,14 @@ displaySignedChar:
 			lcd->print("  ");
 			lcd->setCursor(10, 3);
 			lcd->print(' ');
-			if (decal != 0) {
-				lcd->print(':');
+			if (decal == 0) {
+				lcd->print((char)5);
 			} else {
-				lcd->print('.');
+				lcd->print((char)6);
 			}
 
 			lcd->setCursor(12 + this->synthState->stepSelect[whichStepSeq] - decal, 2);
-			if ((this->synthState->stepSelect[whichStepSeq] & 3) == 0) {
-				lcd->print((char)3);
-			} else {
-				lcd->print('v');
-			}
+			lcd->print((char)3);
     	}
     	break;
     case DISPLAY_TYPE_STEP_SEQ2:
@@ -238,9 +234,9 @@ displaySignedChar:
 				lcd->print(stepChars[stepSeq->steps[k + decal]] );
 			}
 			lcd->setCursor(12, 2);
-			lcd->print('|');
+			lcd->print((char)4);
 			lcd->setCursor(16, 2);
-			lcd->print('|');
+			lcd->print((char)4);
     }
     break;
 	}
@@ -364,7 +360,7 @@ void FMDisplay::updateStepSequencer(int currentRow, int encoder, int oldValue, i
 		// Change cursor
 		lcd->setCursor(12 + oldValue - oldDecal, 2);
 		if ((oldValue & 3) == 0) {
-	    	lcd->print('|');
+	    	lcd->print((char)4);
 		} else {
 			lcd->print(' ');
 		}
@@ -375,11 +371,7 @@ void FMDisplay::updateStepSequencer(int currentRow, int encoder, int oldValue, i
 		}
 
 		lcd->setCursor(12 + newValue - decal, 2);
-		if ((newValue & 3) == 0) {
-			lcd->print((char)3);
-		} else {
-			lcd->print('v');
-		}
+		lcd->print((char)3);
 
 	}
 }

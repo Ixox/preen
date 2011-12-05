@@ -46,9 +46,9 @@ public:
 
 		// Gated
 		if ((index & 0xffff) >= gate) {
-			matrix->setSource(source, stepParams->steps[index>>16]<<4);
-		} else {
 			matrix->setSource(source, 0);
+		} else {
+			matrix->setSource(source, stepParams->steps[index>>16]<<4);
 		}
 	}
 

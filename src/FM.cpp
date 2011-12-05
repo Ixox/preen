@@ -121,15 +121,49 @@ void setup()
             B00000
     };
 
-    byte bottomArrow[8] = {
-            B00100,
-            B00100,
-            B00100,
-            B10101,
-            B10101,
+    byte stepCursor[8] = {
+            B00000,
+            B00000,
+            B00000,
+            B00000,
+            B10001,
             B01110,
             B00100,
+            B00100,
+    };
+
+    byte stepPos[8] = {
             B00000,
+            B00000,
+            B00000,
+            B00000,
+            B00000,
+            B00100,
+            B00100,
+            B00000,
+    };
+
+    byte firstSteps[8] = {
+            B00000,
+            B00000,
+            B00000,
+            B00000,
+            B00000,
+            B00000,
+            B10000,
+            B10000,
+    };
+
+
+    byte thirdStep[8] = {
+            B00000,
+            B00000,
+            B00000,
+            B00000,
+            B00000,
+            B00000,
+            B10100,
+            B10100,
     };
 
     Serial1.end();
@@ -185,7 +219,11 @@ void setup()
     lcd.createChar(0, midiIn);
     lcd.createChar(1, midiOut);
     lcd.createChar(2, modified);
-    lcd.createChar(3, bottomArrow);
+    lcd.createChar(3, stepCursor);
+    lcd.createChar(4, stepPos);
+    lcd.createChar(5, firstSteps);
+    lcd.createChar(6, thirdStep);
+
 
     // Load config from EEPROM if has been saved...
     PresetUtil::loadConfigFromEEPROM();
