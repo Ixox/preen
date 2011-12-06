@@ -24,47 +24,20 @@
 
 class LfoStepSeq: public Lfo {
 public:
-
 	void init(int number, Matrix* matrix, SourceEnum source, DestinationEnum dest);
-
-	void valueChanged(int encoder) {
-		if (encoder < 2) {
-			step = (stepParams->bpm << 16) / 15360;
-			gate = stepParams->gate << 11;
-		}
-	}
-
-	void nextValueInMatrix() {
-		// We're called 1024 times per seconds
-		// Each step must last (1024 / 4 * 60/bpm)
-		// = 64*60/bmp
-		// We must going forward bpm / 15360
-		// fix point stepForward = (bpm << 16) / 15360;
-
-		index += step;
-		index &= 0xfffff;
-
-		// Gated
-		if ((index & 0xffff) >= gate) {
-			matrix->setSource(source, 0);
-		} else {
-			matrix->setSource(source, stepParams->steps[index>>16]<<4);
-		}
-	}
-
-	void noteOn() {
-		index = 0;
-	}
-
-	void noteOff() {
-	}
-
+	void valueChanged(int encoder);
+	void nextValueInMatrix();
+	void noteOn();
+	void noteOff();
 
 private:
 	StepSequencerParams* stepParams;
-    unsigned int index;
-    unsigned int step;
-    unsigned int gate;
+    int index;
+    int step;
+    int gateValue;
+    int target;
+    int currentValue;
+    boolean gated;
 };
 
 #endif /* LFOENV_H_ */

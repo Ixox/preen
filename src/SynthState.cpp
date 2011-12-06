@@ -126,7 +126,7 @@ struct ParameterRowDisplay lfoStepParameterRow = {
         "LFO (Step)",
         { "Bpm ", "Gate", "    ", "    " },
         {
-                { 0 ,255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames},
+                { 10 ,240, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames},
                 { 0 ,32, DISPLAY_TYPE_FLOAT_4_4, nullNames},
                 { 0, 0, DISPLAY_TYPE_STEP_SEQ1, nullNames },
                 { 0, 0, DISPLAY_TYPE_STEP_SEQ2, nullNames }
