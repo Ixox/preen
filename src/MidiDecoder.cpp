@@ -18,7 +18,7 @@
 #include "MidiDecoder.h"
 
 // DEBUG
-// extern LiquidCrystal lcd;
+extern LiquidCrystal lcd;
 
 
 MidiDecoder::MidiDecoder() {
@@ -111,7 +111,7 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 	case MIDI_PROGRAM_CHANGE:
 		// Programm change
 		this->synth->allSoundOff();
-		PresetUtil::readFromEEPROM(this->synthState->fullState.bankNumber, midiEvent.value[0], &this->synthState->params);
+		PresetUtil::readSynthParamFromEEPROM(this->synthState->fullState.bankNumber, midiEvent.value[0], &this->synthState->params);
 		this->synthState->propagateAfterNewParamsLoad();
 		this->synthState->resetDisplay();
 
@@ -302,20 +302,44 @@ void MidiDecoder::controlChange(MidiEvent& midiEvent) {
 					midiEvent.value[1] * 2 - 128);
 			break;
 		case CC_LFO1_FREQ:
-			this->synthState->setNewValue(ROW_LFO1, CC_LFO1_FREQ,
+			this->synthState->setNewValue(ROW_LFO1, ENCODER_LFO_FREQ,
 					midiEvent.value[1] * 2);
 			break;
 		case CC_LFO2_FREQ:
-			this->synthState->setNewValue(ROW_LFO2, CC_LFO1_FREQ,
+			this->synthState->setNewValue(ROW_LFO2, ENCODER_LFO_FREQ,
 					midiEvent.value[1] * 2);
 			break;
 		case CC_LFO3_FREQ:
-			this->synthState->setNewValue(ROW_LFO3, CC_LFO1_FREQ,
+			this->synthState->setNewValue(ROW_LFO3, ENCODER_LFO_FREQ,
 					midiEvent.value[1] * 2);
 			break;
-		case CC_LFO4_FREQ:
-			this->synthState->setNewValue(ROW_LFO4, CC_LFO1_FREQ,
+		case CC_STEPSEQ5_BPM:
+			this->synthState->setNewValue(ROW_LFO5, ENCODER_STEPSEQ_BPM,
 					midiEvent.value[1] * 2);
+			break;
+		case CC_STEOSEQ6_BPM:
+			this->synthState->setNewValue(ROW_LFO6, ENCODER_STEPSEQ_BPM,
+					midiEvent.value[1] * 2);
+			break;
+		case CC_STEPSEQ5_GATE:
+			this->synthState->setNewValue(ROW_LFO5, ENCODER_STEPSEQ_GATE,
+					midiEvent.value[1]);
+			break;
+		case CC_STEPSEQ6_GATE:
+			this->synthState->setNewValue(ROW_LFO6, ENCODER_STEPSEQ_GATE,
+					midiEvent.value[1]);
+			break;
+		case CC_MATRIX_SOURCE_CC1:
+			this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC1, midiEvent.value[1]);
+			break;
+		case CC_MATRIX_SOURCE_CC2:
+			this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC2, midiEvent.value[1]);
+			break;
+		case CC_MATRIX_SOURCE_CC3:
+			this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC3, midiEvent.value[1]);
+			break;
+		case CC_MATRIX_SOURCE_CC4:
+			this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC4, midiEvent.value[1]);
 			break;
 		case CC_ALL_NOTES_OFF:
 			this->synth->allNoteOff();
@@ -374,16 +398,26 @@ void MidiDecoder::controlChange(MidiEvent& midiEvent) {
 }
 
 void MidiDecoder::decodeNrpn() {
-	unsigned int index = (this->currentNrpn.paramMSB << 7) + this->currentNrpn.paramLSB;
-	unsigned int value = (this->currentNrpn.valueMSB << 7) + this->currentNrpn.valueLSB;
-	unsigned int row = index / NUMBER_OF_ENCODERS;
-	unsigned int encoder = index % NUMBER_OF_ENCODERS;
+	if (this->currentNrpn.paramMSB < 2) {
+		unsigned int index = (this->currentNrpn.paramMSB << 7) + this->currentNrpn.paramLSB;
+		unsigned int value = (this->currentNrpn.valueMSB << 7) + this->currentNrpn.valueLSB;
+		unsigned int row = index / NUMBER_OF_ENCODERS;
+		unsigned int encoder = index % NUMBER_OF_ENCODERS;
 
-	if (row < NUMBER_OF_ROWS) {
-		// 0 of received value must be min value of the param...
-		struct ParameterDisplay param =
-				allParameterRows.row[row]->params[encoder];
-		this->synthState->setNewValue(row, encoder, param.minValue + value);
+		if (row < NUMBER_OF_ROWS) {
+			// 0 of received value must be min value of the param...
+			struct ParameterDisplay param =
+					allParameterRows.row[row]->params[encoder];
+			this->synthState->setNewValue(row, encoder, param.minValue + value);
+		}
+	} else {
+		unsigned int whichStepSeq = this->currentNrpn.paramMSB -2;
+		unsigned int step = this->currentNrpn.paramLSB;
+		unsigned int value = this->currentNrpn.valueLSB;
+		lcd.setCursor(0,0);
+		lcd.print(whichStepSeq);
+
+		this->synthState->setNewStepValue(whichStepSeq, step, value);
 	}
 }
 
@@ -409,21 +443,45 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
 
 	// Do we send NRPN ?
 	if (sendCCOrNRPN == 2) {
-		// Value to send must be positive
-		int valueToSend = newValue - param->minValue;
-		// NRPN is 4 control change
-		cc.value[0] = 99;
-		cc.value[1] = 0;
-		midiToSend.insert(cc);
-		cc.value[0] = 98;
-		cc.value[1] = (uint8) currentrow * NUMBER_OF_ENCODERS + encoder;
-		midiToSend.insert(cc);
-		cc.value[0] = 6;
-		cc.value[1] = (uint8) (valueToSend >> 7);
-		midiToSend.insert(cc);
-		cc.value[0] = 38;
-		cc.value[1] = (uint8) (valueToSend & 127);
-		midiToSend.insert(cc);
+		// Special case for Step sequencer
+		if (currentrow >= ROW_LFO5 && encoder >=2) {
+			if (encoder == 2) {
+				return;
+			}
+			if (encoder == 3) {
+				// We modify a step value, we want to send that
+				int currentStepSeq = currentrow - ROW_LFO5;
+				// NRPN is 4 control change
+				cc.value[0] = 99;
+				cc.value[1] = currentStepSeq + 2;
+				midiToSend.insert(cc);
+				cc.value[0] = 98;
+				cc.value[1] = this->synthState->stepSelect[currentStepSeq];
+				midiToSend.insert(cc);
+				cc.value[0] = 6;
+				cc.value[1] = 0;
+				midiToSend.insert(cc);
+				cc.value[0] = 38;
+				cc.value[1] = (uint8) newValue;
+				midiToSend.insert(cc);
+			}
+		} else {
+			// Value to send must be positive
+			int valueToSend = newValue - param->minValue;
+			// NRPN is 4 control change
+			cc.value[0] = 99;
+			cc.value[1] = 0;
+			midiToSend.insert(cc);
+			cc.value[0] = 98;
+			cc.value[1] = (uint8) currentrow * NUMBER_OF_ENCODERS + encoder;
+			midiToSend.insert(cc);
+			cc.value[0] = 6;
+			cc.value[1] = (uint8) (valueToSend >> 7);
+			midiToSend.insert(cc);
+			cc.value[0] = 38;
+			cc.value[1] = (uint8) (valueToSend & 127);
+			midiToSend.insert(cc);
+		}
 	}
 
 	// Do we send control change
@@ -482,12 +540,22 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
 				cc.value[1] = (newValue >> 1) + 64;
 			}
 			break;
-		case ROW_LFO_FIRST ... ROW_LFO_LAST:
+		case ROW_LFO_FIRST ... ROW_LFO3:
 			if ((newValue & 0x1) >0)
 				break;
 			if (encoder == ENCODER_LFO_FREQ) {
-				cc.value[0] = CC_MATRIXROW1_MUL + currentrow - ROW_LFO_FIRST;
+				cc.value[0] = CC_LFO1_FREQ + (currentrow - ROW_LFO_FIRST);
 				cc.value[1] = (newValue >> 1);
+			}
+			break;
+		case ROW_LFO5 ... ROW_LFO_LAST:
+			if (encoder == ENCODER_STEPSEQ_BPM) {
+				cc.value[0] = CC_STEPSEQ5_BPM + (currentrow - ROW_LFO5);
+				cc.value[1] = (newValue >> 1);
+			}
+			else if (encoder == ENCODER_STEPSEQ_GATE) {
+				cc.value[0] = CC_STEPSEQ5_GATE + (currentrow - ROW_LFO5);
+				cc.value[1] = newValue;
 			}
 			break;
 		}

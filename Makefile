@@ -43,7 +43,7 @@ BUILD_PATH :=  $(LIB_MAPLE_HOME)/build
 
 PROJECT_BUILD_PATH=build/
 # Useful variables
-GLOBAL_CFLAGS   := -O3 -g -mcpu=cortex-m3 -mthumb -march=armv7-m -nostdlib \
+GLOBAL_CFLAGS   := -O2 -g -mcpu=cortex-m3 -mthumb -march=armv7-m -nostdlib \
                    -ffunction-sections -fdata-sections -Wl,--gc-sections   \
                    -DBOARD_$(BOARD) -DMCU_$(MCU) -fsigned-char -DSTM32_MEDIUM_DENSITY -I/home/xhosxe/libmaple/libraries/LiquidCrystal -I/home/xhosxe/libmaple/libraries/Wire
 

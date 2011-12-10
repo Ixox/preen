@@ -184,21 +184,13 @@ displaySignedChar:
         break;
     case DISPLAY_TYPE_STEP_SEQ1:
     {
-    		struct StepSequencerParams *stepSeq;
-    		int whichStepSeq;
-    		if (row == ROW_LFO5) {
-    			stepSeq = &this->synthState->params.lfo5;
-    			whichStepSeq = 0;
-    		} else {
-    			stepSeq = &this->synthState->params.lfo6;
-    			whichStepSeq = 1;
-    		}
+			int whichStepSeq = row - ROW_LFO5;
+			StepSequencerSteps * seqSteps = &((StepSequencerSteps * )(&this->synthState->params.steps5))[whichStepSeq];
 
-    		int pos = this->synthState->stepSelect[whichStepSeq];
     		int decal = (this->synthState->stepSelect[whichStepSeq] >> 3 ) * 8;
     		lcd->setCursor(12, 3);
 			for (int k=0; k<4; k++) {
-				lcd->print(stepChars[stepSeq->steps[k + decal] ] );
+				lcd->print(stepChars[seqSteps->steps[k + decal] ] );
 			}
 
 			lcd->setCursor(10, 2);
@@ -217,21 +209,13 @@ displaySignedChar:
     	break;
     case DISPLAY_TYPE_STEP_SEQ2:
     {
-			struct StepSequencerParams *stepSeq;
-			int whichStepSeq;
-			if (row == ROW_LFO5) {
-				stepSeq = &this->synthState->params.lfo5;
-				whichStepSeq = 0;
-			} else {
-				stepSeq = &this->synthState->params.lfo6;
-				whichStepSeq = 1;
-			}
-			int pos = this->synthState->stepSelect[whichStepSeq];
+    		int whichStepSeq = row - ROW_LFO5;
+			StepSequencerSteps * seqSteps = &((StepSequencerSteps * )(&this->synthState->params.steps5))[whichStepSeq];
 			int decal = (this->synthState->stepSelect[whichStepSeq] >> 3 ) * 8;
 
 			lcd->setCursor(16, 3);
 			for (int k=4; k<8; k++) {
-				lcd->print(stepChars[stepSeq->steps[k + decal]] );
+				lcd->print(stepChars[seqSteps->steps[k + decal]] );
 			}
 			lcd->setCursor(12, 2);
 			lcd->print((char)4);
@@ -342,13 +326,17 @@ void FMDisplay::checkPresetModified() {
 void FMDisplay::newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
     checkPresetModified();
 	if (currentRow == this->displayedRow) {
+		if (currentRow >= ROW_LFO5 && encoder>1) {
+			updateStepSequencer(currentRow, encoder, oldValue, newValue);
+			return;
+		}
 		updateEncoderValue(currentRow, encoder, param, newValue);
 	}
 }
 
 
 void FMDisplay::updateStepSequencer(int currentRow, int encoder, int oldValue, int newValue) {
-	int whichStepSeq = (currentRow == ROW_LFO5 ? 0 : 1);
+	int whichStepSeq = currentRow - ROW_LFO5 ;
 	int decal = (this->synthState->stepSelect[whichStepSeq] >> 3 ) * 8;
 
 	if (encoder == 3) {
@@ -372,7 +360,6 @@ void FMDisplay::updateStepSequencer(int currentRow, int encoder, int oldValue, i
 
 		lcd->setCursor(12 + newValue - decal, 2);
 		lcd->print((char)3);
-
 	}
 }
 

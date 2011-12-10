@@ -19,21 +19,23 @@
 
 
 
+
 // FLASH :  __attribute__ ((section (".USER_FLASH")))
 // Ex : const char* nullNames [] __attribute__ ((section (".USER_FLASH")))= {};
 // DISPLAY structures
-const char* allChars  = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 &*$,;:";
+const char* allChars  = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 &*$,;:<>";
 
 const char* nullNames []= {};
+const unsigned char* nullNamesOrder = NULL;
 const char* algoNames [] = { "alg1", "alg2", "alg3", "alg4", "alg5", "alg6", "alg7", "alg8", "alg9" };
 struct ParameterRowDisplay engine1ParameterRow  = {
         "Engine" ,
         { "Algo", "Velo", "Voic", "Glid" },
         {
-                {ALGO1, ALGO_END-1, DISPLAY_TYPE_STRINGS, algoNames},
-                {0, 16, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                {1, 4, DISPLAY_TYPE_VOICES, nullNames },
-                {0, 10, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames }
+                {ALGO1, ALGO_END-1, DISPLAY_TYPE_STRINGS, algoNames, nullNamesOrder, nullNamesOrder},
+                {0, 16, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames,nullNamesOrder, nullNamesOrder },
+                {1, 4, DISPLAY_TYPE_VOICES, nullNames, nullNamesOrder, nullNamesOrder },
+                {0, 10, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder }
         }
 };
 
@@ -41,10 +43,10 @@ struct ParameterRowDisplay engine2ParameterRow = {
         "Modulation" ,
         { "IM1 ", "IM2 ", "IM3 ", "IM4 "},
         {
-                {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames },
-                {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames },
-                {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames },
-                {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames }
+                {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames, nullNamesOrder, nullNamesOrder },
+                {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames, nullNamesOrder, nullNamesOrder },
+                {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames, nullNamesOrder, nullNamesOrder },
+                {0, 255, DISPLAY_TYPE_FLOAT_5_3, nullNames, nullNamesOrder, nullNamesOrder }
         }
 };
 
@@ -52,23 +54,40 @@ struct ParameterRowDisplay engine3ParameterRow = {
         "Mixer" ,
         { "Mix1", "Mix2", "Mix3", "Mix4" },
         {
-                {1, 128, DISPLAY_TYPE_FLOAT_1_7, nullNames },
-                {1, 128, DISPLAY_TYPE_FLOAT_1_7, nullNames },
-                {1, 128, DISPLAY_TYPE_FLOAT_1_7, nullNames },
-                {1, 128, DISPLAY_TYPE_FLOAT_1_7, nullNames }
+                {1, 128, DISPLAY_TYPE_FLOAT_1_7, nullNames, nullNamesOrder, nullNamesOrder },
+                {1, 128, DISPLAY_TYPE_FLOAT_1_7, nullNames, nullNamesOrder, nullNamesOrder },
+                {1, 128, DISPLAY_TYPE_FLOAT_1_7, nullNames, nullNamesOrder, nullNamesOrder },
+                {1, 128, DISPLAY_TYPE_FLOAT_1_7, nullNames, nullNamesOrder, nullNamesOrder }
         }
 };
 
+
+
 const char* oscShapeNames []=  {"sin ", "s^2 ", "1/2s", "spos", "rand", "squa", "saw ", "off " } ;
+/*
+enum OscShape {
+	OSC_SHAPE_SIN = 0,
+    OSC_SHAPE_SIN2,
+    OSC_SHAPE_SIN3,
+    OSC_SHAPE_SIN4,
+    OSC_SHAPE_RAND,
+    OSC_SHAPE_SQUARE,
+    OSC_SHAPE_SAW,
+	OSC_SHAPE_OFF
+};
+*/
+unsigned char oscShameOrder[] = { OSC_SHAPE_SIN, OSC_SHAPE_SQUARE, OSC_SHAPE_SAW, OSC_SHAPE_RAND, OSC_SHAPE_SIN2, OSC_SHAPE_SIN3, OSC_SHAPE_SIN4, OSC_SHAPE_OFF };
+unsigned char oscShameOrderReversed[] = { 0, 4, 5, 6, 3, 1, 2, 7};
+
 const char* oscTypeNames [] = { "keyb", "fixe"};
 struct ParameterRowDisplay oscParameterRow = {
         "Oscillator",
         { "Shap", "FTyp", "Freq", "FTun" },
         {
-                { OSC_SHAPE_SIN, OSC_SHAPE_OFF, DISPLAY_TYPE_STRINGS, oscShapeNames },
-                { OSC_FT_KEYBOARD, OSC_FT_FIXE, DISPLAY_TYPE_STRINGS, oscTypeNames },
-                { 0, 128, DISPLAY_TYPE_OSC_FREQUENCY , nullNames },
-                { (char)-127, 127, DISPLAY_TYPE_OSC_FREQUENCY, nullNames }
+                { OSC_SHAPE_SIN, OSC_SHAPE_OFF, DISPLAY_TYPE_STRINGS, oscShapeNames, oscShameOrder, oscShameOrderReversed },
+                { OSC_FT_KEYBOARD, OSC_FT_FIXE, DISPLAY_TYPE_STRINGS, oscTypeNames, nullNamesOrder, nullNamesOrder},
+                { 0, 128, DISPLAY_TYPE_OSC_FREQUENCY , nullNames, nullNamesOrder, nullNamesOrder },
+                { (char)-127, 127, DISPLAY_TYPE_OSC_FREQUENCY, nullNames, nullNamesOrder, nullNamesOrder }
         }
 };
 
@@ -76,35 +95,61 @@ struct ParameterRowDisplay envParameterRow = {
         "Enveloppe",
         { "Attk", "Deca", "Sust", "Rele" },
         {
-                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames }
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder }
         }
 };
 
 struct ParameterRowDisplay lfoEnvParameterRow = {
-        "LFO (Env)",
+        "Enveloppe",
         { "Attk", "Deca", "Sust", "Rele" },
         {
-                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
-                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR_OR_NONE, nullNames }
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR_OR_NONE, nullNames, nullNamesOrder, nullNamesOrder }
         }
 };
 
 const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW", "Velo", "CC1 ", "CC2 ", "CC3 ", "CC4 ", "lfo5", "lfo6"} ;
+/*
+enum SourceEnum {
+	MATRIX_SOURCE_NONE = 0,
+	MATRIX_SOURCE_LFO1=1,
+	MATRIX_SOURCE_LFO2=2,
+	MATRIX_SOURCE_LFO3=3,
+	MATRIX_SOURCE_LFO4=4,
+	MATRIX_SOURCE_PITCHBEND=5,
+	MATRIX_SOURCE_AFTERTOUCH=6,
+	MATRIX_SOURCE_MODWHEEL=7,
+    MATRIX_SOURCE_VELOCITY=8,
+    MATRIX_SOURCE_CC1=9,
+    MATRIX_SOURCE_CC2=10,
+    MATRIX_SOURCE_CC3=11,
+    MATRIX_SOURCE_CC4=12,
+	MATRIX_SOURCE_LFO5=13,
+	MATRIX_SOURCE_LFO6=14,
+	MATRIX_SOURCE_MAX
+};
+*/
+
+unsigned char  matrixSourceNamesOrder[] = { MATRIX_SOURCE_NONE, MATRIX_SOURCE_LFO1,MATRIX_SOURCE_LFO2,MATRIX_SOURCE_LFO3,MATRIX_SOURCE_LFO4,MATRIX_SOURCE_LFO5,MATRIX_SOURCE_LFO6,
+/* 7 */		MATRIX_SOURCE_MODWHEEL, /* 8 */MATRIX_SOURCE_VELOCITY, MATRIX_SOURCE_PITCHBEND,MATRIX_SOURCE_AFTERTOUCH, /* 11 */ MATRIX_SOURCE_CC1,MATRIX_SOURCE_CC2,MATRIX_SOURCE_CC3,MATRIX_SOURCE_CC4 };
+unsigned char  matrixSourceNamesOrderReversed[] = {0, 1, 2, 3, 4, 9, 10, 7, 8, 11, 12, 13, 14, 5, 6 };
+
+
 const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "o5Fr", "o6Fr", "IM1 ", "IM2 ", "IM3 ", "IM4 ", "Mix1", "Mix2", "Mix3", "Mix4",
 		"lfo1", "lfo2", "lfo3", "lfo4", "mtx1", "mtx2", "mtx3", "mtx4", "mtx5", "mtx6", "mtx7", "mtx8" } ;
 struct ParameterRowDisplay matrixParameterRow = {
         "Matrix",
         { "Srce", "Mult", "Dest", "    " },
         {
-                { MATRIX_SOURCE_NONE, MATRIX_SOURCE_MAX-1, DISPLAY_TYPE_STRINGS, matrixSourceNames},
-                { (char)-127, 127, DISPLAY_TYPE_SIGNED_CHAR, nullNames },
-                { DESTINATION_NONE, DESTINATION_MAX-1, DISPLAY_TYPE_STRINGS, matrixDestNames},
-                { 0, 0, DISPLAY_TYPE_NONE, nullNames }
+                { MATRIX_SOURCE_NONE, MATRIX_SOURCE_MAX-1, DISPLAY_TYPE_STRINGS, matrixSourceNames, matrixSourceNamesOrder, matrixSourceNamesOrderReversed},
+                { (char)-127, 127, DISPLAY_TYPE_SIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
+                { DESTINATION_NONE, DESTINATION_MAX-1, DISPLAY_TYPE_STRINGS, matrixDestNames, nullNamesOrder, nullNamesOrder},
+                { 0, 0, DISPLAY_TYPE_NONE, nullNames, nullNamesOrder, nullNamesOrder }
         }
 };
 
@@ -114,22 +159,22 @@ struct ParameterRowDisplay lfoParameterRow = {
         "LFO",
         { "Shap", "Freq", "Bias", "KSyn" },
         {
-                { LFO_SAW, LFO_TYPE_MAX-1, DISPLAY_TYPE_STRINGS,  lfoShapeNames},
-                { 0, 255, DISPLAY_TYPE_FLOAT_4_4, nullNames },
-                { (char)-127, 127, DISPLAY_TYPE_SIGNED_CHAR, nullNames },
-                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames },
+                { LFO_SAW, LFO_TYPE_MAX-1, DISPLAY_TYPE_STRINGS,  lfoShapeNames, nullNamesOrder, nullNamesOrder},
+                { 0, 255, DISPLAY_TYPE_FLOAT_4_4, nullNames, nullNamesOrder, nullNamesOrder },
+                { (char)-127, 127, DISPLAY_TYPE_SIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
+                { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
         }
 };
 
 
 struct ParameterRowDisplay lfoStepParameterRow = {
-        "LFO (Step)",
+        "LFO Seq ",
         { "Bpm ", "Gate", "    ", "    " },
         {
-                { 10 ,240, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames},
-                { 0 ,32, DISPLAY_TYPE_FLOAT_4_4, nullNames},
-                { 0, 0, DISPLAY_TYPE_STEP_SEQ1, nullNames },
-                { 0, 0, DISPLAY_TYPE_STEP_SEQ2, nullNames }
+                { 10 ,240, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder},
+                { 0 ,32, DISPLAY_TYPE_FLOAT_4_4, nullNames, nullNamesOrder, nullNamesOrder},
+                { 0, 0, DISPLAY_TYPE_STEP_SEQ1, nullNames, nullNamesOrder, nullNamesOrder },
+                { 0, 0, DISPLAY_TYPE_STEP_SEQ2, nullNames, nullNamesOrder, nullNamesOrder }
         }
 };
 
@@ -215,31 +260,30 @@ SynthState::SynthState() {
 
     stepSelect[0] = 0;
     stepSelect[1] = 0;
+
+    isPlayingNote = false;
 }
 
 
+
 void SynthState::encoderTurnedForStepSequencer(int row, int encoder, int ticks) {
-	int whichStepSelect = row - ROW_LFO5;
+	int whichStepSeq = row - ROW_LFO5;
+	StepSequencerSteps * seqSteps = &((StepSequencerSteps * )(&params.steps5))[whichStepSeq];
 
 	if (encoder == 2) {
-		int oldPos = stepSelect[whichStepSelect];
-		stepSelect[whichStepSelect] += (ticks>0? 1 : -1);
+		int oldPos = stepSelect[whichStepSeq];
+		stepSelect[whichStepSeq] += (ticks>0? 1 : -1);
 
-		if (stepSelect[whichStepSelect]>15) {
-			stepSelect[whichStepSelect] = 0;
-		} else if (stepSelect[whichStepSelect]<0) {
-			stepSelect[whichStepSelect] = 15;
+		if (stepSelect[whichStepSeq]>15) {
+			stepSelect[whichStepSeq] = 0;
+		} else if (stepSelect[whichStepSeq]<0) {
+			stepSelect[whichStepSeq] = 15;
 		}
 
-        propagateNewParamValue(row, encoder, (ParameterDisplay*)NULL, oldPos, stepSelect[whichStepSelect]);
+        propagateNewParamValue(row, encoder, (ParameterDisplay*)NULL, oldPos, stepSelect[whichStepSeq]);
 
 	} else if (encoder == 3) {
-		char *step;
-		if (row == ROW_LFO5) {
-			step = &params.lfo5.steps[stepSelect[whichStepSelect]];
-		} else {
-			step = &params.lfo6.steps[stepSelect[whichStepSelect]];
-		}
+		char *step = &seqSteps->steps[stepSelect[whichStepSeq]];
 		int oldValue = (int)(*step);
 
 		(*step) += ticks;
@@ -259,24 +303,15 @@ void SynthState::encoderTurnedForStepSequencer(int row, int encoder, int ticks) 
 
 void SynthState::encoderTurned(int encoder, int ticks) {
     if (fullState.synthMode == SYNTH_MODE_EDIT) {
-
         int num = encoder + currentRow * NUMBER_OF_ENCODERS;
-    	// We have the name
+
+        // Step sequencer special case
         if (currentRow >= ROW_LFO5) {
     		if (encoder >= 2) {
     			encoderTurnedForStepSequencer(currentRow, encoder, ticks);
     			return;
     		}
-
-    		// We have the title between this row and the other (13 cars)
-    		if (currentRow == ROW_LFO5) {
-        		num += 13;
-    		} else {
-    			// + 14 because of step size.
-    			num += 13 + 14;
-    		}
     	};
-
 
         struct ParameterDisplay* param = &(allParameterRows.row[currentRow]->params[encoder]);
         int newValue;
@@ -300,18 +335,40 @@ void SynthState::encoderTurned(int encoder, int ticks) {
                 newValue = param->minValue;
             }
             value = (char)newValue;
-        } else {
-            unsigned char &value = ((unsigned char*)&params)[num];
-            oldValue = value;
+        } else if (param->valueNameOrder != NULL) {
+            unsigned char *value = &((unsigned char*)&params)[num];
+            int index;
+
+            newValue = oldValue = (*value);
+
             // Must use newValue (int) so that the minValue comparaison works
-            newValue = value + ticks;
+            // Is there any other order than the default one
+			int pos = param->valueNameOrderReversed[(*value)];
+            if (ticks>0 && pos < param->maxValue) {
+                newValue = param->valueNameOrder[pos+1];
+            }
+            if (ticks<0 && pos>param->minValue) {
+                newValue = param->valueNameOrder[pos-1];
+            }
+
+            (*value) = (unsigned char)newValue;
+        } else {
+            unsigned char *value;
+
+			value = &((unsigned char*)&params)[num];
+
+            oldValue = (*value);
+            // Must use newValue (int) so that the minValue comparaison works
+            // Is there any other order than the default one
+			newValue = (*value) + ticks;
             if (ticks>0 && newValue>param->maxValue) {
                 newValue = param->maxValue;
             }
             if (ticks<0 && newValue<param->minValue) {
                 newValue = param->minValue;
             }
-            value = (unsigned char)newValue;
+
+            (*value) = (unsigned char)newValue;
         }
 
         if (newValue != oldValue) {
@@ -398,12 +455,12 @@ void SynthState::encoderTurned(int encoder, int ticks) {
             if (fullState.currentMenuItem->menuState == MENU_LOAD_INTERNAL) {
                 char* preset = (char*)&(presets[fullState.menuSelect].engine1);
                 propagateBeforeNewParamsLoad();
-                PresetUtil::copyPatch(preset, (char*)&params);
+                PresetUtil::copySynthParams(preset, (char*)&params);
                 propagateAfterNewParamsLoad();
                 fullState.internalPresetNumber = fullState.menuSelect;
             } else if (fullState.currentMenuItem->menuState == MENU_LOAD_USER_SELECT_PRESET) {
                 propagateBeforeNewParamsLoad();
-                PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect, &params);
+                PresetUtil::readSynthParamFromEEPROM(fullState.bankNumber, fullState.menuSelect, &params);
                 propagateAfterNewParamsLoad();
                 fullState.presetNumber = fullState.menuSelect;
             }
@@ -521,12 +578,15 @@ void SynthState::buttonPressed(int button) {
             fullState.synthMode = SYNTH_MODE_MENU;
             fullState.menuSelect = fullState.firstMenu;
             // allow undo event after trying some patches
-            PresetUtil::copyPatch((char*)&params, (char*)&backupParams);
+            PresetUtil::copySynthParams((char*)&params, (char*)&backupParams);
             fullState.currentMenuItem = MenuItemUtil::getMenuItem(MAIN_MENU);
             break;
         case BUTTON_BACK:
-			changeSynthModeRow(lastButtonSelected, -1);
-			break;
+        	if (this->isPlayingNote) {
+        		//synth->noteOff(50);
+        		this->isPlayingNote = false;
+        	}
+        	break;
         }
     } else {
     	// MENU MODE
@@ -606,6 +666,12 @@ void SynthState::buttonLongPressed(int button) {
         	lastButtonSelected = button ;
         	changeSynthModeRow(button , -1);
             break;
+        case BUTTON_BACK:
+        	if (!this->isPlayingNote) {
+        		// synth.noteOn(50,100);
+        		this->isPlayingNote = true;
+        	}
+        	break;
         }
     }
     if (oldCurrentRow != currentRow) {
@@ -614,9 +680,34 @@ void SynthState::buttonLongPressed(int button) {
 }
 
 
+void SynthState::setNewStepValue(int whichStepSeq, int step, int newValue) {
+	if (whichStepSeq <0 || whichStepSeq>1 || step <0 || step > 15 || newValue<0 || newValue>15) {
+		return;
+	}
+	StepSequencerSteps * seqSteps = &((StepSequencerSteps * )(&params.steps5))[whichStepSeq];
+
+	int oldValue = seqSteps->steps[step];
+
+	if (oldValue !=  newValue) {
+		int oldStep = stepSelect[whichStepSeq];
+		seqSteps->steps[step] = newValue;
+		stepSelect[whichStepSeq] = step;
+		if (oldStep != step) {
+			propagateNewParamValueFromExternal(ROW_LFO5 + whichStepSeq, 2, NULL, oldStep, stepSelect[whichStepSeq]);
+		}
+		propagateNewParamValueFromExternal(ROW_LFO5 + whichStepSeq, 3, NULL, oldValue, newValue);
+	}
+
+}
+
 void SynthState::setNewValue(int row, int number, int newValue) {
     int index = row * NUMBER_OF_ENCODERS + number;
     struct ParameterDisplay* param = &(allParameterRows.row[row]->params[number]);
+    if (newValue > param->maxValue) {
+    	newValue= param->maxValue;
+    } else if (newValue < param->minValue) {
+    	newValue= param->minValue;
+    }
     if (param->displayType == DISPLAY_TYPE_SIGNED_CHAR) {
         ((char*)&params)[index] = newValue;
     } else {
@@ -648,7 +739,7 @@ const MenuItem* SynthState::afterButtonPressed() {
         break;
     case MENU_LOAD_INTERNAL:
         // Make change definitive
-        PresetUtil::copyPatch((char*)&params, (char*)&backupParams);
+        PresetUtil::copySynthParams((char*)&params, (char*)&backupParams);
         fullState.presetModified = false;
         break;
     case MENU_SAVE_BANK_CONFIRM:
@@ -659,8 +750,8 @@ const MenuItem* SynthState::afterButtonPressed() {
         break;
     case MENU_LOAD_USER_SELECT_PRESET:
         propagateBeforeNewParamsLoad();
-        PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.menuSelect, &params);
-        PresetUtil::copyPatch((char*)&params, (char*)&backupParams);
+        PresetUtil::readSynthParamFromEEPROM(fullState.bankNumber, fullState.menuSelect, &params);
+        PresetUtil::copySynthParams((char*)&params, (char*)&backupParams);
         propagateAfterNewParamsLoad();
         fullState.presetModified = false;
         break;
@@ -740,7 +831,7 @@ const MenuItem* SynthState::afterButtonPressed() {
         break;
     case MENU_LOAD_USER_SELECT_PRESET:
         propagateBeforeNewParamsLoad();
-        PresetUtil::readFromEEPROM(fullState.bankNumber, fullState.presetNumber, &params);
+        PresetUtil::readSynthParamFromEEPROM(fullState.bankNumber, fullState.presetNumber, &params);
         propagateAfterNewParamsLoad();
         fullState.menuSelect = fullState.presetNumber;
         break;
@@ -755,7 +846,7 @@ const MenuItem* SynthState::afterButtonPressed() {
         break;
     case MENU_LOAD_INTERNAL:
         propagateBeforeNewParamsLoad();
-        PresetUtil::copyPatch((char*)&presets[fullState.internalPresetNumber], (char*)&params);
+        PresetUtil::copySynthParams((char*)&presets[fullState.internalPresetNumber], (char*)&params);
         propagateAfterNewParamsLoad();
         fullState.menuSelect = fullState.internalPresetNumber;
         break;
@@ -788,12 +879,12 @@ const MenuItem* SynthState::menuBack() {
     case MENU_LOAD_USER_SELECT_PRESET:
         fullState.menuSelect = fullState.bankNumber;
         propagateBeforeNewParamsLoad();
-        PresetUtil::copyPatch((char*)&backupParams, (char*)&params);
+        PresetUtil::copySynthParams((char*)&backupParams, (char*)&params);
         propagateAfterNewParamsLoad();
         break;
     case MENU_LOAD_INTERNAL:
         propagateBeforeNewParamsLoad();
-        PresetUtil::copyPatch((char*)&backupParams, (char*)&params);
+        PresetUtil::copySynthParams((char*)&backupParams, (char*)&params);
         propagateAfterNewParamsLoad();
         break;
     case MENU_SAVE_BANK:

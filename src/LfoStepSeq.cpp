@@ -21,10 +21,15 @@
 
 void LfoStepSeq::init(int number, Matrix *matrix, SourceEnum source, DestinationEnum dest) {
 	Lfo::init(number, matrix, source, dest);
-	if (source == MATRIX_SOURCE_LFO5) {
-		this->stepParams = (StepSequencerParams *)&this->synthState->params.lfo5;
-	} else {
-		this->stepParams = (StepSequencerParams *)&this->synthState->params.lfo6;
+	switch (source) {
+	case MATRIX_SOURCE_LFO5:
+		this->seqParams = (StepSequencerParams *)&this->synthState->params.lfo5;
+		this->seqSteps = (StepSequencerSteps*)&this->synthState->params.steps5;
+		break;
+	case MATRIX_SOURCE_LFO6:
+		this->seqParams = (StepSequencerParams *)&this->synthState->params.lfo6;
+		this->seqSteps = (StepSequencerSteps*)&this->synthState->params.steps6;
+		break;
 	}
 	gated = false;
 }
@@ -32,8 +37,8 @@ void LfoStepSeq::init(int number, Matrix *matrix, SourceEnum source, Destination
 
 void LfoStepSeq::valueChanged(int encoder) {
 	if (encoder < 2) {
-		step = (stepParams->bpm << 16) / 15360;
-		gateValue = stepParams->gate<< 11;
+		step = (seqParams->bpm << 16) / 15360;
+		gateValue = seqParams->gate<< 11;
 	}
 }
 
@@ -49,7 +54,7 @@ void LfoStepSeq::nextValueInMatrix() {
 
    	// We'll reach the new value step by step to reduice audio click !
 
-  	 if (stepParams->gate < 32) {
+  	 if (seqParams->gate < 32) {
 		 // Gated ?
 		 if (!gated && ((index & 0xffff) >= gateValue)) {
 			target = 0;
@@ -57,11 +62,11 @@ void LfoStepSeq::nextValueInMatrix() {
 		 }
 		// End of gate ?
 		 if (gated && ((index & 0xffff) < gateValue)) {
-			target = stepParams->steps[index>>16];
+			target = seqSteps->steps[index>>16];
 			gated = false;
 		 }
   	 } else {
-  		 target = stepParams->steps[index>>16];
+  		 target = seqSteps->steps[index>>16];
   	 }
 
    	if (currentValue < target) {

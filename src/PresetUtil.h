@@ -34,6 +34,7 @@
 #define PART1_SIZE 128
 #define PART2_SIZE 64
 
+#define PATCH_SIZE PART1_SIZE+PART2_SIZE
 
 
 class SynthState;
@@ -54,9 +55,11 @@ public:
     static void dumpPatch();
     static void dumpLine(const char *enums1[], int a, const char *enums2[], int b, const char *enums3[], int c, const char *enums4[], int d) ;
 
-    static void readFromEEPROM(uint8 bankNumber, uint8 preset, AllSynthParams* params);
+    static void readSynthParamFromEEPROM(int bankNumber, int preset, AllSynthParams* params);
+    static void readCharsFromEEPROM(int bankNumber, int preset, uint8* chars);
     static char* readPresetNameFromEEPROM(int bankNumber, int preset);
     static void savePatchToEEPROM(AllSynthParams* synthParams, int bankNumber, int preset);
+    static void saveCharParamsToEEPROM(uint8* paramChars, int bankNumber, int preset);
     static void saveCurrentPatchToEEPROM(int bankNumber, int preset);
     static void formatEEPROM();
     static void saveConfigToEEPROM();
@@ -65,15 +68,15 @@ public:
 
     static void sendBankToSysex(int bankNumber);
     static void sendCurrentPatchToSysex();
-    static void sendParamsToSysex(char* params, int size);
+    static void sendParamsToSysex(uint8* params);
     static int  readSysex(bool patchAllowed, bool bankAllowed);
-    static int  readSysexPatch(char* params);
+    static int  readSysexPatch(uint8* params);
     static int  readSysexBank();
 
     static void copyBank(int source, int dest);
 
     static int  getNextMidiByte();
-    static void copyPatch(char* source, char* dest);
+    static void copySynthParams(char* source, char* dest);
 
     static void loadDefaultPatchIfAny();
     static void saveCurrentPatchAsDefault();

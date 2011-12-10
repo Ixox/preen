@@ -21,9 +21,11 @@
 #include "LiquidCrystal.h"
 
 extern LiquidCrystal lcd;
+extern const struct MidiConfig midiConfig[];
 
 char PresetUtil::readName[13];
 SynthState * PresetUtil::synthState;
+
 
 PresetUtil::PresetUtil() {
 }
@@ -68,7 +70,7 @@ int PresetUtil::getAddress1(int bankNumber, int preset) {
 	}
 }
 
-// Part 2 is 32 bytes long
+// Part 2 is 64 bytes long
 int PresetUtil::getAddress2(int bankNumber, int preset) {
 	if (bankNumber <4) {
 		// EEPROM 2 - Bank 0 - column bankNumber
@@ -221,10 +223,16 @@ void PresetUtil::dumpPatch() {
 
 #endif
 
-void PresetUtil::readFromEEPROM(uint8 bankNumber, uint8 preset, AllSynthParams* params) {
+
+void PresetUtil::readSynthParamFromEEPROM(int bankNumber, int preset, AllSynthParams* params) {
+	uint8 paramChars[PATCH_SIZE];
+	PresetUtil::readCharsFromEEPROM(bankNumber, preset, paramChars);
+	convertCharArrayToSynthState(paramChars, params);
+}
+
+void PresetUtil::readCharsFromEEPROM(int bankNumber, int preset, uint8* chars) {
 	uint8 deviceaddress = PresetUtil::getDeviceId1(bankNumber);
 	int address = PresetUtil::getAddress1(bankNumber, preset);
-	uint8 paramsChar[PART1_SIZE + PART2_SIZE];
 
 	uint8 bufReadAddress[2];
 	i2c_msg msgsRead[2];
@@ -241,7 +249,7 @@ void PresetUtil::readFromEEPROM(uint8 bankNumber, uint8 preset, AllSynthParams* 
 	msgsRead[1].addr = deviceaddress;
 	msgsRead[1].flags = I2C_MSG_READ;
 	msgsRead[1].length = blockSize;
-	msgsRead[1].data = paramsChar;
+	msgsRead[1].data = chars;
 
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
 	delay(1);
@@ -259,7 +267,7 @@ void PresetUtil::readFromEEPROM(uint8 bankNumber, uint8 preset, AllSynthParams* 
 	msgsRead[1].addr = deviceaddress;
 	msgsRead[1].flags = I2C_MSG_READ;
 	msgsRead[1].length = blockSize;
-	msgsRead[1].data = paramsChar+ 64;
+	msgsRead[1].data = chars+ 64;
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
 
 	delay(1);
@@ -279,17 +287,16 @@ void PresetUtil::readFromEEPROM(uint8 bankNumber, uint8 preset, AllSynthParams* 
 	msgsRead[1].addr = deviceaddress;
 	msgsRead[1].flags = I2C_MSG_READ;
 	msgsRead[1].length = blockSize;
-	msgsRead[1].data = paramsChar+ blockSize *2;
+	msgsRead[1].data = chars+ blockSize *2;
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
 
 	delay(1);
 
-	convertCharArrayToSynthState(paramsChar, params);
 }
 
 char* PresetUtil::readPresetNameFromEEPROM(int bankNumber, int preset) {
 	uint8 deviceaddress = PresetUtil::getDeviceId1(bankNumber);
-	int address = PresetUtil::getAddress1(bankNumber, preset) + 108;
+	int address = PresetUtil::getAddress1(bankNumber, preset) + 27*4;
 	uint8 bufReadAddress[2];
 	i2c_msg msgsRead[2];
 
@@ -313,60 +320,63 @@ char* PresetUtil::readPresetNameFromEEPROM(int bankNumber, int preset) {
 	return readName;
 }
 
+
 void PresetUtil::savePatchToEEPROM(AllSynthParams* synthParams, int bankNumber, int preset) {
+	uint8 paramChars[PATCH_SIZE];
+	PresetUtil::convertSynthStateToCharArray(synthParams, paramChars );
+	PresetUtil::saveCharParamsToEEPROM(paramChars, bankNumber, preset);
+}
+
+
+void PresetUtil::saveCharParamsToEEPROM(uint8* chars, int bankNumber, int preset) {
+	const int blockSize = 64;
 	uint8 deviceaddress = PresetUtil::getDeviceId1(bankNumber);
 	int address = PresetUtil::getAddress1(bankNumber, preset);
-	uint8 params[PART1_SIZE + PART2_SIZE];
-
-	convertSynthStateToCharArray(synthParams, params );
 
 	i2c_msg msgWrite1, msgWrite2;
-	int blockSize = 64;
-	uint8 bufWrite1[blockSize + 2];
 
-	bufWrite1[0] = (uint8) ((int) address >> 8);
-	bufWrite1[1] = (uint8) ((int) address & 0xff);
+	uint8 bufWrite[blockSize];
+
+	bufWrite[0] = (uint8) ((int) address >> 8);
+	bufWrite[1] = (uint8) ((int) address & 0xff);
 	for (int k = 0; k < blockSize; k++) {
-		bufWrite1[k + 2] = params[k];
+		bufWrite[k + 2] = chars[k];
 	}
 
 	/* Write test pattern  */
 	msgWrite1.addr = deviceaddress;
 	msgWrite1.flags = 0;
 	msgWrite1.length = blockSize + 2;
-	msgWrite1.data = bufWrite1;
+	msgWrite1.data = bufWrite;
 	i2c_master_xfer(I2C1, &msgWrite1, 1, 500);
 	delay(5);
 
-	uint8 bufWrite2[blockSize + 2];
 	address = address + blockSize;
-	bufWrite2[0] = (uint8) ((int) address >> 8);
-	bufWrite2[1] = (uint8) ((int) address & 0xff);
+	bufWrite[0] = (uint8) ((int) address >> 8);
+	bufWrite[1] = (uint8) ((int) address & 0xff);
 	for (int k = 0; k < blockSize; k++) {
-		bufWrite2[k + 2] = params[k + blockSize];
+		bufWrite[k + 2] = chars[k + blockSize];
 	}
 	msgWrite2.addr = deviceaddress;
 	msgWrite2.flags = 0;
 	msgWrite2.length = blockSize + 2;
-	msgWrite2.data = bufWrite2;
+	msgWrite2.data = bufWrite;
 	i2c_master_xfer(I2C1, &msgWrite2, 1, 500);
 	delay(5);
-
 
 	// Let's save part 2 !!!
 	deviceaddress = PresetUtil::getDeviceId2(bankNumber);
 	address = PresetUtil::getAddress2(bankNumber, preset);
 
-	uint8 bufWrite3[blockSize + 2];
-	bufWrite3[0] = (uint8) ((int) address >> 8);
-	bufWrite3[1] = (uint8) ((int) address & 0xff);
+	bufWrite[0] = (uint8) ((int) address >> 8);
+	bufWrite[1] = (uint8) ((int) address & 0xff);
 	for (int k = 0; k < blockSize; k++) {
-		bufWrite3[k + 2] = params[k + blockSize * 2];
+		bufWrite[k + 2] = chars[k + blockSize * 2];
 	}
 	msgWrite2.addr = deviceaddress;
 	msgWrite2.flags = 0;
 	msgWrite2.length = blockSize + 2;
-	msgWrite2.data = bufWrite3;
+	msgWrite2.data = bufWrite;
 	i2c_master_xfer(I2C1, &msgWrite2, 1, 500);
 	delay(5);
 
@@ -404,16 +414,19 @@ void PresetUtil::loadConfigFromEEPROM() {
 
 	if (eeprom[0] == EEPROM_CONFIG_CHECK) {
 		for (int k = 0; k < MIDICONFIG_SIZE; k++) {
-			PresetUtil::synthState->fullState.midiConfigValue[k] = eeprom[k + 1];
+			uint8 value = eeprom[k + 1];
+			if (value >=0 && value < midiConfig[k].maxValue ) {
+				PresetUtil::synthState->fullState.midiConfigValue[k] = value;
+			}
 		}
 	}
 
 }
 
 void PresetUtil::saveConfigToEEPROM() {
-	// Config at the begining of EEPROM2
+	// Config EEPROM 2 - bank 2 - block 0
 	uint8 deviceaddress = EEPROM2_ID;
-	int address = 0;
+	int address = 2 * BANKSIZE;
 
 	i2c_msg msgWrite1;
 	int block1Size = MIDICONFIG_SIZE + 1;
@@ -440,57 +453,65 @@ void PresetUtil::saveConfigToEEPROM() {
 
 void PresetUtil::formatEEPROM() {
 
+	AllSynthParams synthParams  =  {
+	        		// patch name : 'Preen'
+	        		// Engine
+	        		{ ALGO1, 6, 4, 6} ,
+	        		{ 16, 24, 0, 0 } ,
+	        		{ 128, 128, 128, 128} ,
+	        		// Oscillator
+	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
+	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+	        		// Enveloppe
+	        		{ 5, 0, 255, 50} ,
+	        		{ 0, 65, 50, 50} ,
+	        		{ 100, 65, 150, 255} ,
+	        		{ 100, 65, 150, 100} ,
+	        		{ 100, 65, 150, 100} ,
+	        		{ 100, 65, 150, 100} ,
+	        		// Modulation matrix
+	        		{ MATRIX_SOURCE_MODWHEEL, 16, INDEX_MODULATION1, 0} ,
+	        		{ MATRIX_SOURCE_PITCHBEND, 64, OSC1_FREQ, 0} ,
+	        		{ MATRIX_SOURCE_LFO1, 0, INDEX_MODULATION2, 0} ,
+	        		{ MATRIX_SOURCE_LFO6, 0, INDEX_MODULATION1, 0} ,
+	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+	        		// LFOs
+	        		{ LFO_SAW, 18, 127, 150} ,
+	        		{ LFO_SAW, 20, 0, 0} ,
+	        		{ LFO_SAW, 3, 0, 0} ,
+	        		{ 100, 65, 150, 100} ,
+	        		{ 70, 16,  0, 0}  ,
+	        		{ 140, 16, 0, 0},
+	        		{ 15, 4, 2, 0, 15, 2, 0, 8, 15, 0, 12, 0, 8, 0, 15 , 0} ,
+	        		{ 15, 4, 2, 0, 15, 2, 0, 8, 15, 0, 12, 0, 8, 0, 15 , 0} ,
+	        		"<Empty>"
+	        };
+
 	for (int bankNumber = 0; bankNumber < 4; bankNumber++) {
 		lcd.setCursor(3,2);
+		lcd.print("Bank ");
 		lcd.print((char)('A'+bankNumber));
 		for (int preset = 0; preset < 128; preset++) {
 
-			lcd.setCursor(5,2);
+			lcd.setCursor(11,2);
 			lcd.print(preset);
+			lcd.print("  ");
 
-			uint8 deviceaddress = PresetUtil::getDeviceId1(bankNumber);
-			int address = PresetUtil::getAddress1(bankNumber, preset);
+			PresetUtil::savePatchToEEPROM(&synthParams, bankNumber, preset);
 
-			i2c_msg msgWrite1, msgWrite2;
-			int block1Size = 64;
-			uint8 bufWrite1[block1Size + 2];
-
-			bufWrite1[0] = (uint8) ((int) address >> 8);
-			bufWrite1[1] = (uint8) ((int) address & 0xff);
-			for (int k = 0; k < block1Size; k++) {
-				bufWrite1[k + 2] = ((uint8*) &presets[bankNumber])[k];
-			}
-			/* Write test pattern  */
-			msgWrite1.addr = deviceaddress;
-			msgWrite1.flags = 0;
-			msgWrite1.length = block1Size + 2;
-			msgWrite1.data = bufWrite1;
-
-			i2c_master_xfer(I2C1, &msgWrite1, 1, 500);
-			delay(1);
-
-			int block2Size = sizeof(struct AllSynthParams) - block1Size;
-			uint8 bufWrite2[block2Size + 2];
-			address = address + block1Size;
-			bufWrite2[0] = (uint8) ((int) address >> 8);
-			bufWrite2[1] = (uint8) ((int) address & 0xff);
-			for (int k = 0; k < block2Size; k++) {
-				bufWrite2[k + 2] = ((uint8*) &presets[bankNumber])[k
-						+ block1Size];
-			}
-			msgWrite2.addr = deviceaddress;
-			msgWrite2.flags = 0;
-			msgWrite2.length = block2Size + 2;
-			msgWrite2.data = bufWrite2;
-
-			i2c_master_xfer(I2C1, &msgWrite2, 1, 500);
-			delay(1);
 		}
 	}
 }
 
 void PresetUtil::sendBankToSysex(int bankNumber) {
-	struct AllSynthParams params;
+	uint8 paramChars[PATCH_SIZE];
 
 	uint8 newPatch[] = { 0xf0, 0x7d, 0x02 };
 	for (int k = 0; k <= 2; k++) {
@@ -501,8 +522,8 @@ void PresetUtil::sendBankToSysex(int bankNumber) {
 		lcd.setCursor(3,2);
 		lcd.print(preset);
 		lcd.print(" / 128");
-		PresetUtil::readFromEEPROM(bankNumber, preset, &params);
-		PresetUtil::sendParamsToSysex((char*)&params, sizeof(struct AllSynthParams));
+		PresetUtil::readCharsFromEEPROM(bankNumber, preset, paramChars);
+		PresetUtil::sendParamsToSysex(paramChars);
 	}
 
 	Serial3.print((uint8) 0xf7);
@@ -511,7 +532,7 @@ void PresetUtil::sendBankToSysex(int bankNumber) {
 
 
 void PresetUtil::checkReadEEPROM() {
-	struct AllSynthParams params;
+	struct AllSynthParams synthParams;
 
 	lcd.clear();
 	lcd.setCursor(3,0);
@@ -522,32 +543,34 @@ void PresetUtil::checkReadEEPROM() {
 		lcd.print("Bank ");
 		lcd.print((char)('A'+bank));
 
-		for (int test = 0; test< 1000; test++) {
+		for (int test = 0; test< 256; test++) {
 			int preset = test%128;
 			lcd.setCursor(3,2);
 			lcd.print(preset);
 			lcd.print(" ");
-			PresetUtil::readFromEEPROM(bank, preset, &params);
+			PresetUtil::readSynthParamFromEEPROM(bank, preset, &synthParams);
 		}
 	}
 }
 
 
 void PresetUtil::sendCurrentPatchToSysex() {
+	uint8 paramChars[PATCH_SIZE];
 	uint8 newPatch[] = { 0xf0, 0x7d, 0x01 };
 	for (int k = 0; k <= 2; k++) {
 		Serial3.print(newPatch[k]);
 	}
 
-	PresetUtil::sendParamsToSysex((char*)&PresetUtil::synthState->params, sizeof(struct AllSynthParams));
+	PresetUtil::convertSynthStateToCharArray(&PresetUtil::synthState->params, paramChars);
+	PresetUtil::sendParamsToSysex(paramChars);
 
 	Serial3.print((uint8) 0xf7);
 }
 
-void PresetUtil::sendParamsToSysex(char* params, int size) {
+void PresetUtil::sendParamsToSysex(uint8* params) {
 	int checksum = 0;
 
-	for (int k = 0; k < size; k++) {
+	for (int k = 0; k < PATCH_SIZE; k++) {
 		uint8 byte = params[k];
 		checksum += byte;
 		while (byte >= 127) {
@@ -560,12 +583,12 @@ void PresetUtil::sendParamsToSysex(char* params, int size) {
 	Serial3.print((uint8) (checksum % 128));
 }
 
-int PresetUtil::readSysexPatch(char* params) {
+int PresetUtil::readSysexPatch(uint8* params) {
 	int checkSum = 0;
 	unsigned int index = 0;
 	int value = 0;
 
-	while (index < sizeof(struct AllSynthParams)) {
+	while (index < PATCH_SIZE) {
 
 		int byte = PresetUtil::getNextMidiByte();
 		if (byte < 0) {
@@ -615,7 +638,8 @@ int PresetUtil::getNextMidiByte() {
  */
 
 int PresetUtil::readSysex(bool patchAllowed, bool bankAllowed) {
-	char params[sizeof(struct AllSynthParams)];
+	uint8 paramChars[PATCH_SIZE];
+
 	boolean isPatch = true;
 	boolean bError = false;
 	boolean bSysexRead = false;
@@ -661,12 +685,12 @@ int PresetUtil::readSysex(bool patchAllowed, bool bankAllowed) {
 			bSysexRead = true;
 			if (isPatch) {
 				int errorCode = 0;
-				if ((errorCode = PresetUtil::readSysexPatch(params)) <0) {
+				if ((errorCode = PresetUtil::readSysexPatch(paramChars)) <0) {
 					index = -errorCode;
 					bError = true;
 				} else {
 					PresetUtil::synthState->propagateBeforeNewParamsLoad();
-					PresetUtil::copyPatch(params, (char*) &PresetUtil::synthState->params);
+					PresetUtil::convertCharArrayToSynthState(paramChars, &PresetUtil::synthState->params);
 					PresetUtil::synthState->propagateAfterNewParamsLoad();
 					PresetUtil::synthState->resetDisplay();
 				}
@@ -685,7 +709,7 @@ int PresetUtil::readSysex(bool patchAllowed, bool bankAllowed) {
 }
 
 
-void PresetUtil::copyPatch(char* source, char* dest) {
+void PresetUtil::copySynthParams(char* source, char* dest) {
     for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
         dest[k] = source[k];
     }
@@ -693,14 +717,14 @@ void PresetUtil::copyPatch(char* source, char* dest) {
 
 
 int PresetUtil::readSysexBank() {
-	struct AllSynthParams params;
+	uint8 paramChars[PATCH_SIZE];
 	int errorCode = 0;
 
 	lcd.setCursor(1,3);
 	lcd.print("Bank:");
 
 	for (int preset = 0; preset<128 && errorCode>=0; preset++) {
-		if ((errorCode = PresetUtil::readSysexPatch((char *)&params)) <0) {
+		if ((errorCode = PresetUtil::readSysexPatch(paramChars)) <0) {
 			errorCode = -500 - preset;
 			break;
 		}
@@ -708,7 +732,7 @@ int PresetUtil::readSysexBank() {
 		lcd.setCursor(7,3);
 		lcd.print(preset);
 
-		PresetUtil::savePatchToEEPROM(&params, 4, preset);
+		PresetUtil::saveCharParamsToEEPROM(paramChars, 4, preset);
 	}
 
 	return errorCode;
@@ -717,104 +741,98 @@ int PresetUtil::readSysexBank() {
 
 
 void PresetUtil::copyBank(int source, int dest) {
-	struct AllSynthParams params;
+	uint8 paramChars[PATCH_SIZE];
 	lcd.setCursor(1,3);
 	lcd.print("Save:");
 	for (int preset=0; preset<127; preset++) {
-		PresetUtil::readFromEEPROM(source, preset, &params);
+		PresetUtil::readCharsFromEEPROM(source, preset, paramChars);
 		lcd.setCursor(7,3);
 		lcd.print(preset);
-		PresetUtil::savePatchToEEPROM(&params, dest, preset);
+		PresetUtil::saveCharParamsToEEPROM(paramChars, dest, preset);
 	}
 }
 
 
 void PresetUtil::loadDefaultPatchIfAny() {
-	struct AllSynthParams params;
+	uint8 paramChars[PATCH_SIZE];
+	PresetUtil::readCharsFromEEPROM(5, 0, paramChars);
 
-	PresetUtil::readFromEEPROM(5, 0, &params);
-	if (((char*)&params)[0] == EEPROM_CONFIG_CHECK) {
-        PresetUtil::readFromEEPROM(5, 1, &PresetUtil::synthState->params);
+	if (((char*)&paramChars)[0] == EEPROM_CONFIG_CHECK) {
+        PresetUtil::readSynthParamFromEEPROM(5, 1, &PresetUtil::synthState->params);
 	}
 }
 
 
 void PresetUtil::saveCurrentPatchAsDefault() {
-	struct AllSynthParams params;
-
-	for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
-		((char*)&params)[k] = EEPROM_CONFIG_CHECK;
+	uint8 paramChars[PATCH_SIZE];
+	for (unsigned int k=0; k<PATCH_SIZE; k++) {
+		paramChars[k] = EEPROM_CONFIG_CHECK;
 	}
-	PresetUtil::savePatchToEEPROM(&params, 5, 0);
+	PresetUtil::saveCharParamsToEEPROM(paramChars, 5, 0);
 	PresetUtil::saveCurrentPatchToEEPROM(5,1);
 }
 
 void PresetUtil::convertSynthStateToCharArray(AllSynthParams* params, uint8* chars) {
-
-	//
-	for (unsigned int k=0; k<sizeof(struct AllSynthParams); k++) {
+	// Clean
+	for (unsigned int k=0; k<PATCH_SIZE; k++) {
 		chars[k] = 0;
 	}
 
-	// Copy first part
-	char* paramChars = (char*) params;
-	int firstPartSize = 121 ; // 27*4 + 13;
+	// 1.00 compatibility
+	int firstPartSize = 27*4;
 	for (unsigned int k=0; k<firstPartSize; k++) {
-		chars[k] = paramChars[k];
+		chars[k] = ((char*) params)[k];
 	}
-	// Then copy the 2 bpm
-	// 121 : bpm of step seq 1
-	chars[121] = params->lfo5.bpm;
-	// 122 : gate of step seq 1
-	chars[122] = params->lfo5.gate;
-	// 123 : bpm of step seq 2
-	chars[123] = params->lfo6.bpm;
-	// 124 : gate of step seq 2
-	chars[124] = params->lfo6.gate;
-	// 125
-	// 126
-	// 127
+
+	for (unsigned int k=0; k<12; k++) {
+		chars[firstPartSize + k] = params->presetName[k];
+	}
+
+	// 120 - 128 : step seqs
+	for (unsigned int k=0; k<8; k++) {
+		chars[120 + k] = ((char*) &params->lfo5)[k];
+	}
 
 	// 128 : 16 step of seq 1 on 8 bits
 	// 4 left bits + 4 right bits
 	for (unsigned int k=0; k<8; k++) {
-		chars[128+k] = (params->lfo5.steps[k*2]<<4) + params->lfo5.steps[k*2+1] ;
+		chars[128+k] = (params->steps5.steps[k*2]<<4) + params->steps5.steps[k*2+1] ;
 	}
 	// 136 : 16 step of seq 2 on 8 bits
 	for (unsigned int k=0; k<8; k++) {
-		chars[136+k] = (params->lfo6.steps[k*2]<<4) + params->lfo6.steps[k*2+1] ;
+		chars[136+k] = (params->steps6.steps[k*2]<<4) + params->steps6.steps[k*2+1] ;
 	}
 }
 
 void PresetUtil::convertCharArrayToSynthState(uint8* chars, AllSynthParams* params) {
 
 	// Copy first part
-	char* paramChars = (char*) params;
-	int firstPartSize = 121 ; // 27*4 + 13;
+	int firstPartSize = 27*4;
 	for (unsigned int k=0; k<firstPartSize; k++) {
-		paramChars[k] = chars[k];
+		((char*) params)[k] = chars[k];
 	}
-	// Then copy the 2 bpm
-	// 121 : bpm of step seq 1
-	params->lfo5.bpm = chars[121];
-	// 122 : gate of step seq 1
-	params->lfo5.gate = chars[122];
+	// Title
+	for (unsigned int k=0; k<12; k++) {
+		params->presetName[k] = chars[firstPartSize+k];
+	}
+	params->presetName[12] = '\0';
 
-	// 123 : bpm of step seq 2
-	params->lfo6.bpm = chars[123];
-	// 124 : gate of step seq 1
-	params->lfo6.gate = chars[124];
+
+	// 120 - 128 : step seqs
+	for (unsigned int k=0; k<8; k++) {
+		((char*) &params->lfo5)[k] = chars[120 + k];
+	}
 
 	// 128 : 16 step of seq 1 on 8 bits
 	// 4 left bits + 4 right bits
 	for (unsigned int k=0; k<8; k++) {
-		params->lfo5.steps[k*2]   = chars[128+k] >> 4;
-		params->lfo5.steps[k*2+1] = chars[128+k] & 0xf;
+		params->steps5.steps[k*2]   = chars[128+k] >> 4;
+		params->steps5.steps[k*2+1] = chars[128+k] & 0xf;
 	}
 	// 136 : 16 step of seq 2 on 8 bits
 	for (unsigned int k=0; k<8; k++) {
-		params->lfo6.steps[k*2]   = chars[136+k] >> 4;
-		params->lfo6.steps[k*2+1] = chars[136+k] & 0xf;
+		params->steps6.steps[k*2]   = chars[136+k] >> 4;
+		params->steps6.steps[k*2+1] = chars[136+k] & 0xf;
 	}
 }
 

@@ -328,21 +328,16 @@ void loop() {
         midiOutMicros = newMicros;
     }
 
-
-
-
-    if (fmDisplay.needRefresh() && ((mainCpt & 0xf) == 0)) {
+    if (fmDisplay.needRefresh() && ((mainCpt & 0x7) == 0)) {
         fillSoundBufferFull();
         fmDisplay.refreshAllScreenByStep();
     }
-
 
     if ((newMicros - encoderMicros) > 2500) {
     	fillSoundBufferFull();
         encoders.checkStatus();
         encoderMicros = newMicros;
     }
-
 }
 
 // Force init to be called *first*, i.e. before static object allocation.
@@ -360,7 +355,3 @@ int main(void)
     }
     return 0;
 }
-
-
-
-

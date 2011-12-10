@@ -89,6 +89,12 @@ enum {
     ENCODER_LFO_KSYNC
 };
 
+enum {
+    ENCODER_STEPSEQ_BPM = 0,
+    ENCODER_STEPSEQ_GATE
+};
+
+
 typedef unsigned char uchar;
 
 enum Algorithm {
@@ -238,9 +244,13 @@ struct MatrixRowParams {
 struct StepSequencerParams {
 	uchar bpm;
 	uchar gate;
-	char steps[16];
+	uchar unused1;
+	uchar unused2;
 };
 
+struct StepSequencerSteps {
+	char steps[16];
+};
 
 enum {
     ROW_ENGINE_FIRST = 0,
@@ -328,9 +338,11 @@ struct AllSynthParams {
 	struct LfoParams lfo2;
 	struct LfoParams lfo3;
 	struct EnvelopeParams lfo4;
-	char presetName[13];
 	struct StepSequencerParams lfo5;
 	struct StepSequencerParams lfo6;
+	struct StepSequencerSteps steps5;
+	struct StepSequencerSteps steps6;
+	char presetName[13];
 };
 
 
@@ -384,6 +396,7 @@ public:
 	void buttonPressed(int number);
 	void buttonLongPressed(int number);
 	void setNewValue(int row, int number, int newValue);
+	void setNewStepValue(int whichStepSeq, int step, int newValue);
 
 	const MenuItem* afterButtonPressed();
 	const MenuItem* menuBack();
@@ -475,6 +488,7 @@ private:
 	char engineRow, operatorRow, matrixRow, lfoRow;
 	char currentRow;
 	unsigned char lastButtonSelected;
+	boolean isPlayingNote ;
 
 	SynthParamListener* firstParamListener;
 	SynthMenuListener* firstMenuListener;

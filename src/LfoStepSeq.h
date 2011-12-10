@@ -31,7 +31,8 @@ public:
 	void noteOff();
 
 private:
-	StepSequencerParams* stepParams;
+	StepSequencerParams* seqParams;
+	StepSequencerSteps* seqSteps;
     int index;
     int step;
     int gateValue;

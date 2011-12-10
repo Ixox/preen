@@ -48,6 +48,8 @@ struct ParameterDisplay {
     unsigned char maxValue;
     ParameterDisplayType displayType;
     const char** valueName;
+    const unsigned char * valueNameOrder;
+    const unsigned char * valueNameOrderReversed;
 };
 
 
