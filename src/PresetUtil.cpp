@@ -33,7 +33,6 @@ PresetUtil::~PresetUtil() {
 }
 
 
-
 void PresetUtil::setSynthState(SynthState* synthState) {
 	// init
 	PresetUtil::synthState = synthState;
@@ -371,51 +370,55 @@ void PresetUtil::saveConfigToEEPROM() {
 
 void PresetUtil::formatEEPROM() {
 
+	AllSynthParams synthParams  =  {
+	        		// patch name : 'Preen'
+	        		// Engine
+	        		{ ALGO1, 6, 4, 6} ,
+	        		{ 48, 24, 0, 0 } ,
+	        		{ 128, 128, 128, 128} ,
+	        		// Oscillator
+	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+	        		{ OSC_SHAPE_SQUARE, OSC_FT_KEYBOARD , 32, 0} ,
+	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+	        		// Enveloppe
+	        		{ 5, 0, 255, 50} ,
+	        		{ 0, 65, 100, 50} ,
+	        		{ 100, 65, 150, 255} ,
+	        		{ 100, 65, 150, 100} ,
+	        		{ 100, 65, 150, 100} ,
+	        		{ 100, 65, 150, 100} ,
+	        		// Modulation matrix
+	        		{ MATRIX_SOURCE_MODWHEEL, 16, INDEX_MODULATION1, 0} ,
+	        		{ MATRIX_SOURCE_PITCHBEND, 64, OSC1_FREQ, 0} ,
+	        		{ MATRIX_SOURCE_LFO1, 0, INDEX_MODULATION2, 0} ,
+	        		{ MATRIX_SOURCE_LFO2, 0, INDEX_MODULATION1, 0} ,
+	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+	        		// LFOs
+	        		{ LFO_SAW, 18, 127, 150} ,
+	        		{ LFO_SAW, 20, 0, 0} ,
+	        		{ LFO_SAW, 3, 0, 0} ,
+	        		{ 100, 65, 150, 100} ,
+	        		"<Empty>"
+	        };
+
 	for (int bankNumber = 0; bankNumber < 4; bankNumber++) {
 		lcd.setCursor(3,2);
+		lcd.print("Bank ");
 		lcd.print((char)('A'+bankNumber));
 		for (int preset = 0; preset < 128; preset++) {
 
-			lcd.setCursor(5,2);
+			lcd.setCursor(11,2);
 			lcd.print(preset);
+			lcd.print("  ");
 
-			uint8 deviceaddress = PresetUtil::getDeviceId(bankNumber);
-			int address = PresetUtil::getAddress(bankNumber, preset);
+			PresetUtil::savePatchToEEPROM((unsigned char *)&synthParams, bankNumber, preset);
 
-			i2c_msg msgWrite1, msgWrite2;
-			int block1Size = 64;
-			uint8 bufWrite1[block1Size + 2];
-
-			bufWrite1[0] = (uint8) ((int) address >> 8);
-			bufWrite1[1] = (uint8) ((int) address & 0xff);
-			for (int k = 0; k < block1Size; k++) {
-				bufWrite1[k + 2] = ((uint8*) &presets[bankNumber])[k];
-			}
-			/* Write test pattern  */
-			msgWrite1.addr = deviceaddress;
-			msgWrite1.flags = 0;
-			msgWrite1.length = block1Size + 2;
-			msgWrite1.data = bufWrite1;
-
-			i2c_master_xfer(I2C1, &msgWrite1, 1, 500);
-			delay(1);
-
-			int block2Size = sizeof(struct AllSynthParams) - block1Size;
-			uint8 bufWrite2[block2Size + 2];
-			address = address + block1Size;
-			bufWrite2[0] = (uint8) ((int) address >> 8);
-			bufWrite2[1] = (uint8) ((int) address & 0xff);
-			for (int k = 0; k < block2Size; k++) {
-				bufWrite2[k + 2] = ((uint8*) &presets[bankNumber])[k
-						+ block1Size];
-			}
-			msgWrite2.addr = deviceaddress;
-			msgWrite2.flags = 0;
-			msgWrite2.length = block2Size + 2;
-			msgWrite2.data = bufWrite2;
-
-			i2c_master_xfer(I2C1, &msgWrite2, 1, 500);
-			delay(1);
 		}
 	}
 }

@@ -22,7 +22,7 @@
 // FLASH :  __attribute__ ((section (".USER_FLASH")))
 // Ex : const char* nullNames [] __attribute__ ((section (".USER_FLASH")))= {};
 // DISPLAY structures
-const char* allChars  = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 &*$,;:";
+const char* allChars  = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 <>&*$,;:";
 
 const char* nullNames []= {};
 const char* algoNames [] = { "alg1", "alg2", "alg3", "alg4", "alg5", "alg6", "alg7", "alg8", "alg9" };
