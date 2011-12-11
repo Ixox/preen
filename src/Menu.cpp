@@ -53,12 +53,12 @@ const struct MidiConfig midiConfig[]  = {
 		},
 		{
 			"Test Note: ",
-			128,
+			127,
 			0
 		},
 		{
 			"Test Velocity: ",
-			128,
+			127,
 			0
 		}
 
