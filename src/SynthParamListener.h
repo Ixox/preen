@@ -61,6 +61,10 @@ public:
     virtual void beforeNewParamsLoad() = 0;
     virtual void afterNewParamsLoad() = 0;
 
+    virtual void playNote(char note, char velocity) = 0;
+    virtual void stopNote(char note) = 0;
+
+
     SynthParamListener* nextListener;
 };
 

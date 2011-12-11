@@ -23,7 +23,7 @@
 // FLASH :  __attribute__ ((section (".USER_FLASH")))
 // Ex : const char* nullNames [] __attribute__ ((section (".USER_FLASH")))= {};
 // DISPLAY structures
-const char* allChars  = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 &*$,;:<>";
+const char* allChars  = "_ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789 <>&*$,;:";
 
 const char* nullNames []= {};
 const unsigned char* nullNamesOrder = NULL;
@@ -262,6 +262,9 @@ SynthState::SynthState() {
     stepSelect[1] = 0;
 
     isPlayingNote = false;
+    testNote = 50;
+    testVelocity = 128;
+
 }
 
 
@@ -583,8 +586,7 @@ void SynthState::buttonPressed(int button) {
             break;
         case BUTTON_BACK:
         	if (this->isPlayingNote) {
-        		//synth->noteOff(50);
-        		this->isPlayingNote = false;
+        		propagateNoteOff();
         	}
         	break;
         }
@@ -668,8 +670,7 @@ void SynthState::buttonLongPressed(int button) {
             break;
         case BUTTON_BACK:
         	if (!this->isPlayingNote) {
-        		// synth.noteOn(50,100);
-        		this->isPlayingNote = true;
+        		propagateNoteOn();
         	}
         	break;
         }

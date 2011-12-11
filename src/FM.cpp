@@ -166,6 +166,17 @@ void setup()
             B10100,
     };
 
+    byte note[8] = {
+            B00100,
+            B00110,
+            B00101,
+            B00101,
+            B00100,
+            B11100,
+            B11100,
+            B00000,
+    };
+
     Serial1.end();
     Serial2.end();
     Serial3.begin(31250);
@@ -223,6 +234,7 @@ void setup()
     lcd.createChar(4, stepPos);
     lcd.createChar(5, firstSteps);
     lcd.createChar(6, thirdStep);
+    lcd.createChar(7, note);
 
 
     // Load config from EEPROM if has been saved...

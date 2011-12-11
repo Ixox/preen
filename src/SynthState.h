@@ -470,6 +470,22 @@ public:
         }
     }
 
+    void propagateNoteOff() {
+        for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
+            listener->stopNote(testNote);
+        }
+		this->isPlayingNote = false;
+    }
+
+    void propagateNoteOn() {
+        for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
+            listener->playNote(testNote, testVelocity);
+        }
+		this->isPlayingNote = true;
+		playingNote = testNote;
+
+    }
+
     void propagateAfterNewParamsLoad();
 
     SynthMode getSynthMode() {
@@ -492,6 +508,8 @@ private:
 
 	SynthParamListener* firstParamListener;
 	SynthMenuListener* firstMenuListener;
+
+	char testNote, testVelocity, playingNote;
 
     int getLength(const char *str) {
         int length = 0;

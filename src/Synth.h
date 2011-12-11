@@ -53,6 +53,15 @@ public:
     void nextSample();
 
 
+    // Overide SynthParamListener
+    void playNote(char note, char velocity) {
+    	noteOn(note, velocity);
+    }
+    void stopNote(char note) {
+    	noteOff(note);
+    }
+
+
     void newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
         newParamValue(type, currentRow, encoder, param, oldValue, newValue);
     }

@@ -84,6 +84,16 @@ public:
         presetModifed = false;
     }
 
+    // Overide SynthParamListener
+    void playNote(char note, char velocity) {
+    	lcd->setCursor(3,0);
+    	lcd->print((char)7);
+    }
+    void stopNote(char note) {
+    	lcd->setCursor(3,0);
+    	lcd->print(' ');
+    }
+
 
 private:
 	LiquidCrystal* lcd;

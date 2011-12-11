@@ -136,6 +136,9 @@ public:
     void afterNewParamsLoad() {};
     void sendMidiOut();
     void readSysex();
+    void playNote(char note, char velocity) {};
+    void stopNote(char note) {};
+
     boolean hasMidiToSend() {
         return (midiToSend.getCount()>0);
     }
