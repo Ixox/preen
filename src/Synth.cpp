@@ -168,72 +168,44 @@ void Synth::nextSample() {
 	// step 32 : update lfo1 , step 33 update lfo2 etc....
 	int step32 = cpt & 0x1f;
 	switch (step32) {
-	case 0:
-	case 1:
-	case 2:
-	case 3:
+	case 0 ... 5:
 		this->lfo[step32]->nextValueInMatrix();
 		break;
-	case 4:
+
+	case 6:
 		// Value must be reset because the matrix only add value to destination.
 		this->matrix.resetUsedFuturDestination();
 		break;
-	case 5:
-	case 6:
-	case 7:
-	case 8:
-	case 9:
-	case 10:
-	case 11:
-	case 12:
-		this->matrix.computeFutureDestintation(step32 - 5);
-		break;
-	case 13:
-		this->matrix.useNewValues();
-		break;
-	case 14:
-		// Update static members, can be called a ony voice
-		this->voices[0].updateModulationIndex1();
-		break;
-	case 15:
-		this->voices[0].updateModulationIndex2();
-		break;
-	case 16:
-		this->voices[0].updateModulationIndex3();
-		break;
-	case 17:
-		this->voices[0].updateModulationIndex4();
-		break;
-	case 18:
-		this->voices[0].updateMixOsc1();
+	case 7 ... 18:
+		this->matrix.computeFutureDestintation(step32 - 7);
 		break;
 	case 19:
-		this->voices[0].updateMixOsc2();
+		this->matrix.useNewValues();
 		break;
 	case 20:
-		this->voices[0].updateMixOsc3();
+		// Update static members, can be called a ony voice
+		this->voices[0].updateModulationIndex1();
+		this->voices[0].updateModulationIndex2();
 		break;
 	case 21:
-		this->voices[0].updateMixOsc4();
+		this->voices[0].updateModulationIndex3();
+		this->voices[0].updateModulationIndex4();
 		break;
 	case 22:
-		// glide can happens only on Voice 0
-		this->voices[0].glide();
+		this->voices[0].updateMixOsc1();
+		this->voices[0].updateMixOsc2();
 		break;
 	case 23:
-	case 24:
-	case 25:
-	case 26:
-		this->voices[step32 - 23].calculateFrequencyWithMatrix();
+		this->voices[0].updateMixOsc3();
+		this->voices[0].updateMixOsc4();
+		break;
+	case 24 ... 27:
+		this->voices[step32 - 24].calculateFrequencyWithMatrix();
 		break;
 		//
-	case 27:
-		// update step sequencer
-		this->lfoStepSeq[0].nextValueInMatrix();
-		break;
 	case 28:
-		// update step sequencer
-		this->lfoStepSeq[1].nextValueInMatrix();
+		// glide can happens only on Voice 0
+		this->voices[0].glide();
 		break;
 	default:
 		break;

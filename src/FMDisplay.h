@@ -39,13 +39,14 @@ public:
 	inline void updateEncoderValue(int refreshStatus);
 
 
-	int getLength(const char *str) {
+	static int getLength(const char *str) {
 		int length = 0;
 		for (const char *c = str; *c != '\0'; c++) {
 			length++;
 		}
 		return length;
 	}
+
 	int getRowNumberRelative(int row) {
 		if (row <= ROW_ENGINE_LAST) {
 			return row - ROW_ENGINE_FIRST +1;

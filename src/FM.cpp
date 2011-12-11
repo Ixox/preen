@@ -182,8 +182,8 @@ void setup()
     Serial3.begin(31250);
 
     lcd.begin(20, 4);
-    lcd.setCursor(0,0);
-    lcd.print("        PreenFM "PREENFM_VERSION);
+    lcd.setCursor(12-FMDisplay::getLength(PREENFM_VERSION),0);
+    lcd.print("PreenFM "PREENFM_VERSION);
     lcd.setCursor(0,1);
     lcd.print("     By Xavier Hosxe");
     lcd.setCursor(0,3);

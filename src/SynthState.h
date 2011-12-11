@@ -184,6 +184,10 @@ enum DestinationEnum {
 	MTX6_MUL,
 	MTX7_MUL,
 	MTX8_MUL,
+	MTX9_MUL,
+	MTX10_MUL,
+	MTX11_MUL,
+	MTX12_MUL,
 	DESTINATION_MAX
 };
 
@@ -293,7 +297,11 @@ enum {
     ROW_MATRIX6 ,
     ROW_MATRIX7 ,
     ROW_MATRIX8 ,
-    ROW_MATRIX_LAST = ROW_MATRIX8
+    ROW_MATRIX9 ,
+    ROW_MATRIX10 ,
+    ROW_MATRIX11 ,
+    ROW_MATRIX12 ,
+    ROW_MATRIX_LAST = ROW_MATRIX12
 };
 
 enum {
@@ -334,6 +342,10 @@ struct AllSynthParams {
 	struct MatrixRowParams matrixRowState6;
     struct MatrixRowParams matrixRowState7;
     struct MatrixRowParams matrixRowState8;
+	struct MatrixRowParams matrixRowState9;
+	struct MatrixRowParams matrixRowState10;
+    struct MatrixRowParams matrixRowState11;
+    struct MatrixRowParams matrixRowState12;
 	struct LfoParams lfo1;
 	struct LfoParams lfo2;
 	struct LfoParams lfo3;

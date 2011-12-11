@@ -248,6 +248,6 @@ void LiquidCrystal::send(uint8 value, uint8 mode) {
   togglePin(_enable_pin);
 
   // Commands needs > 37us to settle.
-  delayMicroseconds(28);
+  delayMicroseconds(29);
 }
 

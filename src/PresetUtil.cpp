@@ -482,6 +482,10 @@ void PresetUtil::formatEEPROM() {
 	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
 	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
 	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
 	        		// LFOs
 	        		{ LFO_SAW, 18, 127, 150} ,
 	        		{ LFO_SAW, 20, 0, 0} ,
@@ -772,6 +776,8 @@ void PresetUtil::saveCurrentPatchAsDefault() {
 	PresetUtil::saveCurrentPatchToEEPROM(5,1);
 }
 
+// ABSTRACTION OF MEMORY/SYSEX MANAGEMENT FOR FUTUR COMPATIBILITY
+
 void PresetUtil::convertSynthStateToCharArray(AllSynthParams* params, uint8* chars) {
 	// Clean
 	for (unsigned int k=0; k<PATCH_SIZE; k++) {
@@ -779,13 +785,20 @@ void PresetUtil::convertSynthStateToCharArray(AllSynthParams* params, uint8* cha
 	}
 
 	// 1.00 compatibility
-	int firstPartSize = 27*4;
+	// => matrix 6
+	int firstPartSize = 23*4;
 	for (unsigned int k=0; k<firstPartSize; k++) {
 		chars[k] = ((char*) params)[k];
 	}
+	// LFO 1->4
+	int secondPartSize = 4*4;
+	for (unsigned int k=0; k<secondPartSize; k++) {
+		chars[firstPartSize + k] = ((char*) &params->lfo1)[k];
+	}
 
+	// Then the title
 	for (unsigned int k=0; k<12; k++) {
-		chars[firstPartSize + k] = params->presetName[k];
+		chars[27*4 + k] = params->presetName[k];
 	}
 
 	// 120 - 128 : step seqs
@@ -802,18 +815,30 @@ void PresetUtil::convertSynthStateToCharArray(AllSynthParams* params, uint8* cha
 	for (unsigned int k=0; k<8; k++) {
 		chars[136+k] = (params->steps6.steps[k*2]<<4) + params->steps6.steps[k*2+1] ;
 	}
+
+	// 144 : Matrix 9->12
+	for (unsigned int k=0; k<16; k++) {
+		chars[144 + k] = ((char*) &params->matrixRowState9)[k];
+	}
+
 }
 
 void PresetUtil::convertCharArrayToSynthState(uint8* chars, AllSynthParams* params) {
 
 	// Copy first part
-	int firstPartSize = 27*4;
+	int firstPartSize = 24*4;
 	for (unsigned int k=0; k<firstPartSize; k++) {
 		((char*) params)[k] = chars[k];
 	}
+	// LFO 1->4
+	int secondPartSize = 4*4;
+	for (unsigned int k=0; k<secondPartSize; k++) {
+		((char*) &params->lfo1)[k] = chars[firstPartSize + k];
+	}
+
 	// Title
 	for (unsigned int k=0; k<12; k++) {
-		params->presetName[k] = chars[firstPartSize+k];
+		params->presetName[k] = chars[27*4+k];
 	}
 	params->presetName[12] = '\0';
 
@@ -833,6 +858,10 @@ void PresetUtil::convertCharArrayToSynthState(uint8* chars, AllSynthParams* para
 	for (unsigned int k=0; k<8; k++) {
 		params->steps6.steps[k*2]   = chars[136+k] >> 4;
 		params->steps6.steps[k*2+1] = chars[136+k] & 0xf;
+	}
+	// 144 : Matrix 9->12
+	for (unsigned int k=0; k<16; k++) {
+		((char*) &params->matrixRowState9)[k] = chars[144 + k];
 	}
 }
 
