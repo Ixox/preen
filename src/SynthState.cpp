@@ -251,6 +251,8 @@ SynthState::SynthState() {
     fullState.midiConfigValue[MIDICONFIG_RECEIVES] = 3;
     fullState.midiConfigValue[MIDICONFIG_SENDS] = 1;
     fullState.midiConfigValue[MIDICONFIG_REALTIME_SYSEX] = 0;
+    fullState.midiConfigValue[MIDICONFIG_TEST_NOTE] = 60;
+    fullState.midiConfigValue[MIDICONFIG_TEST_VELOCITY] = 120;
     fullState.firstMenu = 0;
 
     for (int k=0; k<12; k++) {
@@ -266,8 +268,6 @@ SynthState::SynthState() {
     stepSelect[1] = 0;
 
     isPlayingNote = false;
-    testNote = 50;
-    testVelocity = 128;
 
 }
 

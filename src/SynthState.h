@@ -484,18 +484,17 @@ public:
 
     void propagateNoteOff() {
         for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
-            listener->stopNote(testNote);
+            listener->stopNote(playingNote);
         }
 		this->isPlayingNote = false;
     }
 
     void propagateNoteOn() {
         for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
-            listener->playNote(testNote, testVelocity);
+            listener->playNote(fullState.midiConfigValue[MIDICONFIG_TEST_NOTE], fullState.midiConfigValue[MIDICONFIG_TEST_VELOCITY]);
         }
 		this->isPlayingNote = true;
-		playingNote = testNote;
-
+		playingNote = fullState.midiConfigValue[MIDICONFIG_TEST_NOTE];
     }
 
     void propagateAfterNewParamsLoad();
@@ -517,11 +516,11 @@ private:
 	char currentRow;
 	unsigned char lastButtonSelected;
 	boolean isPlayingNote ;
+	char playingNote;
 
 	SynthParamListener* firstParamListener;
 	SynthMenuListener* firstMenuListener;
 
-	char testNote, testVelocity, playingNote;
 
     int getLength(const char *str) {
         int length = 0;

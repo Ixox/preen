@@ -470,6 +470,10 @@ void FMDisplay::newMenuState(FullState* fullState) {
 			lcd->setCursor(1, menuRow-1);
 			lcd->print("Save to EEPROM ?");
 			break;
+		case MENU_MIDI_PATCH_DUMP:
+			lcd->setCursor(1, menuRow-1);
+			lcd->print("Send Patch ?");
+			break;
 	}
 
 	newMenuSelect(fullState);
@@ -537,7 +541,12 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 		eraseRow(menuRow-1);
 		lcd->setCursor(1, menuRow-1);
 		lcd->print(midiConfig[fullState->menuSelect].title);
-		lcd->print(midiConfig[fullState->menuSelect].valueName[fullState->midiConfigValue[fullState->menuSelect]]);
+		if (midiConfig[fullState->menuSelect].valueName != NULL) {
+			lcd->print(midiConfig[fullState->menuSelect].valueName[fullState->midiConfigValue[fullState->menuSelect]]);
+		} else {
+			lcd->print((int)fullState->midiConfigValue[fullState->menuSelect]);
+			lcd->print(' ');
+		}
 		break;
 	default:
 		break;

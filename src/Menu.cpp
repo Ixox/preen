@@ -42,7 +42,7 @@ const struct MidiConfig midiConfig[]  = {
 			midiReceives
 		},
 		{
-			"Send : ",
+			"Send: ",
 			3,
 			midiSends
 		},
@@ -50,6 +50,16 @@ const struct MidiConfig midiConfig[]  = {
 			"R.Time SysEx: ",
 			2,
 			yesNo
+		},
+		{
+			"Test Note: ",
+			128,
+			0
+		},
+		{
+			"Test Velocity: ",
+			128,
+			0
 		}
 
 };
