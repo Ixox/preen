@@ -68,9 +68,10 @@ public:
         futurDestinations[(int)rows[k].destination] += sources[(int)rows[k].source] * mul;
     }
 
-    void setSource(SourceEnum source, int value) {
+    void setSource(SourceEnum source, int value) __attribute__((always_inline)) {
         this->sources[source] = value;
     }
+
     int getDestination(DestinationEnum destination)   __attribute__((always_inline))  {
         return this->currentDestinations[destination];
     }

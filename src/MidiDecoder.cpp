@@ -110,8 +110,7 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 		break;
 	case MIDI_PITCH_BEND:
 		this->synth->getMatrix()->setSource(MATRIX_SOURCE_PITCHBEND,
-				(int) ((((int) midiEvent.value[1] << 7) + (int) midiEvent.value[0]
-						- 8192) >> 6));
+				(int) ((((int) midiEvent.value[1] << 7) + (int) midiEvent.value[0]- 8192) >> 6));
 		break;
 	case MIDI_PROGRAM_CHANGE:
 		// Programm change

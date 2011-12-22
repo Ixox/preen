@@ -109,7 +109,6 @@ private:
     int frequency;
     bool released;
     bool playing;
-    int  autoModulation;
     unsigned int index;
     char note;
     char velocity;

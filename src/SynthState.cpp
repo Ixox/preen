@@ -103,7 +103,7 @@ struct ParameterRowDisplay envParameterRow = {
 };
 
 struct ParameterRowDisplay lfoEnvParameterRow = {
-        "Enveloppe",
+        "LFO Env",
         { "Attk", "Deca", "Sust", "Rele" },
         {
                 { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
@@ -140,15 +140,46 @@ unsigned char  matrixSourceNamesOrder[] = { MATRIX_SOURCE_NONE, MATRIX_SOURCE_LF
 unsigned char  matrixSourceNamesOrderReversed[] = {0, 1, 2, 3, 4, 9, 10, 7, 8, 11, 12, 13, 14, 5, 6 };
 
 
-const char* matrixDestNames [] = { "None", "o1Fr", "o2Fr", "o3Fr", "o4Fr", "o5Fr", "o6Fr", "IM1 ", "IM2 ", "IM3 ", "IM4 ", "Mix1", "Mix2", "Mix3", "Mix4",
-		"lfo1", "lfo2", "lfo3", "lfo4", "mtx1", "mtx2", "mtx3", "mtx4", "mtx5", "mtx6", "mtx7", "mtx8" } ;
+/*
+enum DestinationEnum {
+	DESTINATION_NONE = 0, 	OSC1_FREQ, 	OSC2_FREQ,
+	OSC3_FREQ = 3 ,	OSC4_FREQ,	OSC5_FREQ,
+	OSC6_FREQ = 6,	INDEX_MODULATION1,	INDEX_MODULATION2,
+	INDEX_MODULATION3 = 9,    INDEX_MODULATION4,	MIX_OSC1,
+    MIX_OSC2 = 12,    MIX_OSC3,    MIX_OSC4,
+	LFO1_FREQ = 15,	LFO2_FREQ,	LFO3_FREQ,
+	LFO4_FREQ = 18,	MTX1_MUL,	MTX2_MUL,
+	MTX3_MUL = 21,	MTX4_MUL,	MTX5_MUL,
+	MTX6_MUL = 24,	MTX7_MUL,	MTX8_MUL,
+	MTX9_MUL = 27,	MTX10_MUL,	MTX11_MUL,
+	MTX12_MUL= 30,	ALL_OSC_FREQ,	LFO5_GATE,
+	LFO6_GATE,
+
+*/
+
+const char* matrixDestNames [] = { "None", "o1Fq", "o2Fq", "o3Fq", "o4Fq", "o5Fq", "o6Fq", "IM1 ", "IM2 ", "IM3 ", "IM4 ", "Mix1", "Mix2", "Mix3", "Mix4",
+		"l1Fq", "l2Fq", "l3Fq", "l4Fq", "mx01", "mx02", "mx03", "mx04", "mx05", "mx06", "mx07", "mx08", "mx09", "mx10", "mx11", "mx12", "o*Fq", "l5gt", "l6gt" } ;
+unsigned char  matrixDestNamesOrder[] = { DESTINATION_NONE, OSC1_FREQ, 	OSC2_FREQ,
+/* 3 */		OSC3_FREQ  ,	OSC4_FREQ,	OSC5_FREQ, OSC6_FREQ ,
+/* 7 */     ALL_OSC_FREQ, INDEX_MODULATION1,	INDEX_MODULATION2,
+/* 10 */	INDEX_MODULATION3 ,    INDEX_MODULATION4,	MIX_OSC1,
+/* 13 */    MIX_OSC2 ,    MIX_OSC3,    MIX_OSC4,
+/* 16 */	LFO1_FREQ ,	LFO2_FREQ,	LFO3_FREQ,
+/* 19 */	LFO4_FREQ , LFO5_GATE, 	LFO6_GATE, MTX1_MUL,	MTX2_MUL,
+/* 24 */	MTX3_MUL, MTX4_MUL,	MTX5_MUL,
+/* 27 */	MTX6_MUL, 	MTX7_MUL,	MTX8_MUL,
+/* 30 */	MTX9_MUL ,	MTX10_MUL,	MTX11_MUL,
+/* 33 */	MTX12_MUL	  };
+unsigned char  matrixDestNamesOrderReversed[] = {0,1,2,3,4,5,6,8,9,10,11,12,13,14,15,16,17,18,19,22,23,24,25,26,27,28,29,30,31,32,33,7,20,21};
+
+
 struct ParameterRowDisplay matrixParameterRow = {
         "Matrix",
         { "Srce", "Mult", "Dest", "    " },
         {
                 { MATRIX_SOURCE_NONE, MATRIX_SOURCE_MAX-1, DISPLAY_TYPE_STRINGS, matrixSourceNames, matrixSourceNamesOrder, matrixSourceNamesOrderReversed},
                 { (char)-127, 127, DISPLAY_TYPE_SIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
-                { DESTINATION_NONE, DESTINATION_MAX-1, DISPLAY_TYPE_STRINGS, matrixDestNames, nullNamesOrder, nullNamesOrder},
+                { DESTINATION_NONE, DESTINATION_MAX-1, DISPLAY_TYPE_STRINGS, matrixDestNames, matrixDestNamesOrder, matrixDestNamesOrderReversed},
                 { 0, 0, DISPLAY_TYPE_NONE, nullNames, nullNamesOrder, nullNamesOrder }
         }
 };
@@ -156,7 +187,7 @@ struct ParameterRowDisplay matrixParameterRow = {
 
 const char* lfoShapeNames [] =  { "Saw ", "Ramp", "Squa", "Rand"} ;
 struct ParameterRowDisplay lfoParameterRow = {
-        "LFO",
+        "LFO Osc",
         { "Shap", "Freq", "Bias", "KSyn" },
         {
                 { LFO_SAW, LFO_TYPE_MAX-1, DISPLAY_TYPE_STRINGS,  lfoShapeNames, nullNamesOrder, nullNamesOrder},
@@ -168,7 +199,7 @@ struct ParameterRowDisplay lfoParameterRow = {
 
 
 struct ParameterRowDisplay lfoStepParameterRow = {
-        "LFO Seq ",
+        "LFO Seq",
         { "Bpm ", "Gate", "    ", "    " },
         {
                 { 10 ,240, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder},
@@ -595,56 +626,57 @@ void SynthState::buttonPressed(int button) {
         	break;
         }
     } else {
-    	// MENU MODE
-        switch (button) {
-        case BUTTON_MENUSELECT:
-            fullState.currentMenuItem = afterButtonPressed();
-            break;
-        case BUTTON_BACK:
-            fullState.currentMenuItem = menuBack();
-            propagateMenuBack();
-            break;
+        // Any button when done is display makes the synth go back to edit mode.
+		// MENU MODE
+		switch (button) {
+		case BUTTON_MENUSELECT:
+			fullState.currentMenuItem = afterButtonPressed();
+			break;
+		case BUTTON_BACK:
+			fullState.currentMenuItem = menuBack();
+			propagateMenuBack();
+			break;
 #ifdef DEBUG
-        case BUTTON_DUMP:
-        {
-            PresetUtil::dumpPatch();
-            break;
-        }
+		case BUTTON_DUMP:
+		{
+			PresetUtil::dumpPatch();
+			break;
+		}
 #endif
-        case BUTTON_LFO:
-        {
-            if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
-                fullState.name[fullState.menuSelect] = 0;
-                propagateNewMenuSelect();
-            }
-            break;
-        }
-        case BUTTON_MATRIX:
-        {
-            if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
-                fullState.name[fullState.menuSelect] = 27;
-                propagateNewMenuSelect();
-            }
-            break;
-        }
-        case BUTTON_ENV:
-        {
-            if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
-                fullState.name[fullState.menuSelect] = 55;
-                propagateNewMenuSelect();
-            }
-            break;
-        }
-        case BUTTON_OSC:
-        {
-            if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
-                fullState.name[fullState.menuSelect] = 66;
-                propagateNewMenuSelect();
-            }
-            break;
-        }
-        // MENU MODE
-        }
+		case BUTTON_LFO:
+		{
+			if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
+				fullState.name[fullState.menuSelect] = 0;
+				propagateNewMenuSelect();
+			}
+			break;
+		}
+		case BUTTON_MATRIX:
+		{
+			if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
+				fullState.name[fullState.menuSelect] = 27;
+				propagateNewMenuSelect();
+			}
+			break;
+		}
+		case BUTTON_ENV:
+		{
+			if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
+				fullState.name[fullState.menuSelect] = 55;
+				propagateNewMenuSelect();
+			}
+			break;
+		}
+		case BUTTON_OSC:
+		{
+			if (fullState.currentMenuItem->menuState == MENU_SAVE_ENTER_NAME) {
+				fullState.name[fullState.menuSelect] = 66;
+				propagateNewMenuSelect();
+			}
+			break;
+		}
+		// MENU MODE
+		}
     }
 
     if (oldSynthMode != fullState.synthMode) {
@@ -797,16 +829,30 @@ const MenuItem* SynthState::afterButtonPressed() {
     case MENU_DONE:
         fullState.synthMode = SYNTH_MODE_EDIT;
         break;
-    case MENU_FORMAT_BANK:
+    case MENU_FORMAT_ALL:
     	if (fullState.menuSelect == 25) {
         	const MenuItem *cmi = fullState.currentMenuItem;
         	// Update display while formating
         	fullState.currentMenuItem = MenuItemUtil::getMenuItem(MENU_IN_PROGRESS);
         	propagateNewMenuState();
             PresetUtil::formatEEPROM();
+        	PresetUtil::resetConfigAndSaveToEEPROM();
             fullState.currentMenuItem = cmi;
     	} else if (fullState.menuSelect == 1) {
 			PresetUtil::checkReadEEPROM();
+    	} else {
+    		return fullState.currentMenuItem;
+    	}
+        break;
+    case MENU_FORMAT_V1_10:
+    	if (fullState.menuSelect == 25) {
+        	const MenuItem *cmi = fullState.currentMenuItem;
+        	// Update display while formating
+        	fullState.currentMenuItem = MenuItemUtil::getMenuItem(MENU_IN_PROGRESS);
+        	propagateNewMenuState();
+            PresetUtil::upgradeEEPROMToV1_10();
+        	PresetUtil::resetConfigAndSaveToEEPROM();
+            fullState.currentMenuItem = cmi;
     	} else {
     		return fullState.currentMenuItem;
     	}
@@ -897,7 +943,8 @@ const MenuItem* SynthState::menuBack() {
         fullState.synthMode = SYNTH_MODE_EDIT;
         // put back old patch (has been overwritten if a new patch has been loaded)
         break;
-    case MENU_FORMAT_BANK:
+    case MENU_FORMAT_ALL:
+    case MENU_FORMAT_V1_10:
     case MENU_LOAD_USER_SELECT_BANK:
     case MENU_MIDI_PATCH:
     case MENU_SAVE_SELECT_USER_BANK:
@@ -920,8 +967,19 @@ void SynthState::newBankReady() {
 
 
 void SynthState::propagateAfterNewParamsLoad() {
-       for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
-           listener->afterNewParamsLoad();
-       }
+   for (SynthParamListener* listener = firstParamListener; listener !=0; listener = listener->nextListener) {
+	   listener->afterNewParamsLoad();
    }
+}
 
+void SynthState::tempoClick() {
+	if (fullState.synthMode == SYNTH_MODE_MENU && fullState.currentMenuItem->menuState == MENU_DONE) {
+		if (doneClick > 7) {
+		    fullState.synthMode = SYNTH_MODE_EDIT;
+		    propagateNewSynthMode();
+		}
+		doneClick ++;
+	} else {
+		doneClick = 0;
+	}
+}

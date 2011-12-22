@@ -46,11 +46,11 @@ RingBuffer<uint16, 50> rb;
 FMDisplay          fmDisplay;
 
 #ifdef PCB_R1
-LiquidCrystal      lcd(2, 8, 3, 4, 5, 6, 7, 27, 26, 25, 22);
+LiquidCrystal      lcd(2, 3, 4, 5, 6, 7, 27, 26, 25, 22);
 #endif
 
  #ifdef PCB_R2
-LiquidCrystal      lcd(2, 8, 3, 4, 5, 6, 7, 31, 30, 29, 28);
+LiquidCrystal      lcd(2, 3, 4, 5, 6, 7, 31, 30, 29, 28);
 #endif
 
 #ifdef PCB_R3
@@ -268,10 +268,18 @@ void setup()
         delayMicroseconds(30);
     }
 
+    lcd.setCursor(0,0);
+    lcd.print('1');
     // Load default patch
     synthState.propagateBeforeNewParamsLoad();
+    lcd.setCursor(0,0);
+    lcd.print('2');
     PresetUtil::loadDefaultPatchIfAny();
+    lcd.setCursor(0,0);
+    lcd.print('3');
     synthState.propagateAfterNewParamsLoad();
+    lcd.setCursor(0,0);
+    lcd.print('4');
 
     fillSoundBuffer();
     fmDisplay.init(&lcd);
@@ -283,6 +291,7 @@ unsigned short midiSent = 0;
 uint32 encoderMicros = 0;
 uint32 midiInMicros = 0;
 uint32 midiOutMicros = 0;
+uint32 synthStateMicros = 0;
 
 
 void loop() {
@@ -349,6 +358,12 @@ void loop() {
     	fillSoundBufferFull();
         encoders.checkStatus();
         encoderMicros = newMicros;
+    }
+
+    if ((newMicros - synthStateMicros) > 200000) {
+    	fillSoundBuffer();
+    	synthState.tempoClick();
+        synthStateMicros = newMicros;
     }
 }
 

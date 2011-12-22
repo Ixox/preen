@@ -18,7 +18,7 @@
 #ifndef PRESETUTIL_H_
 #define PRESETUTIL_H_
 
-#define EEPROM_CONFIG_CHECK 39
+#define EEPROM_CONFIG_CHECK 40
 
 #include "libmaple_types.h"
 #include "wirish.h"
@@ -62,6 +62,8 @@ public:
     static void saveCharParamsToEEPROM(uint8* paramChars, int bankNumber, int preset);
     static void saveCurrentPatchToEEPROM(int bankNumber, int preset);
     static void formatEEPROM();
+    static void upgradeEEPROMToV1_10();
+    static void resetConfigAndSaveToEEPROM();
     static void saveConfigToEEPROM();
     static void loadConfigFromEEPROM();
     static void checkReadEEPROM();

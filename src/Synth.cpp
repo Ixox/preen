@@ -219,7 +219,7 @@ void Synth::nextSample() {
 	cpt++;
 }
 
-void Synth::checkMaxVoice() {
+void Synth::checkMaxVoice(boolean setEngineVoice) {
 	int voiceMax = MAX_NUMBER_OF_VOICES;
 	switch (showUp[this->synthState->params.engine1.algo].osc) {
 	case 4:
@@ -232,10 +232,11 @@ void Synth::checkMaxVoice() {
 		voiceMax = 2;
 		break;
 	}
-	if (this->synthState->params.engine1.numberOfVoice > voiceMax) {
+	allParameterRows.row[0]->params[ENCODER_ENGINE_VOICE].maxValue = voiceMax;
+
+	if (setEngineVoice && this->synthState->params.engine1.numberOfVoice > 1) {
 		this->synthState->setNewValue(ROW_ENGINE, ENCODER_ENGINE_VOICE, voiceMax);
 	}
-	allParameterRows.row[0]->params[ENCODER_ENGINE_VOICE].maxValue = voiceMax;
 }
 
 void Synth::afterNewParamsLoad() {
@@ -250,13 +251,13 @@ void Synth::afterNewParamsLoad() {
     for (int k=0; k<NUMBER_OF_LFO; k++) {
         lfo[k]->valueChanged(-1);
     }
-	checkMaxVoice();
+	checkMaxVoice(false);
 }
 
 
 void Synth::newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
 	if (type == SYNTH_PARAM_TYPE_ENGINE && encoder == ENCODER_ENGINE_ALGO) {
-		checkMaxVoice();
+		checkMaxVoice(true);
 	} else if (type == SYNTH_PARAM_TYPE_ENV) {
         switch (currentRow) {
         case ROW_ENV1:

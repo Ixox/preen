@@ -26,6 +26,52 @@ extern const struct MidiConfig midiConfig[];
 char PresetUtil::readName[13];
 SynthState * PresetUtil::synthState;
 
+AllSynthParams synthParamsEmpty  =  {
+        		// patch name : 'Preen'
+        		// Engine
+        		{ ALGO1, 6, 4, 6} ,
+        		{ 16, 24, 0, 0 } ,
+        		{ 128, 128, 128, 128} ,
+        		// Oscillator
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		// Enveloppe
+        		{ 5, 0, 255, 50} ,
+        		{ 0, 65, 50, 50} ,
+        		{ 100, 65, 150, 255} ,
+        		{ 100, 65, 150, 100} ,
+        		{ 100, 65, 150, 100} ,
+        		{ 100, 65, 150, 100} ,
+        		// Modulation matrix
+        		{ MATRIX_SOURCE_MODWHEEL, 16, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_PITCHBEND, 64, OSC1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 0, INDEX_MODULATION2, 0} ,
+        		{ MATRIX_SOURCE_LFO6, 0, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		// LFOs
+        		{ LFO_SAW, 18, 127, 150} ,
+        		{ LFO_SAW, 20, 0, 0} ,
+        		{ LFO_SAW, 3, 0, 0} ,
+        		{ 100, 65, 150, 100} ,
+        		{ 70, 16,  0, 0}  ,
+        		{ 140, 16, 0, 0},
+        		{ 15, 4, 2, 0, 15, 2, 0, 8, 15, 0, 12, 0, 8, 0, 15 , 0} ,
+        		{ 15, 4, 2, 0, 15, 2, 0, 8, 15, 0, 12, 0, 8, 0, 15 , 0} ,
+        		"<Empty>"
+        };
+
+
 
 PresetUtil::PresetUtil() {
 }
@@ -250,8 +296,12 @@ void PresetUtil::readCharsFromEEPROM(int bankNumber, int preset, uint8* chars) {
 	msgsRead[1].flags = I2C_MSG_READ;
 	msgsRead[1].length = blockSize;
 	msgsRead[1].data = chars;
+	lcd.setCursor(4,0);
+	lcd.print('0');
 
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
+	lcd.setCursor(4,0);
+	lcd.print('1');
 	delay(1);
 
 	// Part 1 second block
@@ -268,7 +318,11 @@ void PresetUtil::readCharsFromEEPROM(int bankNumber, int preset, uint8* chars) {
 	msgsRead[1].flags = I2C_MSG_READ;
 	msgsRead[1].length = blockSize;
 	msgsRead[1].data = chars+ 64;
+	lcd.setCursor(4,0);
+	lcd.print('2');
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
+	lcd.setCursor(4,0);
+	lcd.print('3');
 
 	delay(1);
 
@@ -451,67 +505,69 @@ void PresetUtil::saveConfigToEEPROM() {
 	delay(1);
 }
 
-void PresetUtil::formatEEPROM() {
+void PresetUtil::upgradeEEPROMToV1_10() {
+	uint8 paramChars[PATCH_SIZE];
+	uint8 paramCharsEmpty[PATCH_SIZE];
 
-	AllSynthParams synthParams  =  {
-	        		// patch name : 'Preen'
-	        		// Engine
-	        		{ ALGO1, 6, 4, 6} ,
-	        		{ 16, 24, 0, 0 } ,
-	        		{ 128, 128, 128, 128} ,
-	        		// Oscillator
-	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
-	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
-	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
-	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
-	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
-	        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
-	        		// Enveloppe
-	        		{ 5, 0, 255, 50} ,
-	        		{ 0, 65, 50, 50} ,
-	        		{ 100, 65, 150, 255} ,
-	        		{ 100, 65, 150, 100} ,
-	        		{ 100, 65, 150, 100} ,
-	        		{ 100, 65, 150, 100} ,
-	        		// Modulation matrix
-	        		{ MATRIX_SOURCE_MODWHEEL, 16, INDEX_MODULATION1, 0} ,
-	        		{ MATRIX_SOURCE_PITCHBEND, 64, OSC1_FREQ, 0} ,
-	        		{ MATRIX_SOURCE_LFO1, 0, INDEX_MODULATION2, 0} ,
-	        		{ MATRIX_SOURCE_LFO6, 0, INDEX_MODULATION1, 0} ,
-	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-	        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-	        		// LFOs
-	        		{ LFO_SAW, 18, 127, 150} ,
-	        		{ LFO_SAW, 20, 0, 0} ,
-	        		{ LFO_SAW, 3, 0, 0} ,
-	        		{ 100, 65, 150, 100} ,
-	        		{ 70, 16,  0, 0}  ,
-	        		{ 140, 16, 0, 0},
-	        		{ 15, 4, 2, 0, 15, 2, 0, 8, 15, 0, 12, 0, 8, 0, 15 , 0} ,
-	        		{ 15, 4, 2, 0, 15, 2, 0, 8, 15, 0, 12, 0, 8, 0, 15 , 0} ,
-	        		"<Empty>"
-	        };
+	convertSynthStateToCharArray(&synthParamsEmpty, paramCharsEmpty);
 
 	for (int bankNumber = 0; bankNumber < 4; bankNumber++) {
 		lcd.setCursor(3,2);
-		lcd.print("Bank ");
+		lcd.print("Upgrade ");
 		lcd.print((char)('A'+bankNumber));
 		for (int preset = 0; preset < 128; preset++) {
 
-			lcd.setCursor(11,2);
+			lcd.setCursor(13,2);
 			lcd.print(preset);
 			lcd.print("  ");
 
-			PresetUtil::savePatchToEEPROM(&synthParams, bankNumber, preset);
+			// Read preset
+			PresetUtil::readCharsFromEEPROM(bankNumber, preset, paramChars);
+
+
+			// copy char 128 -> 192 from synthParamsEmpty
+			for (unsigned int k=120; k<PATCH_SIZE; k++) {
+				paramChars[k] = paramCharsEmpty[k];
+			}
+
+			// Save preset
+			PresetUtil::saveCharParamsToEEPROM(paramChars, bankNumber, preset);
 
 		}
 	}
+}
+
+void PresetUtil::resetConfigAndSaveToEEPROM() {
+	PresetUtil::synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL] = 0;
+    PresetUtil::synthState->fullState.midiConfigValue[MIDICONFIG_THROUGH] = 0;
+    PresetUtil::synthState->fullState.midiConfigValue[MIDICONFIG_RECEIVES] = 3;
+    PresetUtil::synthState->fullState.midiConfigValue[MIDICONFIG_SENDS] = 1;
+    PresetUtil::synthState->fullState.midiConfigValue[MIDICONFIG_REALTIME_SYSEX] = 0;
+    PresetUtil::synthState->fullState.midiConfigValue[MIDICONFIG_TEST_NOTE] = 60;
+    PresetUtil::synthState->fullState.midiConfigValue[MIDICONFIG_TEST_VELOCITY] = 120;
+
+	saveConfigToEEPROM();
+}
+
+
+void PresetUtil::formatEEPROM() {
+
+
+	for (int bankNumber = 0; bankNumber < 4; bankNumber++) {
+		lcd.setCursor(3,2);
+		lcd.print("Format ");
+		lcd.print((char)('A'+bankNumber));
+		for (int preset = 0; preset < 128; preset++) {
+
+			lcd.setCursor(12,2);
+			lcd.print(preset);
+			lcd.print("  ");
+
+			PresetUtil::savePatchToEEPROM(&synthParamsEmpty, bankNumber, preset);
+
+		}
+	}
+
 }
 
 void PresetUtil::sendBankToSysex(int bankNumber) {
@@ -759,11 +815,20 @@ void PresetUtil::copyBank(int source, int dest) {
 
 void PresetUtil::loadDefaultPatchIfAny() {
 	uint8 paramChars[PATCH_SIZE];
+
+	lcd.setCursor(3,0);
+	lcd.print('0');
 	PresetUtil::readCharsFromEEPROM(5, 0, paramChars);
+	lcd.setCursor(3,0);
+	lcd.print('1');
 
 	if (((char*)&paramChars)[0] == EEPROM_CONFIG_CHECK) {
+		lcd.setCursor(3,0);
+		lcd.print('2');
         PresetUtil::readSynthParamFromEEPROM(5, 1, &PresetUtil::synthState->params);
 	}
+	lcd.setCursor(3,0);
+	lcd.print('3');
 }
 
 

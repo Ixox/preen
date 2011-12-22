@@ -22,7 +22,7 @@
 #define INTERNAL_LAST_BANK 27
 
 
-// Eclipse bug can not be in an enum.... ??????
+
 enum {
 	MIDICONFIG_CHANNEL = 0,
 	MIDICONFIG_THROUGH,
@@ -65,6 +65,8 @@ enum MenuState {
 	MENU_IN_PROGRESS,
     MENU_CONFIG,
 	MENU_FORMAT_BANK,
+	MENU_FORMAT_ALL,
+	MENU_FORMAT_V1_10,
 	MENU_SAVE_BANK,
 	MENU_SAVE_BANK_CONFIRM,
 	MENU_SAVE_DEFAULT,

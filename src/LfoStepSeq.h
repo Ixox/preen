@@ -39,6 +39,7 @@ private:
     int target;
     int currentValue;
     boolean gated;
+    DestinationEnum matrixGateDestination;
 };
 
 #endif /* LFOENV_H_ */

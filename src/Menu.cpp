@@ -216,6 +216,20 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
 	{
 		MENU_FORMAT_BANK,
 		"Format",
+		true,
+		2,
+		{MENU_FORMAT_ALL, MENU_FORMAT_V1_10}
+	},
+	{
+		MENU_FORMAT_ALL,
+		"All",
+		false,
+		27,
+		{MENU_DONE}
+	},
+	{
+		MENU_FORMAT_V1_10,
+		"Upgrade",
 		false,
 		27,
 		{MENU_DONE}

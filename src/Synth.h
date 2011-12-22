@@ -67,7 +67,7 @@ public:
     }
 
     void newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
-    void checkMaxVoice();
+    void checkMaxVoice(boolean setEngineVoice);
 
     void newcurrentRow(int newcurrentRow)  {
         // Nothing to do

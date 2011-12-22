@@ -18,6 +18,7 @@
 #include "LfoStepSeq.h"
 
 
+int	expValues[] = { 0,15, 31, 48, 67, 86, 106, 128, 150, 175, 200, 227, 256, 286, 319, 353 };
 
 void LfoStepSeq::init(int number, Matrix *matrix, SourceEnum source, DestinationEnum dest) {
 	Lfo::init(number, matrix, source, dest);
@@ -25,20 +26,21 @@ void LfoStepSeq::init(int number, Matrix *matrix, SourceEnum source, Destination
 	case MATRIX_SOURCE_LFO5:
 		this->seqParams = (StepSequencerParams *)&this->synthState->params.lfo5;
 		this->seqSteps = (StepSequencerSteps*)&this->synthState->params.steps5;
+		this->matrixGateDestination = LFO5_GATE;
 		break;
 	case MATRIX_SOURCE_LFO6:
 		this->seqParams = (StepSequencerParams *)&this->synthState->params.lfo6;
 		this->seqSteps = (StepSequencerSteps*)&this->synthState->params.steps6;
+		this->matrixGateDestination = LFO6_GATE;
 		break;
 	}
 	gated = false;
-}
 
+}
 
 void LfoStepSeq::valueChanged(int encoder) {
 	if (encoder < 2) {
 		step = (seqParams->bpm << 16) / 15360;
-		gateValue = seqParams->gate<< 11;
 	}
 }
 
@@ -52,16 +54,20 @@ void LfoStepSeq::nextValueInMatrix() {
   	 index += step;
   	 index &= 0xfffff;
 
-   	// We'll reach the new value step by step to reduice audio click !
+  	 // Add gate and matrix value
+  	 int gatePlusMatrix = seqParams->gate + (this->matrix->getDestination(matrixGateDestination) >> 7);
 
-  	 if (seqParams->gate < 32) {
+   	// We'll reach the new value step by step to reduce audio click !
+  	 if (gatePlusMatrix <= 0) {
+  		 target = 0;
+  	 } else if (gatePlusMatrix < 32) {
 		 // Gated ?
-		 if (!gated && ((index & 0xffff) >= gateValue)) {
+		 if (!gated && ((index & 0xffff) >= (gatePlusMatrix<< 11))) {
 			target = 0;
 			gated = true;
 		 }
 		// End of gate ?
-		 if (gated && ((index & 0xffff) < gateValue)) {
+		 if (gated && ((index & 0xffff) < (gatePlusMatrix<< 11))) {
 			target = seqSteps->steps[index>>16];
 			gated = false;
 		 }
@@ -76,10 +82,12 @@ void LfoStepSeq::nextValueInMatrix() {
        	currentValue --;
    	}
 
-  	 matrix->setSource(source, currentValue << 4);}
+	matrix->setSource(source, expValues[currentValue]);
+}
 
 void LfoStepSeq::noteOn() {
 	index = 0;
+	target = seqSteps->steps[0];
 }
 
 void LfoStepSeq::noteOff() {

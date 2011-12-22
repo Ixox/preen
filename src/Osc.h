@@ -32,7 +32,7 @@ extern const int frequenciesX8[];
 struct OscState {
     int index;
     int frequency;
-    int frequencyMatrixValue;
+    int mainFrequencyPlusMatrix;
     int mainFrequency;
     int fromFrequency;
     int nextFrequency;
@@ -51,7 +51,7 @@ public:
     void glideStep(struct OscState& oscState, int step);
 
     void calculateFrequencyWithMatrix(struct OscState *oscState) {
-		oscState->frequencyMatrixValue = ((oscState->frequency >> 2) * this->matrix->getDestination(destFreq)) >> 14;
+		oscState->mainFrequencyPlusMatrix = oscState->mainFrequency + ((oscState->mainFrequency   * (this->matrix->getDestination(destFreq) + this->matrix->getDestination(ALL_OSC_FREQ))) >> 14);
     }
 
     int getNextSample(struct OscState *oscState) __attribute__((always_inline)) {
@@ -95,8 +95,10 @@ public:
         		// r6 : frequency,
         		// r7  : frequencyWithMatrixValue
 
-        		"    ldm %[osc], {r5-r7}\n\t"
-                "    add r5, r5, r7\n\t"
+//         		"    ldm %[osc], {r5-r7}\n\t"
+//                "    add r5, r5, r7\n\t"
+
+        		"    ldm %[osc], {r5-r6}\n\t"
                 "    add r5, r5, r6\n\t"
                 "    mvn r6, #0\n\t"
                 "    lsr r6, r6, #14\n\t"
@@ -176,7 +178,7 @@ public:
                 // BREAK
                 "6:\n\t"
                 : [value] "=r"(oscValue), [osc]"+rV" (oscState)
-                : [sinTable]"rV"(sinTable), [waveforms]"rV"(waveforms), [shape]"r" (oscillator->shape), [dest]"r"(this->matrix->getDestination(destFreq))
+                : [sinTable]"rV"(sinTable), [waveforms]"rV"(waveforms), [shape]"r" (oscillator->shape)
                 : "cc", "r5", "r6", "r7"
         );
 

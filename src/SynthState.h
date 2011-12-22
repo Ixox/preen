@@ -188,6 +188,9 @@ enum DestinationEnum {
 	MTX10_MUL,
 	MTX11_MUL,
 	MTX12_MUL,
+	ALL_OSC_FREQ,
+	LFO5_GATE,
+	LFO6_GATE,
 	DESTINATION_MAX
 };
 
@@ -505,6 +508,8 @@ public:
 
     void newBankReady();
 
+    void tempoClick();
+
     void resetDisplay();
 	struct AllSynthParams params;
     struct AllSynthParams backupParams;
@@ -517,6 +522,9 @@ private:
 	unsigned char lastButtonSelected;
 	boolean isPlayingNote ;
 	char playingNote;
+
+	// Done menu temporisation
+	uint32 doneClick;
 
 	SynthParamListener* firstParamListener;
 	SynthMenuListener* firstMenuListener;
