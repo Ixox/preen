@@ -67,7 +67,7 @@ const struct AllSynthParams presets[]  = {
         {
         		// patch name : 'Preen Seq'
         		// Engine
-        		{ ALGO1, 10, 1, 6} ,
+        		{ ALGO1, 10, 4, 6} ,
         		{ 16, 21, 0, 0} ,
         		{ 128, 128, 128, 0} ,
         		// Oscillator
@@ -176,9 +176,9 @@ const struct AllSynthParams presets[]  = {
         		// Modulation matrix
         		{ MATRIX_SOURCE_MODWHEEL, 2, INDEX_MODULATION1, 0} ,
         		{ MATRIX_SOURCE_PITCHBEND, 16, ALL_OSC_FREQ, 0} ,
-        		{ MATRIX_SOURCE_LFO1, 15, OSC2_FREQ, 0} ,
-        		{ MATRIX_SOURCE_LFO2, 5, OSC2_FREQ, 0} ,
-        		{ MATRIX_SOURCE_LFO2, 5, OSC1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 3, OSC2_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO2, 3, OSC2_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO2, 2, OSC1_FREQ, 0} ,
         		{ MATRIX_SOURCE_LFO5, 0, INDEX_MODULATION1, 0} ,
         		{ MATRIX_SOURCE_LFO6, 0, INDEX_MODULATION2, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
@@ -240,6 +240,94 @@ const struct AllSynthParams presets[]  = {
         		{{ 15, 4, 2, 0, 15, 2, 0, 8, 15, 0, 12, 0, 8, 0, 15 ,0}} ,
         		{{ 15, 4, 2, 0, 15, 2, 0, 8, 15, 0, 12, 0, 8, 0, 15, 0}} ,
         		"Power"
+        },
+        {
+        		// patch name : 'March Seq'
+        		// Engine
+        		{ ALGO4, 0, 3, 7} ,
+        		{ 16, 16, 0, 0} ,
+        		{ 128, 128, 128, 0} ,
+        		// Oscillator
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SAW, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 48, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 4, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		// Enveloppe
+        		{ 0, 0, 255, 50} ,
+        		{ 0, 0, 255, 52} ,
+        		{ 0, 101, 255, 255} ,
+        		{ 0, 100, 255, 255} ,
+        		{ 0, 150, 160, 60} ,
+        		{ 0, 150, 160, 60} ,
+        		// Modulation matrix
+        		{ MATRIX_SOURCE_LFO5, 2, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_LFO1, -6, INDEX_MODULATION2, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 2, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_LFO6, 2, INDEX_MODULATION2, 0} ,
+        		{ MATRIX_SOURCE_NONE, 1, INDEX_MODULATION3, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		// LFOs
+        		{ LFO_SAW, 1, 0, 61} ,
+        		{ LFO_SAW, 2, 127, 18} ,
+        		{ LFO_SAW, 3, 0, 0} ,
+        		{ 0, 4, 0, 0} ,
+        		{ 70, 8, 0, 0} ,
+        		{ 140, 11, 0, 0} ,
+        		{ { 15, 0, 12, 2, 6, 2, 15, 5, 13, 3, 3, 1, 15, 6, 12, 0} } ,
+        		{ { 15, 0, 1, 4, 15, 0, 15, 0, 15, 0, 3, 7, 15, 0, 10, 11} } ,
+        		"March Seq"
+        },
+        {
+        		// patch name : 'March Seq2'
+        		// Engine
+        		{ ALGO1, 0, 4, 7} ,
+        		{ 0, 3, 0, 0} ,
+        		{ 114, 128, 128, 0} ,
+        		// Oscillator
+        		{ OSC_SHAPE_SAW, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SAW, OSC_FT_KEYBOARD , 4, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 48, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		// Enveloppe
+        		{ 0, 0, 255, 50} ,
+        		{ 0, 0, 255, 52} ,
+        		{ 0, 101, 255, 255} ,
+        		{ 0, 100, 255, 255} ,
+        		{ 0, 150, 160, 60} ,
+        		{ 0, 150, 160, 60} ,
+        		// Modulation matrix
+        		{ MATRIX_SOURCE_LFO5, 4, INDEX_MODULATION2, 0} ,
+        		{ MATRIX_SOURCE_LFO6, 7, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 3, INDEX_MODULATION2, 0} ,
+        		{ MATRIX_SOURCE_PITCHBEND, 16, LFO5_GATE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		// LFOs
+        		{ LFO_SAW, 1, 18, 61} ,
+        		{ LFO_SAW, 2, 127, 18} ,
+        		{ LFO_SAW, 3, 0, 0} ,
+        		{ 0, 4, 0, 0} ,
+        		{ 80, 12, 0, 0} ,
+        		{ 160, 29, 0, 0} ,
+        		{ { 15, 4, 6, 0, 12, 9, 2, 0, 10, 1, 7, 0, 9, 4, 15, 0} } ,
+        		{ { 0, 15, 1, 11, 0, 0, 8, 15, 3, 0, 8, 0, 0, 0, 12, 0} } ,
+        		"March Seq2"
         },
         {
         		// patch name : 'Organ'
@@ -747,10 +835,10 @@ const struct AllSynthParams presets[]  = {
         		{ 0, 150, 160, 60} ,
         		{ 0, 150, 160, 60} ,
         		// Modulation matrix
+        		{ MATRIX_SOURCE_LFO4, 23, OSC1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO2, 11, OSC3_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO2, 7, OSC1_FREQ, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-        		{ MATRIX_SOURCE_LFO4, 76, OSC1_FREQ, 0} ,
-        		{ MATRIX_SOURCE_LFO2, 23, OSC3_FREQ, 0} ,
-        		{ MATRIX_SOURCE_LFO2, 13, OSC1_FREQ, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
@@ -760,8 +848,8 @@ const struct AllSynthParams presets[]  = {
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		// LFOs
-        		{ LFO_SAW, 36, 0, 158} ,
-        		{ LFO_SAW, 37, 0, 114} ,
+        		{ LFO_SAW, 36, 0, 205} ,
+        		{ LFO_SAW, 37, 0, 211} ,
         		{ LFO_SAW, 3, 0, 0} ,
         		{ 58, 93, 0, 255} ,
         		{ 70, 12,  0, 0}  ,
