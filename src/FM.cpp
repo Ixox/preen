@@ -85,8 +85,10 @@ inline void fillSoundBufferFull() {
 
 void setup()
 {
+#ifndef DEBUG
 	SerialUSB.end();
 	nvic_irq_disable(NVIC_USB_LP_CAN_RX0);
+#endif
 
     byte midiIn[8] = {
             B01100,
