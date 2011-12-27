@@ -137,8 +137,8 @@ const char* engineEnums [] = { "ALGO1", "ALGO2", "ALGO3", "ALGO4", "ALGO5", "ALG
 const char* oscTypeEnums [] = { "OSC_FT_KEYBOARD ", "OSC_FT_FIXE" };
 const char* mixOscShapeEnums [] = { "OSC_SHAPE_SIN", "OSC_SHAPE_SIN2", "OSC_SHAPE_SIN3", "OSC_SHAPE_SIN4", "OSC_SHAPE_RAND", "OSC_SHAPE_SQUARE", "OSC_SHAPE_SAW", "OSC_SHAPE_OFF" };
 const char* lfoShapeEnums [] = { "LFO_SAW", "LFO_RAMP", "LFO_SQUARE", "LFO_RANDOM", "LFO_TYPE_MAX" };
-const char* matrixSourceEnums [] = { "MATRIX_SOURCE_NONE", "MATRIX_SOURCE_LFO1", "MATRIX_SOURCE_LFO2", "MATRIX_SOURCE_LFO3", "MATRIX_SOURCE_LFO4", "MATRIX_SOURCE_PITCHBEND", "MATRIX_SOURCE_AFTERTOUCH", "MATRIX_SOURCE_MODWHEEL", "MATRIX_SOURCE_VELOCITY", "MATRIX_SOURCE_CC1", "MATRIX_SOURCE_CC2", "MATRIX_SOURCE_CC3", "MATRIX_SOURCE_CC4", "MATRIX_SOURCE_MAX" };
-const char* matrixDestEnums [] = { "DESTINATION_NONE", "OSC1_FREQ", "OSC2_FREQ", "OSC3_FREQ", "OSC4_FREQ", "OSC5_FREQ", "OSC6_FREQ", "INDEX_MODULATION1", "INDEX_MODULATION2", "INDEX_MODULATION3", "INDEX_MODULATION4", "MIX_OSC1", "MIX_OSC2", "MIX_OSC3", "MIX_OSC4", "LFO1_FREQ", "LFO2_FREQ", "LFO3_FREQ", "LFO4_FREQ", "MTX1_MUL", "MTX2_MUL", "MTX3_MUL", "MTX4_MUL", "MTX5_MUL", "MTX6_MUL", "MTX7_MUL", "MTX8_MUL", "DESTINATION_MAX" };
+const char* matrixSourceEnums [] = { "MATRIX_SOURCE_NONE", "MATRIX_SOURCE_LFO1", "MATRIX_SOURCE_LFO2", "MATRIX_SOURCE_LFO3", "MATRIX_SOURCE_LFO4", "MATRIX_SOURCE_PITCHBEND", "MATRIX_SOURCE_AFTERTOUCH", "MATRIX_SOURCE_MODWHEEL", "MATRIX_SOURCE_VELOCITY", "MATRIX_SOURCE_CC1", "MATRIX_SOURCE_CC2", "MATRIX_SOURCE_CC3", "MATRIX_SOURCE_CC4", "MATRIX_SOURCE_LFO5", "MATRIX_SOURCE_LFO6","MATRIX_SOURCE_MAX" };
+const char* matrixDestEnums [] = { "DESTINATION_NONE", "OSC1_FREQ", "OSC2_FREQ", "OSC3_FREQ", "OSC4_FREQ", "OSC5_FREQ", "OSC6_FREQ", "INDEX_MODULATION1", "INDEX_MODULATION2", "INDEX_MODULATION3", "INDEX_MODULATION4", "MIX_OSC1", "MIX_OSC2", "MIX_OSC3", "MIX_OSC4", "LFO1_FREQ", "LFO2_FREQ", "LFO3_FREQ", "LFO4_FREQ", "MTX1_MUL", "MTX2_MUL", "MTX3_MUL", "MTX4_MUL", "MTX5_MUL", "MTX6_MUL", "MTX7_MUL", "MTX8_MUL", "MTX9_MUL", "MTX10_MUL", "MTX11_MUL", "MTX12_MUL", "ALL_OSC_FREQ", "LFO5_GATE", "LFO6_GATE","DESTINATION_MAX" };
 
 
 void PresetUtil::dumpLine(const char *enums1[], int a, const char *enums2[], int b, const char *enums3[], int c, const char *enums4[], int d) {
@@ -229,7 +229,7 @@ void PresetUtil::dumpPatch() {
 	}
 	SerialUSB.println("// Modulation matrix");
 	MatrixRowParams	* m = (MatrixRowParams*) (&(PresetUtil::synthState->params.matrixRowState1));
-	for (int k = 0; k < 8; k++) {
+	for (int k = 0; k < 12; k++) {
 		dumpLine(
 				matrixSourceEnums,
 				m[k].source,
@@ -253,15 +253,43 @@ void PresetUtil::dumpPatch() {
 				NULL,
 				l[k].keybRamp);
 	}
+	EnvelopeParams* le = (EnvelopeParams*) (&(PresetUtil::synthState->params.lfo4));
 	dumpLine(
 			NULL,
-			l[3].shape,
+			le[0].attack,
 			NULL,
-			l[3].freq,
+			le[0].decay,
 			NULL,
-			l[3].bias,
+			le[0].sustain,
 			NULL,
-			l[3].keybRamp);
+			le[0].release
+			);
+	StepSequencerParams* ls = (StepSequencerParams*) (&(PresetUtil::synthState->params.lfo5));
+	for (int k = 0; k < 2; k++) {
+		dumpLine(
+				NULL,
+				ls[k].bpm,
+				NULL,
+				ls[k].gate,
+				NULL,
+				0,
+				NULL,
+				0
+				);
+	}
+	StepSequencerSteps* step = (StepSequencerSteps*) (&(PresetUtil::synthState->params.steps5));
+	for (int k = 0; k < 2; k++) {
+		SerialUSB.print("{ { ");
+		for (int j = 0; j < 16; j++) {
+			SerialUSB.print((int)step[k].steps[j]);
+			if (j != 15) {
+				SerialUSB.print(", ");
+			}
+		}
+		SerialUSB.print("} } ");
+		SerialUSB.println(", ");
+	}
+
 	SerialUSB.print("\"");
 	SerialUSB.print(PresetUtil::synthState->params.presetName);
 	SerialUSB.println("\"");
@@ -296,12 +324,8 @@ void PresetUtil::readCharsFromEEPROM(int bankNumber, int preset, uint8* chars) {
 	msgsRead[1].flags = I2C_MSG_READ;
 	msgsRead[1].length = blockSize;
 	msgsRead[1].data = chars;
-	lcd.setCursor(4,0);
-	lcd.print('0');
 
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
-	lcd.setCursor(4,0);
-	lcd.print('1');
 	delay(1);
 
 	// Part 1 second block
@@ -318,11 +342,7 @@ void PresetUtil::readCharsFromEEPROM(int bankNumber, int preset, uint8* chars) {
 	msgsRead[1].flags = I2C_MSG_READ;
 	msgsRead[1].length = blockSize;
 	msgsRead[1].data = chars+ 64;
-	lcd.setCursor(4,0);
-	lcd.print('2');
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
-	lcd.setCursor(4,0);
-	lcd.print('3');
 
 	delay(1);
 
@@ -816,19 +836,11 @@ void PresetUtil::copyBank(int source, int dest) {
 void PresetUtil::loadDefaultPatchIfAny() {
 	uint8 paramChars[PATCH_SIZE];
 
-	lcd.setCursor(3,0);
-	lcd.print('0');
 	PresetUtil::readCharsFromEEPROM(5, 0, paramChars);
-	lcd.setCursor(3,0);
-	lcd.print('1');
 
 	if (((char*)&paramChars)[0] == EEPROM_CONFIG_CHECK) {
-		lcd.setCursor(3,0);
-		lcd.print('2');
         PresetUtil::readSynthParamFromEEPROM(5, 1, &PresetUtil::synthState->params);
 	}
-	lcd.setCursor(3,0);
-	lcd.print('3');
 }
 
 
@@ -850,7 +862,7 @@ void PresetUtil::convertSynthStateToCharArray(AllSynthParams* params, uint8* cha
 	}
 
 	// 1.00 compatibility
-	// => matrix 6
+	// => matrix 8
 	int firstPartSize = 23*4;
 	for (unsigned int k=0; k<firstPartSize; k++) {
 		chars[k] = ((char*) params)[k];
@@ -891,7 +903,7 @@ void PresetUtil::convertSynthStateToCharArray(AllSynthParams* params, uint8* cha
 void PresetUtil::convertCharArrayToSynthState(uint8* chars, AllSynthParams* params) {
 
 	// Copy first part
-	int firstPartSize = 24*4;
+	int firstPartSize = 23*4;
 	for (unsigned int k=0; k<firstPartSize; k++) {
 		((char*) params)[k] = chars[k];
 	}
