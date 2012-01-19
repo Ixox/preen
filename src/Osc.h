@@ -58,7 +58,7 @@ public:
         int oscValue;
 
         /*
-        oscState->index += (this->matrix->getDestination(destFreq) >> 4) + oscState->frequency;
+        oscState->index +=  oscState->frequency;
         oscState->index &= 0x3ffff;
 
         switch(oscillator->shape) {
@@ -88,15 +88,13 @@ public:
 
         asm volatile(
 
-                // oscState->index += (this->matrix->getDestination(destFreq) >> 4) + oscState->frequency;
+        		// Frequency is prepared in Voice.cpp
+
+        		// oscState->index += oscState->frequency;
                 // oscState->index &= 0x3ffff;
 
                 // r5 : index
         		// r6 : frequency,
-        		// r7  : frequencyWithMatrixValue
-
-//         		"    ldm %[osc], {r5-r7}\n\t"
-//                "    add r5, r5, r7\n\t"
 
         		"    ldm %[osc], {r5-r6}\n\t"
                 "    add r5, r5, r6\n\t"

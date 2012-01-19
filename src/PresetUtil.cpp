@@ -613,24 +613,68 @@ void PresetUtil::sendBankToSysex(int bankNumber) {
 
 void PresetUtil::checkReadEEPROM() {
 	struct AllSynthParams synthParams;
+	struct AllSynthParams synthParams2;
+	uint8 paramChars[PATCH_SIZE];
+	boolean error = false;
 
 	lcd.clear();
 	lcd.setCursor(3,0);
-	lcd.print("Check EEPROM");
+	lcd.print("Check R/W");
+
+	PresetUtil::readSynthParamFromEEPROM(1, 1, &synthParams);
+	copySynthParams((char*)&synthParams, (char*)&synthParams2);
+	PresetUtil::savePatchToEEPROM(&synthParams, 1, 1);
+	PresetUtil::readSynthParamFromEEPROM(1, 1, &synthParams);
+
+	for (int k=0; k<sizeof(struct AllSynthParams ); k++) {
+		if (((char*)&synthParams)[k] != ((char*)&synthParams2)[k]) {
+			error=true;
+		}
+	}
+
+	if (error) {
+		lcd.setCursor(16,0);
+		lcd.print("ER!");
+	} else {
+		lcd.setCursor(16,0);
+		lcd.print("OK");
+	}
+
+	lcd.setCursor(3,1);
+	lcd.print("Check READ");
 
 	for (int bank = 0; bank<4; bank++) {
-		lcd.setCursor(3,1);
+		lcd.setCursor(1,2);
 		lcd.print("Bank ");
 		lcd.print((char)('A'+bank));
 
-		for (int test = 0; test< 256; test++) {
-			int preset = test%128;
-			lcd.setCursor(3,2);
+		for (int preset = 0; preset< 128; preset++) {
+			lcd.setCursor(12,2);
 			lcd.print(preset);
 			lcd.print(" ");
 			PresetUtil::readSynthParamFromEEPROM(bank, preset, &synthParams);
 		}
 	}
+
+	lcd.setCursor(0,2);
+	lcd.print("                   ");
+
+	lcd.setCursor(16,1);
+	lcd.print("OK");
+
+	lcd.setCursor(3,2);
+	lcd.print("Check WRITE");
+
+	PresetUtil::readSynthParamFromEEPROM(1, 2, &synthParams);
+	PresetUtil::convertSynthStateToCharArray(&synthParams, paramChars);
+	PresetUtil::saveCharParamsToEEPROM(paramChars, 1, 2);
+	PresetUtil::saveCharParamsToEEPROM(paramChars, 1, 2);
+	PresetUtil::saveCharParamsToEEPROM(paramChars, 1, 2);
+
+	lcd.setCursor(16,2);
+	lcd.print("OK");
+
+	delay(3000);
 }
 
 
@@ -738,13 +782,6 @@ int PresetUtil::readSysex(bool patchAllowed, bool bankAllowed) {
 		}
 
 		if (index  == 0) {
-			if (byte == 0x7d) {
-				index++;
-			} else {
-				bError = true;
-				break;
-			}
-		} else if (index  == 1) {
 			// Batch or bank
 			index++;
 			if (byte == 1) {
@@ -761,7 +798,7 @@ int PresetUtil::readSysex(bool patchAllowed, bool bankAllowed) {
 			}
 		}
 
-		if (index >1 && !bSysexRead) {
+		if (index >0 && !bSysexRead) {
 			bSysexRead = true;
 			if (isPatch) {
 				int errorCode = 0;

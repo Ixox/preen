@@ -22,7 +22,7 @@ extern LiquidCrystal lcd;
 
 
 MidiDecoder::MidiDecoder() {
-	currentEventState.eventState = MIDI_EVENT_NEW;
+	currentEventState.eventState = MIDI_EVENT_WAITING;
 	currentEventState.index = 0;
 }
 
@@ -36,7 +36,7 @@ void MidiDecoder::setSynth(Synth* synth) {
 
 void MidiDecoder::newByte(unsigned char byte) {
 
-	if (currentEventState.eventState == MIDI_EVENT_NEW) {
+	if (currentEventState.eventState == MIDI_EVENT_WAITING) {
 
 		currentEvent.eventType = (EventType)(byte & 0xf0);
 		currentEvent.channel = byte & 0x0f;
@@ -54,26 +54,47 @@ void MidiDecoder::newByte(unsigned char byte) {
 			currentEventState.numberOfBytes = 1;
 			currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
 			break;
-		case 0xf0:
-		{
-			// System exclusive
-			// Allow patch if real time allowed OR if currenly waiting for sysex
-			// Allow bank if currently waiting for sysex only
-			bool waitingForSysex = this->synthState->fullState.currentMenuItem->menuState == MENU_MIDI_SYSEX_GET;
-			bool realTimeSysexAllowed = this->synthState->fullState.midiConfigValue[MIDICONFIG_REALTIME_SYSEX] == 1;
-			int r = PresetUtil::readSysex(realTimeSysexAllowed || waitingForSysex, waitingForSysex);
-			if (r == 2) {
-				this->synthState->newBankReady();
+		case MIDI_SYSEX:
+			// We must be sure it's 0xF0 and not 0xF1, 0xF8....
+			if (byte == MIDI_SYSEX) {
+				currentEventState.eventState = MIDI_EVENT_SYSEX;
 			}
 			break;
+		default :
+			break;
 		}
-		}
-	} else {
+	} else if (currentEventState.eventState == MIDI_EVENT_IN_PROGRESS) {
 		currentEvent.value[currentEventState.index++] = byte;
 		if (currentEventState.index == currentEventState.numberOfBytes) {
 			midiEventReceived(currentEvent);
-			currentEventState.eventState = MIDI_EVENT_NEW;
+			currentEventState.eventState = MIDI_EVENT_WAITING;
 			currentEventState.index = 0;
+		}
+	} else if (currentEventState.eventState == MIDI_EVENT_SYSEX) {
+		if (byte == MIDI_SYSEX_END) {
+			currentEventState.eventState = MIDI_EVENT_WAITING;
+			currentEventState.index = 0;
+		} else if (currentEventState.index == 0) {
+
+			currentEventState.index = 1;
+			// Only do something for non commercial sysex
+			// We assume it's for us !
+			if (byte == 0x7d) {
+				// System exclusive
+				// Allow patch if real time allowed OR if currenly waiting for sysex
+				// Allow bank if currently waiting for sysex only
+				bool waitingForSysex = this->synthState->fullState.currentMenuItem->menuState == MENU_MIDI_SYSEX_GET;
+				bool realTimeSysexAllowed = this->synthState->fullState.midiConfigValue[MIDICONFIG_REALTIME_SYSEX] == 1;
+				int r = PresetUtil::readSysex(realTimeSysexAllowed || waitingForSysex, waitingForSysex);
+				if (r == 2) {
+					this->synthState->newBankReady();
+				}
+				currentEventState.eventState = MIDI_EVENT_WAITING;
+				currentEventState.index = 0;
+			}
+		} else {
+			// We do nothing !
+			// consume sysex message till the end !
 		}
 	}
 }
@@ -418,8 +439,6 @@ void MidiDecoder::decodeNrpn() {
 		unsigned int whichStepSeq = this->currentNrpn.paramMSB -2;
 		unsigned int step = this->currentNrpn.paramLSB;
 		unsigned int value = this->currentNrpn.valueLSB;
-		lcd.setCursor(0,0);
-		lcd.print(whichStepSeq);
 
 		this->synthState->setNewStepValue(whichStepSeq, step, value);
 	}
