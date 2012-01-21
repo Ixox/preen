@@ -270,18 +270,10 @@ void setup()
         delayMicroseconds(30);
     }
 
-    lcd.setCursor(0,0);
-    lcd.print('1');
     // Load default patch
     synthState.propagateBeforeNewParamsLoad();
-    lcd.setCursor(0,0);
-    lcd.print('2');
     PresetUtil::loadDefaultPatchIfAny();
-    lcd.setCursor(0,0);
-    lcd.print('3');
     synthState.propagateAfterNewParamsLoad();
-    lcd.setCursor(0,0);
-    lcd.print('4');
 
     fillSoundBuffer();
     fmDisplay.init(&lcd);
@@ -307,10 +299,10 @@ void loop() {
             midiDecoder.newByte(Serial3.read());
             if (midiReceive == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
                 fillSoundBuffer();
-                midiReceive = 2500;
                 lcd.setCursor(0,0);
                 lcd.print((char)0);
             }
+            midiReceive = 2500;
         }
 
         if (midiReceive>0) {
@@ -333,10 +325,10 @@ void loop() {
 
             if (midiSent == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
                 fillSoundBuffer();
-                midiSent = 2500;
                 lcd.setCursor(1,0);
                 lcd.print((char)1);
             }
+            midiSent = 2500;
         }
 
         if (midiSent>0) {

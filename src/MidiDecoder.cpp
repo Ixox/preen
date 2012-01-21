@@ -18,7 +18,7 @@
 #include "MidiDecoder.h"
 
 // DEBUG
-extern LiquidCrystal lcd;
+// extern LiquidCrystal lcd;
 
 
 MidiDecoder::MidiDecoder() {
