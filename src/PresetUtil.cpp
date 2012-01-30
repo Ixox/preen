@@ -748,7 +748,12 @@ int PresetUtil::getNextMidiByte() {
 			return -1;
 		}
 	}
-	return (int)Serial3.read();
+	uint8 byte = Serial3.read();
+	if (PresetUtil::synthState->fullState.midiConfigValue[MIDICONFIG_THROUGH] == 1) {
+		Serial3.print((unsigned char) byte);
+	}
+
+	return (int)byte;
 }
 
 /*

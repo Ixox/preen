@@ -1,16 +1,15 @@
 .DEFAULT_GOAL := r3
 
-PREENFM_VERSION_NUMBER=1.51
+PREENFM_VERSION_NUMBER=1.52.B1
 PREENFM_VERSION=\"$(PREENFM_VERSION_NUMBER)\"
 
 LIB_MAPLE_HOME=/home/xhosxe/libmaple
 
 OBJECTS= build/Env.o build/FM.o build/Osc.o build/Synth.o build/Voice.o build/Lfo.o build/Matrix.o build/RingBuffer.o build/MidiDecoder.o build/Encoders.o build/FMDisplay.o build/SynthState.o build/Menu.o build/PresetUtil.o build/Presets.o build/LfoOsc.o build/LfoEnv.o build/LfoStepSeq.o build/LiquidCrystal.o
 
-LIBMAPLE_OBJECTS=$(LIB_MAPLE_HOME)/build/libmaple/i2c.o $(LIB_MAPLE_HOME)/build/libmaple/systick.o $(LIB_MAPLE_HOME)/build/libmaple/timer.o $(LIB_MAPLE_HOME)/build/libmaple/adc.o $(LIB_MAPLE_HOME)/build/libmaple/syscalls.o $(LIB_MAPLE_HOME)/build/libmaple/exti.o $(LIB_MAPLE_HOME)/build/libmaple/gpio.o $(LIB_MAPLE_HOME)/build/libmaple/nvic.o $(LIB_MAPLE_HOME)/build/libmaple/usart.o $(LIB_MAPLE_HOME)/build/libmaple/util.o $(LIB_MAPLE_HOME)/build/libmaple/rcc.o $(LIB_MAPLE_HOME)/build/libmaple/flash.o $(LIB_MAPLE_HOME)/build/libmaple/spi.o $(LIB_MAPLE_HOME)/build/libmaple/fsmc.o $(LIB_MAPLE_HOME)/build/libmaple/dac.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_callbacks.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_hardware.o $(LIB_MAPLE_HOME)/build/libmaple/usb/descriptors.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_core.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_init.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_int.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_mem.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_regs.o $(LIB_MAPLE_HOME)/build/libmaple/exc.o $(LIB_MAPLE_HOME)/build/wirish/wirish_shift.o $(LIB_MAPLE_HOME)/build/wirish/wirish_analog.o $(LIB_MAPLE_HOME)/build/wirish/wirish_time.o $(LIB_MAPLE_HOME)/build/wirish/pwm.o $(LIB_MAPLE_HOME)/build/wirish/ext_interrupts.o $(LIB_MAPLE_HOME)/build/wirish/wirish_digital.o $(LIB_MAPLE_HOME)/build/wirish/wirish_math.o $(LIB_MAPLE_HOME)/build/wirish/Print.o $(LIB_MAPLE_HOME)/build/wirish/comm/HardwareSerial.o $(LIB_MAPLE_HOME)/build/wirish/comm/HardwareSPI.o $(LIB_MAPLE_HOME)/build/wirish/usb_serial.o $(LIB_MAPLE_HOME)/build/wirish/HardwareTimer.o $(LIB_MAPLE_HOME)/build/wirish/boards/maple_mini.o $(LIB_MAPLE_HOME)/build/wirish/boards.o $(LIB_MAPLE_HOME)/build/wirish/cxxabi-compat.o $(LIB_MAPLE_HOME)/build/libraries/Servo/Servo.o $(LIB_MAPLE_HOME)/build/libraries/Wire/Wire.o
+LIBMAPLE_OBJECTS= $(LIB_MAPLE_HOME)/build/libmaple/i2c.o $(LIB_MAPLE_HOME)/build/libmaple/systick.o $(LIB_MAPLE_HOME)/build/libmaple/timer.o $(LIB_MAPLE_HOME)/build/libmaple/adc.o $(LIB_MAPLE_HOME)/build/libmaple/syscalls.o $(LIB_MAPLE_HOME)/build/libmaple/exti.o $(LIB_MAPLE_HOME)/build/libmaple/gpio.o $(LIB_MAPLE_HOME)/build/libmaple/nvic.o $(LIB_MAPLE_HOME)/build/libmaple/usart.o $(LIB_MAPLE_HOME)/build/libmaple/util.o $(LIB_MAPLE_HOME)/build/libmaple/rcc.o $(LIB_MAPLE_HOME)/build/libmaple/flash.o $(LIB_MAPLE_HOME)/build/libmaple/spi.o $(LIB_MAPLE_HOME)/build/libmaple/fsmc.o $(LIB_MAPLE_HOME)/build/libmaple/dac.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_callbacks.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_hardware.o $(LIB_MAPLE_HOME)/build/libmaple/usb/descriptors.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_core.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_init.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_int.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_mem.o $(LIB_MAPLE_HOME)/build/libmaple/usb/usb_lib/usb_regs.o $(LIB_MAPLE_HOME)/build/libmaple/exc.o $(LIB_MAPLE_HOME)/build/wirish/wirish_shift.o $(LIB_MAPLE_HOME)/build/wirish/wirish_analog.o $(LIB_MAPLE_HOME)/build/wirish/wirish_time.o $(LIB_MAPLE_HOME)/build/wirish/pwm.o $(LIB_MAPLE_HOME)/build/wirish/ext_interrupts.o $(LIB_MAPLE_HOME)/build/wirish/wirish_digital.o $(LIB_MAPLE_HOME)/build/wirish/wirish_math.o $(LIB_MAPLE_HOME)/build/wirish/Print.o $(LIB_MAPLE_HOME)/build/wirish/comm/HardwareSerial.o $(LIB_MAPLE_HOME)/build/wirish/comm/HardwareSPI.o $(LIB_MAPLE_HOME)/build/wirish/usb_serial.o $(LIB_MAPLE_HOME)/build/wirish/HardwareTimer.o $(LIB_MAPLE_HOME)/build/wirish/boards/maple_mini.o $(LIB_MAPLE_HOME)/build/wirish/boards.o $(LIB_MAPLE_HOME)/build/wirish/cxxabi-compat.o $(LIB_MAPLE_HOME)/build/libraries/Servo/Servo.o $(LIB_MAPLE_HOME)/build/libraries/Wire/Wire.o
 
 #  $(LIB_MAPLE_HOME)/build/wirish/wirish.o
-
 #  $(LIB_MAPLE_HOME)/build/libmaple/i2c.o
 
 # Valid BOARDs: maple, maple_native, ...
@@ -54,7 +53,8 @@ GLOBAL_ASFLAGS  := -mcpu=cortex-m3 -march=armv7-m -mthumb -DBOARD_$(BOARD) \
 LDDIR    := $(SUPPORT_PATH)/ld
 LDFLAGS  = -T$(LDDIR)/$(LDSCRIPT) -L$(LDDIR)    \
             -mcpu=cortex-m3 -mthumb -Xlinker     \
-            --gc-sections --print-gc-sections --march=armv7-m -Wall
+            --gc-sections --print-gc-sections --march=armv7-m -Wall 
+#-L$(LIB_MAPLE_HOME)/build/ -lmaple
 
 # Set up build rules and some useful templates
 include $(SUPPORT_PATH)/make/build-rules.mk

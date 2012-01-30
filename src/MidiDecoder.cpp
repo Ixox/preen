@@ -36,6 +36,11 @@ void MidiDecoder::setSynth(Synth* synth) {
 
 void MidiDecoder::newByte(unsigned char byte) {
 
+	if (this->synthState->fullState.midiConfigValue[MIDICONFIG_THROUGH] == 1) {
+		Serial3.print((unsigned char) byte);
+	}
+
+
 	if (currentEventState.eventState == MIDI_EVENT_WAITING) {
 
 		currentEvent.eventType = (EventType)(byte & 0xf0);
@@ -61,6 +66,7 @@ void MidiDecoder::newByte(unsigned char byte) {
 			}
 			break;
 		default :
+			// Nothing to do...
 			break;
 		}
 	} else if (currentEventState.eventState == MIDI_EVENT_IN_PROGRESS) {
@@ -103,10 +109,7 @@ void MidiDecoder::newByte(unsigned char byte) {
 void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 	int acceptedChannel = this->synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL] -1;
 	if (acceptedChannel >= 0 && midiEvent.channel != acceptedChannel) {
-		if (this->synthState->fullState.midiConfigValue[MIDICONFIG_THROUGH] == 1) {
-			// Forward to midiout !
-			midiToSend.insert(midiEvent);
-		}
+		// Not the right channel !
 		return;
 	}
 
@@ -139,7 +142,6 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 		PresetUtil::readSynthParamFromEEPROM(this->synthState->fullState.bankNumber, midiEvent.value[0], &this->synthState->params);
 		this->synthState->propagateAfterNewParamsLoad();
 		this->synthState->resetDisplay();
-
 		break;
 	}
 }
@@ -489,14 +491,16 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
 				midiToSend.insert(cc);
 			}
 		} else {
+			// MSB / LSB
+			int paramNumber =  currentrow * NUMBER_OF_ENCODERS + encoder;
 			// Value to send must be positive
 			int valueToSend = newValue - param->minValue;
 			// NRPN is 4 control change
 			cc.value[0] = 99;
-			cc.value[1] = 0;
+			cc.value[1] = (uint8)(paramNumber >> 7);
 			midiToSend.insert(cc);
 			cc.value[0] = 98;
-			cc.value[1] = (uint8) currentrow * NUMBER_OF_ENCODERS + encoder;
+			cc.value[1] = (uint8)(paramNumber & 127);
 			midiToSend.insert(cc);
 			cc.value[0] = 6;
 			cc.value[1] = (uint8) (valueToSend >> 7);
@@ -573,6 +577,8 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
 			break;
 		case ROW_LFO5 ... ROW_LFO_LAST:
 			if (encoder == ENCODER_STEPSEQ_BPM) {
+				if ((newValue & 0x1) >0)
+					break;
 				cc.value[0] = CC_STEPSEQ5_BPM + (currentrow - ROW_LFO5);
 				cc.value[1] = (newValue >> 1);
 			}
@@ -590,24 +596,25 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
 }
 
 void MidiDecoder::sendMidiOut() {
-	int howManyToSend = midiToSend.getCount();
-	if (howManyToSend > 0) {
-		MidiEvent toSend = midiToSend.remove();
+	// 1.52 : from now only MIDI_CONTRIL_CHANGE should be sent...
+	// Other events are directly copied when recevied...
+	// Check before calling that there is something to send...
 
-		switch (toSend.eventType) {
-		case MIDI_NOTE_OFF:
-		case MIDI_NOTE_ON:
-		case MIDI_CONTROL_CHANGE:
-		case MIDI_PITCH_BEND:
-			Serial3.print((unsigned char) (toSend.eventType + toSend.channel));
-			Serial3.print((unsigned char) toSend.value[0]);
-			Serial3.print((unsigned char) toSend.value[1]);
-			break;
-		case MIDI_AFTER_TOUCH:
-		case MIDI_PROGRAM_CHANGE:
-			Serial3.print((unsigned char) (toSend.eventType + toSend.channel));
-			Serial3.print((unsigned char) toSend.value[0]);
-			break;
-		}
+	MidiEvent toSend = midiToSend.remove();
+
+	switch (toSend.eventType) {
+	case MIDI_NOTE_OFF:
+	case MIDI_NOTE_ON:
+	case MIDI_CONTROL_CHANGE:
+	case MIDI_PITCH_BEND:
+		Serial3.print((unsigned char) (toSend.eventType + toSend.channel));
+		Serial3.print((unsigned char) toSend.value[0]);
+		Serial3.print((unsigned char) toSend.value[1]);
+		break;
+	case MIDI_AFTER_TOUCH:
+	case MIDI_PROGRAM_CHANGE:
+		Serial3.print((unsigned char) (toSend.eventType + toSend.channel));
+		Serial3.print((unsigned char) toSend.value[0]);
+		break;
 	}
 }

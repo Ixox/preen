@@ -325,7 +325,7 @@ void FMDisplay::checkPresetModified() {
 
 void FMDisplay::newParamValueFromExternal(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
     checkPresetModified();
-	if (currentRow == this->displayedRow) {
+	if (this->synthState->getSynthMode() == SYNTH_MODE_EDIT && currentRow == this->displayedRow) {
 		if (currentRow >= ROW_LFO5 && encoder>1) {
 			updateStepSequencer(currentRow, encoder, oldValue, newValue);
 			return;
