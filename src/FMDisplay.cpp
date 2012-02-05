@@ -18,6 +18,9 @@
 #include "FMDisplay.h"
 
 
+extern const char* lfoSeqMidiClock[];
+extern const char* lfoOscMidiClock[];
+
 const char* stepChars  = "_123456789ABCDEF";
 
 FMDisplay::FMDisplay() {
@@ -78,6 +81,12 @@ void FMDisplay::updateEncoderValue(int row, int encoder, ParameterDisplay* param
 	case DISPLAY_TYPE_STRINGS :
 		lcd->print(param->valueName[newValue]);
 		break;
+    case DISPLAY_TYPE_LFO_HZ:
+    	if (newValue > 246) {
+    		lcd->print(lfoOscMidiClock[newValue-247]);
+    		break;
+    	}
+    	// else what follows :
 	case DISPLAY_TYPE_FLOAT_4_4:
 displayFloat44:
 		lcd->print(newValue>>4);
@@ -140,6 +149,12 @@ displayFloat53:
         lcd->print(' ');
         break;
     }
+    case DISPLAY_TYPE_STEP_SEQ_BPM:
+    	if (newValue > 240) {
+    		lcd->print(lfoSeqMidiClock[newValue-241]);
+    		break;
+    	}
+    	goto displaySignedChar;
     case DISPLAY_TYPE_UNSIGNED_CHAR_OR_NONE:
     	if (newValue == 255) {
     		lcd->print("None");

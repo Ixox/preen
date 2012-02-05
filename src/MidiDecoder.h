@@ -99,7 +99,13 @@ enum EventType {
     MIDI_PROGRAM_CHANGE =0xc0,
     MIDI_AFTER_TOUCH = 0xd0,
     MIDI_PITCH_BEND = 0xe0,
+    MIDI_REAL_TIME_EVENT = 0xf0,
     MIDI_SYSEX = 0xf0,
+    MIDI_SONG_POSITION = 0xf2,
+    MIDI_START = 0xfa,
+    MIDI_CLOCK = 0xf8,
+    MIDI_CONTINUE = 0xfb,
+    MIDI_STOP = 0xfc,
     MIDI_SYSEX_END = 0xf7
 };
 

@@ -75,7 +75,9 @@ void Synth::init() {
 				&this->osc5, &this->osc6);
 	}
 
-	cpt = 0;
+	this->cpt = 0;
+	this->isSequencerPlaying = false;
+	this->midiClockCpt = 0;
 }
 
 void Synth::noteOn(char note, char velocity) {

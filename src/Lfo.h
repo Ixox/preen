@@ -39,12 +39,19 @@ public:
 	virtual void nextValueInMatrix() = 0 ;
 	virtual void noteOn() = 0;
 	virtual void noteOff() = 0;
+	virtual void midiClock(int songPosition) {};
+	void midiContinue() {
+		ticks = 0;
+	};
+
 
 protected:
 	Matrix *matrix;
     DestinationEnum destination;
 	SourceEnum source;
 	int index;
+	// Midi Clock sync
+	int ticks;
 };
 
 #endif /* LFO_H_ */

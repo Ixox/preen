@@ -79,6 +79,44 @@ public:
 
     void afterNewParamsLoad();
 
+    void setSongPosition(int songPosition) {
+    	this->songPosition = songPosition;
+    }
+
+    int getSongPosition() {
+    	return this->songPosition;
+    }
+
+    void midiContinue() {
+    	this->isSequencerPlaying = true;
+    	for (int k=0; k<NUMBER_OF_LFO; k++) {
+    		lfo[k]->midiContinue();
+    	}
+    }
+
+    void midiStart() {
+    	this->isSequencerPlaying = true;
+    	this->songPosition = 0;
+    	this->midiClockCpt = 0;
+    	for (int k=0; k<NUMBER_OF_LFO; k++) {
+    		lfo[k]->midiContinue();
+    	}
+    }
+
+    void midiStop() {
+    	this->isSequencerPlaying = false;
+    }
+
+    void midiClock() {
+    	this->midiClockCpt++;
+    	if (this->midiClockCpt == 6) {
+    		this->songPosition++;
+    		this->midiClockCpt = 0;
+        	for (int k=0; k<NUMBER_OF_LFO; k++) {
+        		lfo[k]->midiClock(this->songPosition);
+        	}
+    	}
+    }
 
 private:
     // Called by setSynthState
@@ -94,6 +132,11 @@ private:
     LfoStepSeq lfoStepSeq[NUMBER_OF_LFO_STEP];
 
     Lfo* lfo[NUMBER_OF_LFO];
+
+    // Is Sequencer playing
+    boolean isSequencerPlaying;
+    int midiClockCpt;
+    int songPosition;
 
     // 6 oscillators Max
     Osc<1> osc1;

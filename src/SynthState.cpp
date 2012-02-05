@@ -184,6 +184,7 @@ struct ParameterRowDisplay matrixParameterRow = {
         }
 };
 
+const char* lfoOscMidiClock[] =  { "M/16", "MC/8", "MC/4", "MC/2", "MClk", "MC*2", "MC*3", "MC*4", "MC*8"};
 
 const char* lfoShapeNames [] =  { "Saw ", "Ramp", "Squa", "Rand"} ;
 struct ParameterRowDisplay lfoParameterRow = {
@@ -191,18 +192,21 @@ struct ParameterRowDisplay lfoParameterRow = {
         { "Shap", "Freq", "Bias", "KSyn" },
         {
                 { LFO_SAW, LFO_TYPE_MAX-1, DISPLAY_TYPE_STRINGS,  lfoShapeNames, nullNamesOrder, nullNamesOrder},
-                { 0, 255, DISPLAY_TYPE_FLOAT_4_4, nullNames, nullNamesOrder, nullNamesOrder },
+                { 0, 255, DISPLAY_TYPE_LFO_HZ, nullNames, nullNamesOrder, nullNamesOrder },
                 { (char)-127, 127, DISPLAY_TYPE_SIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
                 { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
         }
 };
 
 
+
+const char* lfoSeqMidiClock[] =  { "MC/4", "MC/2", "MC  ", "MC*2", "MC*4" };
+
 struct ParameterRowDisplay lfoStepParameterRow = {
         "LFO Seq",
         { "Bpm ", "Gate", "    ", "    " },
         {
-                { 10 ,240, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder},
+                { 10 ,245, DISPLAY_TYPE_STEP_SEQ_BPM, nullNames, nullNamesOrder, nullNamesOrder},
                 { 0 ,32, DISPLAY_TYPE_FLOAT_4_4, nullNames, nullNamesOrder, nullNamesOrder},
                 { 0, 0, DISPLAY_TYPE_STEP_SEQ1, nullNames, nullNamesOrder, nullNamesOrder },
                 { 0, 0, DISPLAY_TYPE_STEP_SEQ2, nullNames, nullNamesOrder, nullNamesOrder }

@@ -20,6 +20,13 @@
 
 #include "Lfo.h"
 
+enum {
+	LFO_SEQ_MIDICLOCK_DIV_4 = 241,
+	LFO_SEQ_MIDICLOCK_DIV_2,
+	LFO_SEQ_MIDICLOCK,
+	LFO_SEQ_MIDICLOCK_TIME_2,
+	LFO_SEQ_MIDICLOCK_TIME_4,
+};
 
 
 class LfoStepSeq: public Lfo {
@@ -29,10 +36,13 @@ public:
 	void nextValueInMatrix();
 	void noteOn();
 	void noteOff();
+	void midiClock(int songPosition);
+
 
 private:
 	StepSequencerParams* seqParams;
 	StepSequencerSteps* seqSteps;
+
     int index;
     int step;
     int gateValue;

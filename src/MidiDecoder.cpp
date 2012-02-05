@@ -59,10 +59,29 @@ void MidiDecoder::newByte(unsigned char byte) {
 			currentEventState.numberOfBytes = 1;
 			currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
 			break;
-		case MIDI_SYSEX:
+		case MIDI_REAL_TIME_EVENT:
 			// We must be sure it's 0xF0 and not 0xF1, 0xF8....
-			if (byte == MIDI_SYSEX) {
+			switch (byte)  {
+			case MIDI_SYSEX:
 				currentEventState.eventState = MIDI_EVENT_SYSEX;
+				break;
+			case MIDI_CONTINUE:
+				this->synth->midiContinue();
+				break;
+			case MIDI_CLOCK:
+				this->synth->midiClock();
+				break;
+			case MIDI_START:
+				this->synth->midiStart();
+				break;
+			case MIDI_STOP:
+				this->synth->midiStop();
+				break;
+			case MIDI_SONG_POSITION:
+				currentEvent.eventType = MIDI_SONG_POSITION;
+				currentEventState.numberOfBytes = 2;
+				currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
+				break;
 			}
 			break;
 		default :
@@ -142,6 +161,9 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 		PresetUtil::readSynthParamFromEEPROM(this->synthState->fullState.bankNumber, midiEvent.value[0], &this->synthState->params);
 		this->synthState->propagateAfterNewParamsLoad();
 		this->synthState->resetDisplay();
+		break;
+	case MIDI_SONG_POSITION:
+		this->synth->setSongPosition(((int) midiEvent.value[1] << 7) + midiEvent.value[0]);
 		break;
 	}
 }

@@ -21,6 +21,19 @@
 #include "Lfo.h"
 #include "Osc.h"
 
+
+enum {
+	LFO_MIDICLOCK_MC_DIV_16 = 247,
+	LFO_MIDICLOCK_MC_DIV_8,
+	LFO_MIDICLOCK_MC_DIV_4,
+	LFO_MIDICLOCK_MC_DIV_2,
+	LFO_MIDICLOCK_MC,
+	LFO_MIDICLOCK_MC_TIME_2,
+	LFO_MIDICLOCK_MC_TIME_3,
+	LFO_MIDICLOCK_MC_TIME_4,
+	LFO_MIDICLOCK_MC_TIME_8
+};
+
 class LfoOsc: public Lfo {
 public:
 
@@ -30,22 +43,23 @@ public:
 	    ramp = lfo->keybRamp << 4; // * 16
 	}
 
+	void midiClock(int songPosition);
+
 	void nextValueInMatrix() {
 	     int lfoValue = 0;
 
+	     ticks ++;
 		// then new value
 		//	index = (index +  ((lfo->freq << 16) / LFO_SAMPLE_RATE_x_8 ))  & 0xffff;
 		//		int jmp = lfo->freq	<< 3 ; // << 16 >> 13
-	    int realfreq = lfo->freq + (this->matrix->getDestination(destination) >> 7);
+	     if (lfo->freq <LFO_MIDICLOCK_MC_DIV_16) {
+	    	 stepPlusMatrix = (lfo->freq + (this->matrix->getDestination(destination) >> 7)) << 3;
+	     }
 
 		switch (lfo->shape) {
-		case LFO_RAMP:
-			index = (index + (realfreq << 3)) & 0xffff;
-			lfoValue = (index>>8)-128;
-			break;
 		case LFO_SAW:
 		{
-			index = (index + (realfreq << 3)) & 0xffff;
+			index = (index + stepPlusMatrix) & 0xffff;
 			if (index < 32768) {
 			    lfoValue = (index>>7) - 128;
 			} else {
@@ -53,8 +67,12 @@ public:
 			}
 			break;
 		}
+		case LFO_RAMP:
+			index = (index + stepPlusMatrix) & 0xffff;
+			lfoValue = (index>>8)-128;
+			break;
 		case LFO_SQUARE:
-			index = (index + (realfreq << 3)) & 0xffff;
+			index = (index + stepPlusMatrix) & 0xffff;
 			if ((index) < 32768) {
 			    lfoValue = -128;
 			} else {
@@ -63,7 +81,7 @@ public:
 			break;
 
 		case LFO_RANDOM:
-			index = (index + (realfreq << 3));
+			index += stepPlusMatrix;
 			if (index > 0xffff) {
 				 index &= 0xffff;
 				 currentRandomValue = (RANDOM >> 8);
@@ -96,12 +114,15 @@ public:
 	}
 
 
+
 private:
 	LfoType type;
 	LfoParams* lfo ;
     int index, rampIndex, ramp;
     DestinationEnum destination;
     int currentRandomValue;
+
+    int stepPlusMatrix ;
 
 };
 

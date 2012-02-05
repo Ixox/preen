@@ -32,3 +32,74 @@ void LfoOsc::init(int number, Matrix *matrix, SourceEnum source, DestinationEnum
 
 }
 
+
+void LfoOsc::midiClock(int songPosition) {
+	switch (lfo->freq) {
+		case LFO_MIDICLOCK_MC_DIV_16:
+			if ((songPosition & 0x3)==0) {
+				stepPlusMatrix = 0xfff / ticks;
+				ticks = 0;
+				index = (songPosition & 0x3C) * 0x3ff ;
+			}
+			break;
+		case LFO_MIDICLOCK_MC_DIV_8:
+			if ((songPosition & 0x3)==0) {
+				stepPlusMatrix = 0x1fff / ticks;
+				ticks = 0;
+				index = (songPosition & 0x1C) * 0x7ff ;
+			}
+			break;
+		case LFO_MIDICLOCK_MC_DIV_4:
+			if ((songPosition & 0x3)==0) {
+				stepPlusMatrix = 0x3fff / ticks;
+				ticks = 0;
+				index = (songPosition & 0xC) * 0xfff ;
+			}
+			break;
+		case LFO_MIDICLOCK_MC_DIV_2:
+			if ((songPosition & 0x3)==0) {
+				stepPlusMatrix = 0x7fff / ticks;
+				ticks = 0;
+				index = (songPosition & 0x4) * 0x1fff ;
+			}
+			break;
+		case LFO_MIDICLOCK_MC:
+			// Midi Clock
+			if ((songPosition & 0x3)==0) {
+				stepPlusMatrix = 0xffff / ticks;
+				ticks = 0;
+				index = 0;
+			}
+			break;
+		case LFO_MIDICLOCK_MC_TIME_2:
+			if ((songPosition & 0x3)==0) {
+				stepPlusMatrix = 0x1ffff / ticks;
+				ticks = 0;
+				index = 0;
+			}
+			break;
+		case LFO_MIDICLOCK_MC_TIME_3:
+			if ((songPosition & 0x3)==0) {
+				stepPlusMatrix = 0xffff / ticks * 3;
+				ticks = 0;
+				index = 0;
+			}
+			break;
+		case LFO_MIDICLOCK_MC_TIME_4:
+			if ((songPosition & 0x3)==0) {
+				stepPlusMatrix = 0x3ffff / ticks;
+				ticks = 0;
+				index = 0;
+			}
+			break;
+		case LFO_MIDICLOCK_MC_TIME_8:
+			if ((songPosition & 0x3)==0) {
+				stepPlusMatrix = 0x7ffff / ticks;
+				ticks = 0;
+				index = 0;
+			}
+			break;
+	}
+}
+
+
