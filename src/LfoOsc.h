@@ -43,7 +43,7 @@ public:
 	    ramp = lfo->keybRamp << 4; // * 16
 	}
 
-	void midiClock(int songPosition);
+	void midiClock(int songPosition, boolean computeStep);
 
 	void nextValueInMatrix() {
 	     int lfoValue = 0;
@@ -102,8 +102,10 @@ public:
 
 	void noteOn() {
         if (ramp > 0) {
-            index = 0;
             rampIndex = 0;
+        	if (lfo->freq <LFO_MIDICLOCK_MC_DIV_16) {
+        		index = 0;
+        	}
         } else {
             rampIndex = 1; // greater than 0
         }

@@ -36,7 +36,7 @@ public:
 	void nextValueInMatrix();
 	void noteOn();
 	void noteOff();
-	void midiClock(int songPosition);
+	void midiClock(int songPosition, boolean computeStep);
 
 
 private:

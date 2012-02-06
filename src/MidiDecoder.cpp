@@ -79,6 +79,9 @@ void MidiDecoder::newByte(unsigned char byte) {
 				break;
 			case MIDI_SONG_POSITION:
 				currentEvent.eventType = MIDI_SONG_POSITION;
+				// Channel hack to make it accpeted
+				currentEvent.channel = 	this->synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL] -1;
+
 				currentEventState.numberOfBytes = 2;
 				currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
 				break;

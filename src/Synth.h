@@ -26,11 +26,14 @@
 #include "Env.h"
 #include "SynthParamListener.h"
 #include "wirish.h"
-#include "LiquidCrystal.h"
 
 #define MAX_NUMBER_OF_VOICES 4
 
 #define UINT_MAX  4294967295
+
+// #include "LiquidCrystal.h"
+// extern LiquidCrystal lcd;
+
 
 class Synth : public SynthParamListener, public SynthStateAware
 {
@@ -81,6 +84,9 @@ public:
 
     void setSongPosition(int songPosition) {
     	this->songPosition = songPosition;
+		this->midiClockCpt = 0;
+		// Next one is OK only if we're on a quarter...
+    	this->recomputeNext = ((songPosition&0x3)==0);
     }
 
     int getSongPosition() {
@@ -89,8 +95,9 @@ public:
 
     void midiContinue() {
     	this->isSequencerPlaying = true;
+    	this->midiClockCpt = 0;
     	for (int k=0; k<NUMBER_OF_LFO; k++) {
-    		lfo[k]->midiContinue();
+    		lfo[k]->midiClock(this->songPosition, false);
     	}
     }
 
@@ -101,6 +108,7 @@ public:
     	for (int k=0; k<NUMBER_OF_LFO; k++) {
     		lfo[k]->midiContinue();
     	}
+    	this->recomputeNext = true;
     }
 
     void midiStop() {
@@ -110,10 +118,15 @@ public:
     void midiClock() {
     	this->midiClockCpt++;
     	if (this->midiClockCpt == 6) {
-    		this->songPosition++;
+    		if (this->isSequencerPlaying) {
+    			this->songPosition++;
+    		}
     		this->midiClockCpt = 0;
         	for (int k=0; k<NUMBER_OF_LFO; k++) {
-        		lfo[k]->midiClock(this->songPosition);
+        		lfo[k]->midiClock(this->songPosition, this->recomputeNext);
+        	}
+        	if ((songPosition&0x3)==0) {
+        		this->recomputeNext = true;
         	}
     	}
     }
@@ -137,6 +150,7 @@ private:
     boolean isSequencerPlaying;
     int midiClockCpt;
     int songPosition;
+    boolean recomputeNext;
 
     // 6 oscillators Max
     Osc<1> osc1;

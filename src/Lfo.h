@@ -39,7 +39,7 @@ public:
 	virtual void nextValueInMatrix() = 0 ;
 	virtual void noteOn() = 0;
 	virtual void noteOff() = 0;
-	virtual void midiClock(int songPosition) {};
+	virtual void midiClock(int songPosition, boolean computeStep) {};
 	void midiContinue() {
 		ticks = 0;
 	};

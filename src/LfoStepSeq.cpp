@@ -42,41 +42,50 @@ void LfoStepSeq::init(int number, Matrix *matrix, SourceEnum source,
 	ticks = 0;
 }
 
-
-void LfoStepSeq::midiClock(int songPosition) {
+void LfoStepSeq::midiClock(int songPosition, boolean computeStep) {
 	switch (seqParams->bpm)  {
 	case LFO_SEQ_MIDICLOCK_DIV_4:
 		// Midi Clock  / 4
 		if ((songPosition & 0x3)==0) {
-			step = 0xffff / ticks;
+			if (computeStep) {
+				step = 0xffff / ticks;
+			}
 			ticks = 0;
 			index = ((songPosition >> 2)& 0xf) << 16;
 		}
 		break;
 	case LFO_SEQ_MIDICLOCK_DIV_2:
 		if ((songPosition & 0x3)==0) {
-			step = 0x1ffff / ticks;
+			if (computeStep) {
+				step = 0x1ffff / ticks;
+			}
 			ticks = 0;
 			index = ((songPosition >> 1) & 0xf) << 16;
 		}
 		break;
 	case LFO_SEQ_MIDICLOCK:
 		if ((songPosition & 0x3)==0) {
-			step = 0x3ffff / ticks;
+			if (computeStep) {
+				step = 0x3ffff / ticks;
+			}
 			ticks = 0;
 			index = (songPosition& 0xf) << 16;
 		}
 		break;
 	case LFO_SEQ_MIDICLOCK_TIME_2:
 		if ((songPosition & 0x3)==0) {
-			step = 0x7ffff / ticks;
+			if (computeStep) {
+				step = 0x7ffff / ticks;
+			}
 			ticks = 0;
 			index = ((songPosition * 2) & 0xf) << 16;
 		}
 		break;
 	case LFO_SEQ_MIDICLOCK_TIME_4:
 		if ((songPosition & 0x3)==0) {
-			step = 0xfffff / ticks;
+			if (computeStep) {
+				step = 0xfffff / ticks;
+			}
 			ticks = 0;
 			index = ((songPosition * 4) & 0xf) << 16;
 		}

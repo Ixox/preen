@@ -78,6 +78,7 @@ void Synth::init() {
 	this->cpt = 0;
 	this->isSequencerPlaying = false;
 	this->midiClockCpt = 0;
+	this->recomputeNext = true;
 }
 
 void Synth::noteOn(char note, char velocity) {
