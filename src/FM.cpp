@@ -294,22 +294,22 @@ void loop() {
     mainCpt++;
     fillSoundBufferFull();
 
-    if ((newMicros - midiInMicros) > 200) {
-        while (Serial3.available()) {
-            fillSoundBuffer();
-            midiDecoder.newByte(Serial3.read());
-            if (midiReceive == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
-                fillSoundBuffer();
-                lcd.setCursor(0,0);
-                lcd.print((char)0);
-            }
-           	if (synthState.fullState.synthMode == SYNTH_MODE_MENU) {
-				midiReceive = 0;
-            } else {
-            	midiReceive = 2500;
-            }
-        }
+	while (Serial3.available()) {
+		fillSoundBuffer();
+		midiDecoder.newByte(Serial3.read());
+		if (midiReceive == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
+			fillSoundBuffer();
+			lcd.setCursor(0,0);
+			lcd.print((char)0);
+		}
+		if (synthState.fullState.synthMode == SYNTH_MODE_MENU) {
+			midiReceive = 0;
+		} else {
+			midiReceive = 2500;
+		}
+	}
 
+	if ((newMicros - midiInMicros) > 200) {
         if (midiReceive>0) {
             if (midiReceive == 1 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
                 fillSoundBuffer();
