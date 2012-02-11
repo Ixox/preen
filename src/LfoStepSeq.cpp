@@ -17,6 +17,9 @@
 
 #include "LfoStepSeq.h"
 
+#include "LiquidCrystal.h"
+extern LiquidCrystal lcd;
+
 
 int expValues[] = { 0, 15, 31, 48, 67, 86, 106, 128, 150, 175, 200, 227, 256,
 		286, 319, 353 };
@@ -46,48 +49,54 @@ void LfoStepSeq::midiClock(int songPosition, boolean computeStep) {
 	switch (seqParams->bpm)  {
 	case LFO_SEQ_MIDICLOCK_DIV_4:
 		// Midi Clock  / 4
-		if ((songPosition & 0x3)==0) {
+		if ((songPosition & 0x1)==0) {
 			if (computeStep) {
-				step = 0xffff / ticks;
+				step = 0x7ffff / ticks;
+				ticks = 0;
 			}
-			ticks = 0;
-			index = ((songPosition >> 2)& 0xf) << 16;
+			if ((songPosition & 0x3)==0) {
+				// We don't want to reset the 20 MSBits of index
+				index = (((songPosition >> 2) & 0xf) << 20);
+			} else {
+				index = (((songPosition >> 2) & 0xf) << 20) | (index & 0xfffff);
+			}
 		}
 		break;
 	case LFO_SEQ_MIDICLOCK_DIV_2:
-		if ((songPosition & 0x3)==0) {
+		if ((songPosition & 0x1)==0) {
 			if (computeStep) {
-				step = 0x1ffff / ticks;
+				step = 0xfffff / ticks;
+				ticks = 0;
 			}
-			ticks = 0;
-			index = ((songPosition >> 1) & 0xf) << 16;
+			index = ((songPosition >> 1) & 0xf) << 20;
 		}
 		break;
 	case LFO_SEQ_MIDICLOCK:
-		if ((songPosition & 0x3)==0) {
+		if ((songPosition & 0x1)==0) {
 			if (computeStep) {
-				step = 0x3ffff / ticks;
+				// Should do 2 times ffffff in ticks...
+				step = 0x1fffff / ticks;
+				ticks = 0;
 			}
-			ticks = 0;
-			index = (songPosition& 0xf) << 16;
+			index = (songPosition & 0xf) << 20;
 		}
 		break;
 	case LFO_SEQ_MIDICLOCK_TIME_2:
-		if ((songPosition & 0x3)==0) {
+		if ((songPosition & 0x1)==0) {
 			if (computeStep) {
-				step = 0x7ffff / ticks;
+				step = 0x3fffff / ticks;
+				ticks = 0;
 			}
-			ticks = 0;
-			index = ((songPosition * 2) & 0xf) << 16;
+			index = ((songPosition * 2) & 0xf) << 20;
 		}
 		break;
 	case LFO_SEQ_MIDICLOCK_TIME_4:
-		if ((songPosition & 0x3)==0) {
+		if ((songPosition & 0x1)==0) {
 			if (computeStep) {
-				step = 0xfffff / ticks;
+				step = 0x7fffff / ticks;
+				ticks = 0;
 			}
-			ticks = 0;
-			index = ((songPosition * 4) & 0xf) << 16;
+			index = ((songPosition * 4) & 0xf) << 20;
 		}
 		break;
 	}
@@ -96,14 +105,14 @@ void LfoStepSeq::midiClock(int songPosition, boolean computeStep) {
 
 void LfoStepSeq::valueChanged(int encoder) {
 	if (encoder < 2) {
-		if (seqParams->bpm <= 240 ) {
+		if (seqParams->bpm < LFO_SEQ_MIDICLOCK_DIV_4 ) {
 			// We're called 1024 times per seconds
 			// Each step must last (1024 / 4 * 60/bpm)
 			// = 64*60/bmp = 15360 / bmp
 			// We must going forward bpm / 15360
 			// fix point stepForward = (bpm << 16) / 15360;
 
-			step = (seqParams->bpm << 16) / 15360;
+			step = (seqParams->bpm << 20) / 15360;
 		}
 	}
 }
@@ -113,7 +122,7 @@ void LfoStepSeq::nextValueInMatrix() {
 	ticks++;
 
 	index += step;
-	index &= 0xfffff;
+	index &= 0xffffff;
 
 	// Add gate and matrix value
 	int gatePlusMatrix = seqParams->gate + (this->matrix->getDestination(matrixGateDestination) >> 7);
@@ -123,17 +132,17 @@ void LfoStepSeq::nextValueInMatrix() {
 		target = 0;
 	} else if (gatePlusMatrix < 32) {
 		// Gated ?
-		if (!gated && ((index & 0xffff) >= (gatePlusMatrix << 11))) {
+		if (!gated && ((index & 0xfffff) >= (gatePlusMatrix << 15))) {
 			target = 0;
 			gated = true;
 		}
 		// End of gate ?
-		if (gated && ((index & 0xffff) < (gatePlusMatrix << 11))) {
-			target = seqSteps->steps[index >> 16];
+		if (gated && ((index & 0xfffff) < (gatePlusMatrix << 15))) {
+			target = seqSteps->steps[index >> 20];
 			gated = false;
 		}
 	} else {
-		target = seqSteps->steps[index >> 16];
+		target = seqSteps->steps[index >> 20];
 	}
 
 	if (currentValue < target) {
@@ -142,13 +151,14 @@ void LfoStepSeq::nextValueInMatrix() {
 	if (currentValue > target) {
 		currentValue--;
 	}
-
 	matrix->setSource(source, expValues[currentValue]);
 }
 
 void LfoStepSeq::noteOn() {
-	index = 0;
-	target = seqSteps->steps[0];
+	if (seqParams->bpm < LFO_SEQ_MIDICLOCK_DIV_4) {
+		index = 0;
+		target = seqSteps->steps[0];
+	}
 }
 
 void LfoStepSeq::noteOff() {

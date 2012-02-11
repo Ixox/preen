@@ -45,60 +45,8 @@ public:
 
 	void midiClock(int songPosition, boolean computeStep);
 
-	void nextValueInMatrix() {
-	     int lfoValue = 0;
+	void nextValueInMatrix();
 
-	     ticks ++;
-		// then new value
-		//	index = (index +  ((lfo->freq << 16) / LFO_SAMPLE_RATE_x_8 ))  & 0xffff;
-		//		int jmp = lfo->freq	<< 3 ; // << 16 >> 13
-	     if (lfo->freq <LFO_MIDICLOCK_MC_DIV_16) {
-	    	 stepPlusMatrix = (lfo->freq + (this->matrix->getDestination(destination) >> 7)) << 3;
-	     }
-
-		switch (lfo->shape) {
-		case LFO_SAW:
-		{
-			index = (index + stepPlusMatrix) & 0xffff;
-			if (index < 32768) {
-			    lfoValue = (index>>7) - 128;
-			} else {
-			    lfoValue = 383 - (index>>7);
-			}
-			break;
-		}
-		case LFO_RAMP:
-			index = (index + stepPlusMatrix) & 0xffff;
-			lfoValue = (index>>8)-128;
-			break;
-		case LFO_SQUARE:
-			index = (index + stepPlusMatrix) & 0xffff;
-			if ((index) < 32768) {
-			    lfoValue = -128;
-			} else {
-                lfoValue = 127;
-			}
-			break;
-
-		case LFO_RANDOM:
-			index += stepPlusMatrix;
-			if (index > 0xffff) {
-				 index &= 0xffff;
-				 currentRandomValue = (RANDOM >> 8);
-			}
-			lfoValue = currentRandomValue;
-			break;
-		}
-
-		lfoValue += lfo->bias;
-
-		if (rampIndex < ramp) {
-		    lfoValue = lfoValue * rampIndex  / ramp ;
-            rampIndex ++;
-		}
-
-		matrix->setSource(source, lfoValue);
-	}
 
 	void noteOn() {
         if (ramp > 0) {

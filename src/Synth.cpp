@@ -79,6 +79,7 @@ void Synth::init() {
 	this->isSequencerPlaying = false;
 	this->midiClockCpt = 0;
 	this->recomputeNext = true;
+	this->currentGate = 0;
 }
 
 void Synth::noteOn(char note, char velocity) {
@@ -157,11 +158,31 @@ bool Synth::isPlaying() {
 }
 
 int Synth::getSample() {
-		int sample = voices[0].getSample();
+
+	// Gate algo !!
+	int gate = this->matrix.getDestination(MAIN_GATE) >> 4;
+	int sample = 0;
+
+	if (currentGate < 256 && currentGate < gate) {
+		currentGate ++;
+	}
+	if (currentGate > 0 && currentGate > gate) {
+		currentGate --;
+	}
+
+	if (currentGate < 256) {
+		sample = voices[0].getSample();
 		sample += voices[1].getSample();
 		sample += voices[2].getSample();
 		sample += voices[3].getSample();
-		return sample / this->synthState->params.engine1.numberOfVoice;
+		sample /= this->synthState->params.engine1.numberOfVoice;
+
+		if (currentGate > 0) {
+			// Shift all << 8 for better resolution in the calcul
+			sample =  ((sample << 8) - (sample * currentGate)) >> 8;
+		}
+	}
+	return sample;
 }
 
 void Synth::nextSample() {

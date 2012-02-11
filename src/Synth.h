@@ -85,8 +85,8 @@ public:
     void setSongPosition(int songPosition) {
     	this->songPosition = songPosition;
 		this->midiClockCpt = 0;
-		// Next one is OK only if we're on a quarter...
-    	this->recomputeNext = ((songPosition&0x3)==0);
+		// Next one is OK only if we're on a eigth....
+    	this->recomputeNext = ((songPosition&0x1)==0);
     }
 
     int getSongPosition() {
@@ -125,7 +125,7 @@ public:
         	for (int k=0; k<NUMBER_OF_LFO; k++) {
         		lfo[k]->midiClock(this->songPosition, this->recomputeNext);
         	}
-        	if ((songPosition&0x3)==0) {
+        	if ((songPosition&0x1)==0) {
         		this->recomputeNext = true;
         	}
     	}
@@ -151,6 +151,8 @@ private:
     int midiClockCpt;
     int songPosition;
     boolean recomputeNext;
+
+    int currentGate;
 
     // 6 oscillators Max
     Osc<1> osc1;

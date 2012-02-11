@@ -133,6 +133,7 @@ enum LfoType {
 	LFO_RAMP,
 	LFO_SQUARE,
 	LFO_RANDOM,
+	LFO_SIN,
 	LFO_TYPE_MAX
 };
 
@@ -191,6 +192,7 @@ enum DestinationEnum {
 	ALL_OSC_FREQ,
 	LFO5_GATE,
 	LFO6_GATE,
+	MAIN_GATE,
 	DESTINATION_MAX
 };
 
@@ -436,6 +438,7 @@ public:
 	}
 
 	void propagateNewSynthMode() {
+    	propagateNoteOff();
 		for (SynthMenuListener* listener = firstMenuListener; listener !=0; listener = listener->nextListener) {
 			listener->newSynthMode(&fullState);
 		}

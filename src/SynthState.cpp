@@ -158,7 +158,7 @@ enum DestinationEnum {
 */
 
 const char* matrixDestNames [] = { "None", "o1Fq", "o2Fq", "o3Fq", "o4Fq", "o5Fq", "o6Fq", "IM1 ", "IM2 ", "IM3 ", "IM4 ", "Mix1", "Mix2", "Mix3", "Mix4",
-		"l1Fq", "l2Fq", "l3Fq", "l4Fq", "mx01", "mx02", "mx03", "mx04", "mx05", "mx06", "mx07", "mx08", "mx09", "mx10", "mx11", "mx12", "o*Fq", "l5gt", "l6gt" } ;
+		"l1Fq", "l2Fq", "l3Fq", "l4Fq", "mx01", "mx02", "mx03", "mx04", "mx05", "mx06", "mx07", "mx08", "mx09", "mx10", "mx11", "mx12", "o*Fq", "l5gt", "l6gt", "gate" } ;
 unsigned char  matrixDestNamesOrder[] = { DESTINATION_NONE, OSC1_FREQ, 	OSC2_FREQ,
 /* 3 */		OSC3_FREQ  ,	OSC4_FREQ,	OSC5_FREQ, OSC6_FREQ ,
 /* 7 */     ALL_OSC_FREQ, INDEX_MODULATION1,	INDEX_MODULATION2,
@@ -169,9 +169,9 @@ unsigned char  matrixDestNamesOrder[] = { DESTINATION_NONE, OSC1_FREQ, 	OSC2_FRE
 /* 24 */	MTX3_MUL, MTX4_MUL,	MTX5_MUL,
 /* 27 */	MTX6_MUL, 	MTX7_MUL,	MTX8_MUL,
 /* 30 */	MTX9_MUL ,	MTX10_MUL,	MTX11_MUL,
-/* 33 */	MTX12_MUL	  };
-unsigned char  matrixDestNamesOrderReversed[] = {0,1,2,3,4,5,6,8,9,10,11,12,13,14,15,16,17,18,19,22,23,24,25,26,27,28,29,30,31,32,33,7,20,21};
+/* 33 */	MTX12_MUL, MAIN_GATE	  };
 
+unsigned char  matrixDestNamesOrderReversed[] = {0,1,2,3,4,5,6,8,9,10,11,12,13,14,15,16,17,18,19,22,23,24,25,26,27,28,29,30,31,32,33,7,20,21,34};
 
 struct ParameterRowDisplay matrixParameterRow = {
         "Matrix",
@@ -186,12 +186,16 @@ struct ParameterRowDisplay matrixParameterRow = {
 
 const char* lfoOscMidiClock[] =  { "M/16", "MC/8", "MC/4", "MC/2", "MClk", "MC*2", "MC*3", "MC*4", "MC*8"};
 
-const char* lfoShapeNames [] =  { "Saw ", "Ramp", "Squa", "Rand"} ;
+const char* lfoShapeNames [] =  { "Saw ", "Ramp", "Squa", "Rand", "Sin "} ;
+
+unsigned char  lfoShapeNamesOrder[] = { LFO_SIN, LFO_SAW, LFO_RAMP, LFO_SQUARE, LFO_RANDOM };
+unsigned char  lfoShapeNamesOrderReversed[] = { 1, 2, 3, 4, 0};
+
 struct ParameterRowDisplay lfoParameterRow = {
         "LFO Osc",
         { "Shap", "Freq", "Bias", "KSyn" },
         {
-                { LFO_SAW, LFO_TYPE_MAX-1, DISPLAY_TYPE_STRINGS,  lfoShapeNames, nullNamesOrder, nullNamesOrder},
+                { LFO_SAW, LFO_TYPE_MAX-1, DISPLAY_TYPE_STRINGS,  lfoShapeNames, lfoShapeNamesOrder, lfoShapeNamesOrderReversed},
                 { 0, 255, DISPLAY_TYPE_LFO_HZ, nullNames, nullNamesOrder, nullNamesOrder },
                 { (char)-127, 127, DISPLAY_TYPE_SIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
                 { 0, 255, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
