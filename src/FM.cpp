@@ -198,8 +198,9 @@ void setup()
     // MidiDecoder, Synth (Env,Osc, Lfo, Matrix, Voice ), FMDisplay, PresetUtil...
 
     synth.setSynthState(&synthState);
-    midiDecoder.setSynthState(&synthState);
     fmDisplay.setSynthState(&synthState);
+    midiDecoder.setSynthState(&synthState);
+    midiDecoder.setVisualInfo(&fmDisplay);
     PresetUtil::setSynthState(&synthState);
 
     midiDecoder.setSynth(&synth);
@@ -297,10 +298,9 @@ void loop() {
 	while (Serial3.available()) {
 		fillSoundBuffer();
 		midiDecoder.newByte(Serial3.read());
-		if (midiReceive == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
+		if (midiReceive == 0) {
 			fillSoundBuffer();
-			lcd.setCursor(0,0);
-			lcd.print((char)0);
+			fmDisplay.midiIn(true);
 		}
 		if (synthState.fullState.synthMode == SYNTH_MODE_MENU) {
 			midiReceive = 0;
@@ -311,10 +311,9 @@ void loop() {
 
 	if ((newMicros - midiInMicros) > 200) {
         if (midiReceive>0) {
-            if (midiReceive == 1 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
+            if (midiReceive == 1) {
                 fillSoundBuffer();
-                lcd.setCursor(0,0);
-                lcd.print(' ');
+    			fmDisplay.midiIn(false);
             }
             midiReceive--;
         }
@@ -328,10 +327,9 @@ void loop() {
             fillSoundBufferFull();
             midiDecoder.sendMidiOut();
 
-            if (midiSent == 0 && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
+            if (midiSent == 0) {
                 fillSoundBuffer();
-                lcd.setCursor(1,0);
-                lcd.print((char)1);
+    			fmDisplay.midiOut(true);
             }
             if (synthState.fullState.synthMode == SYNTH_MODE_MENU) {
             	midiSent = 0;
@@ -341,10 +339,9 @@ void loop() {
         }
 
         if (midiSent>0) {
-            if (midiSent == 1  && synthState.fullState.synthMode == SYNTH_MODE_EDIT) {
+            if (midiSent == 1) {
                 fillSoundBuffer();
-                lcd.setCursor(1,0);
-                lcd.print(' ');
+    			fmDisplay.midiOut(false);
             }
             midiSent--;
         }
