@@ -31,10 +31,6 @@
 
 #define UINT_MAX  4294967295
 
-// #include "LiquidCrystal.h"
-// extern LiquidCrystal lcd;
-
-
 class Synth : public SynthParamListener, public SynthStateAware
 {
 public:
@@ -82,53 +78,35 @@ public:
 
     void afterNewParamsLoad();
 
-    void setSongPosition(int songPosition) {
-    	this->songPosition = songPosition;
-		this->midiClockCpt = 0;
-		// Next one is OK only if we're on a eigth....
+    void midiClockSetSongPosition(int songPosition) {
+    	// nothing to do
+    }
+
+    void midiClockContinue(int songPosition) {
+    	for (int k=0; k<NUMBER_OF_LFO; k++) {
+    		lfo[k]->midiClock(songPosition, false);
+    	}
     	this->recomputeNext = ((songPosition&0x1)==0);
     }
 
-    int getSongPosition() {
-    	return this->songPosition;
-    }
 
-    void midiContinue() {
-    	this->isSequencerPlaying = true;
-    	this->midiClockCpt = 0;
-    	for (int k=0; k<NUMBER_OF_LFO; k++) {
-    		lfo[k]->midiClock(this->songPosition, false);
-    	}
-    }
-
-    void midiStart() {
-    	this->isSequencerPlaying = true;
-    	this->songPosition = 0;
-    	this->midiClockCpt = 0;
+    void midiClockStart() {
     	for (int k=0; k<NUMBER_OF_LFO; k++) {
     		lfo[k]->midiContinue();
     	}
     	this->recomputeNext = true;
     }
 
-    void midiStop() {
-    	this->isSequencerPlaying = false;
+    void midiClockStop() {
     }
 
-    void midiClock() {
-    	this->midiClockCpt++;
-    	if (this->midiClockCpt == 6) {
-    		if (this->isSequencerPlaying) {
-    			this->songPosition++;
-    		}
-    		this->midiClockCpt = 0;
-        	for (int k=0; k<NUMBER_OF_LFO; k++) {
-        		lfo[k]->midiClock(this->songPosition, this->recomputeNext);
-        	}
-        	if ((songPosition&0x1)==0) {
-        		this->recomputeNext = true;
-        	}
-    	}
+    void midiClockSongPositionStep(int songPosition) {
+		for (int k=0; k<NUMBER_OF_LFO; k++) {
+			lfo[k]->midiClock(songPosition, this->recomputeNext);
+		}
+		if ((songPosition & 0x1)==0) {
+			this->recomputeNext = true;
+		}
     }
 
 private:
@@ -146,10 +124,7 @@ private:
 
     Lfo* lfo[NUMBER_OF_LFO];
 
-    // Is Sequencer playing
-    boolean isSequencerPlaying;
-    int midiClockCpt;
-    int songPosition;
+    // Must recompute LFO steps ?
     boolean recomputeNext;
 
     int currentGate;

@@ -17,13 +17,12 @@
 
 #include "MidiDecoder.h"
 
-// DEBUG
-// extern LiquidCrystal lcd;
-
 
 MidiDecoder::MidiDecoder() {
 	currentEventState.eventState = MIDI_EVENT_WAITING;
 	currentEventState.index = 0;
+	this->isSequencerPlaying = false;
+	this->midiClockCpt = 0;
 }
 
 MidiDecoder::~MidiDecoder() {
@@ -33,6 +32,9 @@ void MidiDecoder::setSynth(Synth* synth) {
 	this->synth = synth;
 }
 
+void MidiDecoder::setVisualInfo(VisualInfo *visualInfo) {
+	this->visualInfo = visualInfo;
+}
 
 void MidiDecoder::newByte(unsigned char byte) {
 
@@ -66,22 +68,46 @@ void MidiDecoder::newByte(unsigned char byte) {
 				currentEventState.eventState = MIDI_EVENT_SYSEX;
 				break;
 			case MIDI_CONTINUE:
-				this->synth->midiContinue();
+				this->isSequencerPlaying = true;
+				this->midiClockCpt = 0;
+				this->synth->midiClockContinue(this->songPosition);
+				if ((this->songPosition & 0x3) <= 1) {
+					this->visualInfo->midiClock(true);
+				}
 				break;
 			case MIDI_CLOCK:
-				this->synth->midiClock();
+		    	this->midiClockCpt++;
+		    	if (this->midiClockCpt == 6) {
+		    		if (this->isSequencerPlaying) {
+		    			this->songPosition++;
+		    		}
+		    		this->midiClockCpt = 0;
+					this->synth->midiClockSongPositionStep(this->songPosition);
+
+					if ((this->songPosition & 0x3) == 0) {
+						this->visualInfo->midiClock(true);
+			    	}
+					if ((this->songPosition & 0x3) == 0x2) {
+						this->visualInfo->midiClock(false);
+			    	}
+		    	}
 				break;
 			case MIDI_START:
-				this->synth->midiStart();
+				this->isSequencerPlaying = true;
+				this->songPosition = 0;
+				this->midiClockCpt = 0;
+				this->visualInfo->midiClock(true);
+				this->synth->midiClockStart();
 				break;
 			case MIDI_STOP:
-				this->synth->midiStop();
+				this->isSequencerPlaying = false;
+				this->synth->midiClockStop();
+				this->visualInfo->midiClock(false);
 				break;
 			case MIDI_SONG_POSITION:
 				currentEvent.eventType = MIDI_SONG_POSITION;
 				// Channel hack to make it accpeted
 				currentEvent.channel = 	this->synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL] -1;
-
 				currentEventState.numberOfBytes = 2;
 				currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
 				break;
@@ -166,7 +192,8 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 		this->synthState->resetDisplay();
 		break;
 	case MIDI_SONG_POSITION:
-		this->synth->setSongPosition(((int) midiEvent.value[1] << 7) + midiEvent.value[0]);
+		this->songPosition = ((int) midiEvent.value[1] << 7) + midiEvent.value[0];
+		this->synth->midiClockSetSongPosition(this->songPosition);
 		break;
 	}
 }

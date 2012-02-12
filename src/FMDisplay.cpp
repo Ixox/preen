@@ -586,3 +586,36 @@ void FMDisplay::menuBack(FullState* fullState) {
 	menuRow--;
 }
 
+
+void FMDisplay::midiClock(boolean show) {
+	if (this->synthState->fullState.synthMode  == SYNTH_MODE_EDIT) {
+		lcd->setCursor(3,0);
+		if (show) {
+			lcd->print((char)2);
+		} else {
+			lcd->print(' ');
+		}
+	}
+}
+
+void FMDisplay::midiIn(boolean show) {
+	if (this->synthState->fullState.synthMode  == SYNTH_MODE_EDIT) {
+		lcd->setCursor(0,0);
+		if (show) {
+			lcd->print((char)0);
+		} else {
+			lcd->print(' ');
+		}
+	}
+}
+
+void FMDisplay::midiOut(boolean show) {
+	if (this->synthState->fullState.synthMode  == SYNTH_MODE_EDIT) {
+		lcd->setCursor(1,0);
+		if (show) {
+			lcd->print((char)1);
+		} else {
+			lcd->print(' ');
+		}
+	}
+}

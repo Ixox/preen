@@ -22,11 +22,12 @@
 #include "SynthStateAware.h"
 #include "LiquidCrystal.h"
 #include "Menu.h"
+#include "VisualInfo.h"
 
 
 
 
-class FMDisplay : public SynthParamListener, public SynthMenuListener, public SynthStateAware {
+class FMDisplay : public SynthParamListener, public SynthMenuListener, public SynthStateAware, public VisualInfo {
 public:
 	FMDisplay();
 	~FMDisplay();
@@ -37,6 +38,11 @@ public:
 	inline void printValueWithSpace(int value);
 	inline boolean shouldThisValueShowUp(int row, int encoder);
 	inline void updateEncoderValue(int refreshStatus);
+
+	// VisualInfo
+	void midiClock(boolean show);
+	void midiIn(boolean show);
+	void midiOut(boolean show);
 
 
 	static int getLength(const char *str) {
@@ -87,11 +93,11 @@ public:
 
     // Overide SynthParamListener
     void playNote(char note, char velocity) {
-    	lcd->setCursor(3,0);
+    	lcd->setCursor(5,0);
     	lcd->print((char)7);
     }
     void stopNote(char note) {
-    	lcd->setCursor(3,0);
+    	lcd->setCursor(5,0);
     	lcd->print(' ');
     }
 

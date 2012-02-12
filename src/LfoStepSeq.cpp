@@ -17,12 +17,7 @@
 
 #include "LfoStepSeq.h"
 
-#include "LiquidCrystal.h"
-extern LiquidCrystal lcd;
-
-
-int expValues[] = { 0, 15, 31, 48, 67, 86, 106, 128, 150, 175, 200, 227, 256,
-		286, 319, 353 };
+int expValues[] = { 0, 15, 31, 48, 67, 86, 106, 128, 150, 175, 200, 227, 256, 286, 319, 353 };
 
 void LfoStepSeq::init(int number, Matrix *matrix, SourceEnum source,
 		DestinationEnum dest) {

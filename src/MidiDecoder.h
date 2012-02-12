@@ -21,6 +21,7 @@
 #include "SynthStateAware.h"
 #include "Synth.h"
 #include "RingBuffer.h"
+#include "VisualInfo.h"
 
 enum AllControlChange {
     CC_BANK_SELECT = 0,
@@ -138,6 +139,8 @@ public:
     void controlChange(MidiEvent& midiEvent);
     void decodeNrpn();
     void setSynth(Synth* synth);
+    void setVisualInfo(VisualInfo* visualInfo);
+
     void newParamValueFromExternal(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newParamValue(SynthParamType type, int currentrow, int encoder, ParameterDisplay* param, int oldValue, int newValue);
     void newcurrentRow(int newcurrentRow) {}
@@ -156,9 +159,16 @@ private:
     struct MidiEventState currentEventState;
     struct MidiEvent currentEvent;
     Synth* synth;
+    VisualInfo *visualInfo;
     Matrix* matrix;
     RingBuffer<MidiEvent, 16> midiToSend;
     struct Nrpn currentNrpn;
+
+    // Midi Clock
+    boolean isSequencerPlaying;
+    int midiClockCpt;
+    int songPosition;
+
 };
 
 #endif /* MIDIDECODER_H_ */
