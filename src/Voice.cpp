@@ -78,7 +78,8 @@ void Voice::noteOnWithoutPop(short newNote, char velocity, unsigned int index) {
         this->newNotePending = true;
         this->nextVelocity = velocity;
         this->nextNote = newNote;
-
+        // Not release anymore... not available for new notes...
+        this->released = false;
         env1->noteOffQuick(&envState1);
         env2->noteOffQuick(&envState2);
         env3->noteOffQuick(&envState3);

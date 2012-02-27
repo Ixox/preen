@@ -94,24 +94,26 @@ void Synth::noteOn(char note, char velocity) {
 	for (int k = 0; k < numberOfNote && freeNote == -1; k++) {
 		if (!voices[k].isPlaying()) {
 			freeNote = k;
+			voices[freeNote].noteOn(note, velocity, voiceIndex++);
+			return;
 		}
 	}
-	if (freeNote >= 0) {
-		voices[freeNote].noteOn(note, velocity, voiceIndex++);
-	} else {
-		unsigned int indexMin = (unsigned int)4294967295;
+
+	for (int k = 0; k < numberOfNote; k++) {
+		if (voices[k].getNote() == note || voices[k].isReleased()) {
+			freeNote = k;
+		}
+	}
+	if (freeNote == -1) {
+		unsigned int indexMin = (unsigned int)2147483647;
 		for (int k = 0; k < numberOfNote; k++) {
-			if (voices[k].getNote() == note || voices[k].isReleased()) {
-				indexMin = 0;
-				freeNote = k;
-			}
 			if (voices[k].getIndex() < indexMin) {
 				indexMin = voices[k].getIndex();
 				freeNote = k;
 			}
 		}
-		voices[freeNote].noteOnWithoutPop(note, velocity, voiceIndex++);
 	}
+	voices[freeNote].noteOnWithoutPop(note, velocity, voiceIndex++);
 }
 
 void Synth::noteOff(char note) {
