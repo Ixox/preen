@@ -171,6 +171,7 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 			this->synth->noteOff(midiEvent.value[0]);
 		} else {
 			this->synth->noteOn(midiEvent.value[0], midiEvent.value[1]);
+			this->synth->getMatrix()->setSource(MATRIX_SOURCE_KEY, 127-midiEvent.value[0]);
 			this->synth->getMatrix()->setSource(MATRIX_SOURCE_VELOCITY, midiEvent.value[1]);
 		}
 		break;
@@ -200,8 +201,9 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 
 void MidiDecoder::controlChange(MidiEvent& midiEvent) {
 	int receives = this->synthState->fullState.midiConfigValue[MIDICONFIG_RECEIVES] ;
-	if (receives == 1 || receives ==3) {
-		switch (midiEvent.value[0]) {
+
+	// the following one should always been recevied...
+	switch (midiEvent.value[0]) {
 		case CC_BANK_SELECT:
 			if (midiEvent.value[1] >= 1 and midiEvent.value[1] <= 3) {
 				this->synthState->fullState.bankNumber = midiEvent.value[1];
@@ -210,6 +212,17 @@ void MidiDecoder::controlChange(MidiEvent& midiEvent) {
 		case CC_MODWHEEL:
 			this->synth->getMatrix()->setSource(MATRIX_SOURCE_MODWHEEL, midiEvent.value[1]);
 			break;
+		case CC_ALL_NOTES_OFF:
+			this->synth->allNoteOff();
+			break;
+		case CC_ALL_SOUND_OFF:
+			this->synth->allSoundOff();
+			break;
+	}
+
+
+	if (receives == 1 || receives ==3) {
+		switch (midiEvent.value[0]) {
 		case CC_VOICE:
 			if (midiEvent.value[1] >= 1 and midiEvent.value[1] <= 4) {
 				this->synthState->setNewValue(ROW_ENGINE, ENCODER_ENGINE_VOICE,
@@ -420,12 +433,6 @@ void MidiDecoder::controlChange(MidiEvent& midiEvent) {
 		case CC_MATRIX_SOURCE_CC4:
 			this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC4, midiEvent.value[1]);
 			break;
-		case CC_ALL_NOTES_OFF:
-			this->synth->allNoteOff();
-			break;
-		case CC_ALL_SOUND_OFF:
-			this->synth->allSoundOff();
-			break;
 		}
 	}
 
@@ -488,13 +495,18 @@ void MidiDecoder::decodeNrpn() {
 			struct ParameterDisplay param =
 					allParameterRows.row[row]->params[encoder];
 			this->synthState->setNewValue(row, encoder, param.minValue + value);
+		} else if (index >= 228 && index<240) {
+			this->synthState->params.presetName[index - 228] = (char) value;
+			this->synthState->propagateNewPresetName();
 		}
-	} else {
+	} else if (this->currentNrpn.paramMSB < 4)  {
 		unsigned int whichStepSeq = this->currentNrpn.paramMSB -2;
 		unsigned int step = this->currentNrpn.paramLSB;
 		unsigned int value = this->currentNrpn.valueLSB;
 
 		this->synthState->setNewStepValue(whichStepSeq, step, value);
+	} else if (this->currentNrpn.paramMSB == 127 && this->currentNrpn.paramLSB == 127)  {
+		PresetUtil::sendCurrentPatchAsNrpns();
 	}
 }
 
@@ -505,7 +517,7 @@ void MidiDecoder::newParamValueFromExternal(SynthParamType type,
 }
 
 void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
-		int encoder, ParameterDisplay* param, int oldValue, int newValue) {
+	int encoder, ParameterDisplay* param, int oldValue, int newValue) {
 
 	int sendCCOrNRPN = this->synthState->fullState.midiConfigValue[MIDICONFIG_SENDS] ;
 	int channel = this->synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL] -1;
@@ -670,3 +682,4 @@ void MidiDecoder::sendMidiOut() {
 		break;
 	}
 }
+

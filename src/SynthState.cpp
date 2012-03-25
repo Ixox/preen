@@ -18,8 +18,6 @@
 #include "SynthState.h"
 
 
-
-
 // FLASH :  __attribute__ ((section (".USER_FLASH")))
 // Ex : const char* nullNames [] __attribute__ ((section (".USER_FLASH")))= {};
 // DISPLAY structures
@@ -113,7 +111,7 @@ struct ParameterRowDisplay lfoEnvParameterRow = {
         }
 };
 
-const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW", "Velo", "CC1 ", "CC2 ", "CC3 ", "CC4 ", "lfo5", "lfo6"} ;
+const char* matrixSourceNames [] = { "None", "lfo1", "lfo2", "lfo3", "lfo4", "PitB", "AftT", "ModW", "Velo", "CC1 ", "CC2 ", "CC3 ", "CC4 ", "lfo5", "lfo6", "key "} ;
 /*
 enum SourceEnum {
 	MATRIX_SOURCE_NONE = 0,
@@ -131,13 +129,14 @@ enum SourceEnum {
     MATRIX_SOURCE_CC4=12,
 	MATRIX_SOURCE_LFO5=13,
 	MATRIX_SOURCE_LFO6=14,
+	MATRIX_SOURCE_KEY=15,
 	MATRIX_SOURCE_MAX
 };
 */
 
 unsigned char  matrixSourceNamesOrder[] = { MATRIX_SOURCE_NONE, MATRIX_SOURCE_LFO1,MATRIX_SOURCE_LFO2,MATRIX_SOURCE_LFO3,MATRIX_SOURCE_LFO4,MATRIX_SOURCE_LFO5,MATRIX_SOURCE_LFO6,
-/* 7 */		MATRIX_SOURCE_MODWHEEL, /* 8 */MATRIX_SOURCE_VELOCITY, MATRIX_SOURCE_PITCHBEND,MATRIX_SOURCE_AFTERTOUCH, /* 11 */ MATRIX_SOURCE_CC1,MATRIX_SOURCE_CC2,MATRIX_SOURCE_CC3,MATRIX_SOURCE_CC4 };
-unsigned char  matrixSourceNamesOrderReversed[] = {0, 1, 2, 3, 4, 9, 10, 7, 8, 11, 12, 13, 14, 5, 6 };
+/* 7 */		MATRIX_SOURCE_MODWHEEL, /* 8 */MATRIX_SOURCE_VELOCITY, MATRIX_SOURCE_KEY, MATRIX_SOURCE_PITCHBEND,MATRIX_SOURCE_AFTERTOUCH, /* 12 */ MATRIX_SOURCE_CC1,MATRIX_SOURCE_CC2,MATRIX_SOURCE_CC3,MATRIX_SOURCE_CC4 };
+unsigned char  matrixSourceNamesOrderReversed[] = {0, 1, 2, 3, 4, 10, 11, 7, 8, 12, 13, 14, 15, 5, 6, 9 };
 
 
 /*
@@ -846,6 +845,8 @@ const MenuItem* SynthState::afterButtonPressed() {
             PresetUtil::formatEEPROM();
         	PresetUtil::resetConfigAndSaveToEEPROM();
             fullState.currentMenuItem = cmi;
+    	} else if (fullState.menuSelect == 2) {
+    		PresetUtil::sendCurrentPatchAsNrpns();
     	} else if (fullState.menuSelect == 1) {
 			PresetUtil::checkReadEEPROM();
     	} else {
