@@ -85,6 +85,8 @@ public:
     static void convertSynthStateToCharArray(AllSynthParams* params, uint8* chars);
     static void convertCharArrayToSynthState(uint8* chars, AllSynthParams* params);
 
+    static void sendNrpn(struct MidiEvent cc);
+    static void sendCurrentPatchAsNrpns();
 
 private:
     static char readName[13];

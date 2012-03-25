@@ -691,6 +691,93 @@ void PresetUtil::sendCurrentPatchToSysex() {
 	Serial3.print((uint8) 0xf7);
 }
 
+
+void PresetUtil::sendNrpn(struct MidiEvent cc) {
+	Serial3.print((unsigned char) (cc.eventType + cc.channel));
+	Serial3.print((unsigned char) cc.value[0]);
+	Serial3.print((unsigned char) cc.value[1]);
+}
+
+void PresetUtil::sendCurrentPatchAsNrpns() {
+
+	int channel = PresetUtil::synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL] -1;
+	struct MidiEvent cc;
+	cc.eventType = MIDI_CONTROL_CHANGE;
+	// Si channel = ALL envoie sur 1
+	if (channel == -1) {
+		channel = 0;
+	}
+	cc.channel = channel;
+
+
+	// Send the title
+	for (unsigned int k=0; k<12; k++) {
+		int valueToSend = PresetUtil::synthState->params.presetName[k];
+		cc.value[0] = 99;
+		cc.value[1] = 1;
+		sendNrpn(cc);
+		cc.value[0] = 98;
+		cc.value[1] = 100+k;
+		sendNrpn(cc);
+		cc.value[0] = 6;
+		cc.value[1] = (uint8) (valueToSend >> 7);
+		sendNrpn(cc);
+		cc.value[0] = 38;
+		cc.value[1] = (uint8) (valueToSend & 127);
+		sendNrpn(cc);
+	}
+
+	// MSB / LSB
+	for (int currentrow = 0; currentrow < NUMBER_OF_ROWS; currentrow++) {
+		for (int encoder = 0; encoder < NUMBER_OF_ENCODERS; encoder++) {
+
+			struct ParameterDisplay param = allParameterRows.row[currentrow]->params[encoder];
+		    int newValue;
+			if (param.displayType == DISPLAY_TYPE_SIGNED_CHAR) {
+				newValue = ((char*)&PresetUtil::synthState->params)[currentrow*NUMBER_OF_ENCODERS+encoder];
+			} else {
+				newValue = ((unsigned char*)&PresetUtil::synthState->params)[currentrow*NUMBER_OF_ENCODERS+encoder];
+			}
+			int valueToSend = newValue - param.minValue;
+			int paramNumber = currentrow * NUMBER_OF_ENCODERS+ encoder;
+			// NRPN is 4 control change
+			cc.value[0] = 99;
+			cc.value[1] = (uint8)(paramNumber >> 7);
+			sendNrpn(cc);
+			cc.value[0] = 98;
+			cc.value[1] = (uint8)(paramNumber & 127);
+			sendNrpn(cc);
+			cc.value[0] = 6;
+			cc.value[1] = (uint8) (valueToSend >> 7);
+			sendNrpn(cc);
+			cc.value[0] = 38;
+			cc.value[1] = (uint8) (valueToSend & 127);
+			sendNrpn(cc);
+		}
+	}
+
+	for (int whichStepSeq = 0; whichStepSeq < 2; whichStepSeq++) {
+		for (int step = 0; step<16; step++) {
+			cc.value[0] = 99;
+			cc.value[1] = whichStepSeq + 2;
+			sendNrpn(cc);
+			cc.value[0] = 98;
+			cc.value[1] = step;
+			sendNrpn(cc);
+			cc.value[0] = 6;
+			cc.value[1] = 0;
+			sendNrpn(cc);
+			cc.value[0] = 38;
+			StepSequencerSteps * seqSteps = &((StepSequencerSteps * )(&PresetUtil::synthState->params.steps5))[whichStepSeq];
+			cc.value[1] = seqSteps->steps[step];
+			sendNrpn(cc);
+		}
+	}
+
+
+}
+
+
 void PresetUtil::sendParamsToSysex(uint8* params) {
 	int checksum = 0;
 
@@ -983,4 +1070,6 @@ void PresetUtil::convertCharArrayToSynthState(uint8* chars, AllSynthParams* para
 		((char*) &params->matrixRowState9)[k] = chars[144 + k];
 	}
 }
+
+
 
