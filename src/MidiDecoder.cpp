@@ -17,12 +17,44 @@
 
 #include "MidiDecoder.h"
 
+#ifdef LCDDEBUG
+#include "LiquidCrystal.h"
+extern LiquidCrystal lcd;
+int pos = 0;
+
+
+void eraseNext(int pos) {
+	int x = (pos % 2) * 10;
+	int y = pos / 2;
+	y = y % 4;
+	lcd.setCursor(x,y);
+	lcd.print("- --- --- ");
+}
+
+
+void debug(char *l, int i1, int i2) {
+	int x = (pos % 2) * 10;
+	int y = pos / 2;
+	y = y % 4;
+	lcd.setCursor(x,y);
+	lcd.print("          ");
+	lcd.setCursor(x,y);
+	lcd.print(l);
+	lcd.setCursor(x+2, y);
+	lcd.print(i1);
+	lcd.setCursor(x+6, y);
+	lcd.print(i2);
+	pos++;
+	eraseNext(pos);
+}
+#endif
 
 MidiDecoder::MidiDecoder() {
 	currentEventState.eventState = MIDI_EVENT_WAITING;
 	currentEventState.index = 0;
 	this->isSequencerPlaying = false;
 	this->midiClockCpt = 0;
+	this->runningStatus = 0;
 }
 
 MidiDecoder::~MidiDecoder() {
@@ -42,117 +74,141 @@ void MidiDecoder::newByte(unsigned char byte) {
 		Serial3.print((unsigned char) byte);
 	}
 
-
-	if (currentEventState.eventState == MIDI_EVENT_WAITING) {
-
-		currentEvent.eventType = (EventType)(byte & 0xf0);
-		currentEvent.channel = byte & 0x0f;
-
-		switch (currentEvent.eventType) {
-		case MIDI_NOTE_OFF:
-		case MIDI_NOTE_ON:
-		case MIDI_CONTROL_CHANGE:
-		case MIDI_PITCH_BEND:
-			currentEventState.numberOfBytes = 2;
-			currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
+	// Realtime first !
+	if (byte >= 0xF8) {
+		switch (byte) {
+		case MIDI_CONTINUE:
+			this->isSequencerPlaying = true;
+			this->midiClockCpt = 0;
+			this->synth->midiClockContinue(this->songPosition);
+			if ((this->songPosition & 0x3) <= 1) {
+				this->visualInfo->midiClock(true);
+			}
 			break;
-		case MIDI_AFTER_TOUCH:
-		case MIDI_PROGRAM_CHANGE:
-			currentEventState.numberOfBytes = 1;
-			currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
-			break;
-		case MIDI_REAL_TIME_EVENT:
-			// We must be sure it's 0xF0 and not 0xF1, 0xF8....
-			switch (byte)  {
-			case MIDI_SYSEX:
-				currentEventState.eventState = MIDI_EVENT_SYSEX;
-				break;
-			case MIDI_CONTINUE:
-				this->isSequencerPlaying = true;
+		case MIDI_CLOCK:
+			this->midiClockCpt++;
+			if (this->midiClockCpt == 6) {
+				if (this->isSequencerPlaying) {
+					this->songPosition++;
+				}
 				this->midiClockCpt = 0;
-				this->synth->midiClockContinue(this->songPosition);
-				if ((this->songPosition & 0x3) <= 1) {
+				this->synth->midiClockSongPositionStep(this->songPosition);
+
+				if ((this->songPosition & 0x3) == 0) {
 					this->visualInfo->midiClock(true);
 				}
-				break;
-			case MIDI_CLOCK:
-		    	this->midiClockCpt++;
-		    	if (this->midiClockCpt == 6) {
-		    		if (this->isSequencerPlaying) {
-		    			this->songPosition++;
-		    		}
-		    		this->midiClockCpt = 0;
-					this->synth->midiClockSongPositionStep(this->songPosition);
-
-					if ((this->songPosition & 0x3) == 0) {
-						this->visualInfo->midiClock(true);
-			    	}
-					if ((this->songPosition & 0x3) == 0x2) {
-						this->visualInfo->midiClock(false);
-			    	}
-		    	}
-				break;
-			case MIDI_START:
-				this->isSequencerPlaying = true;
-				this->songPosition = 0;
-				this->midiClockCpt = 0;
-				this->visualInfo->midiClock(true);
-				this->synth->midiClockStart();
-				break;
-			case MIDI_STOP:
-				this->isSequencerPlaying = false;
-				this->synth->midiClockStop();
-				this->visualInfo->midiClock(false);
-				break;
-			case MIDI_SONG_POSITION:
-				currentEvent.eventType = MIDI_SONG_POSITION;
-				// Channel hack to make it accpeted
-				currentEvent.channel = 	this->synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL] -1;
-				currentEventState.numberOfBytes = 2;
-				currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
-				break;
+				if ((this->songPosition & 0x3) == 0x2) {
+					this->visualInfo->midiClock(false);
+				}
 			}
 			break;
-		default :
-			// Nothing to do...
+		case MIDI_START:
+			this->isSequencerPlaying = true;
+			this->songPosition = 0;
+			this->midiClockCpt = 0;
+			this->visualInfo->midiClock(true);
+			this->synth->midiClockStart();
+			break;
+		case MIDI_STOP:
+			this->isSequencerPlaying = false;
+			this->synth->midiClockStop();
+			this->visualInfo->midiClock(false);
 			break;
 		}
-	} else if (currentEventState.eventState == MIDI_EVENT_IN_PROGRESS) {
-		currentEvent.value[currentEventState.index++] = byte;
-		if (currentEventState.index == currentEventState.numberOfBytes) {
-			midiEventReceived(currentEvent);
-			currentEventState.eventState = MIDI_EVENT_WAITING;
-			currentEventState.index = 0;
-		}
-	} else if (currentEventState.eventState == MIDI_EVENT_SYSEX) {
-		if (byte == MIDI_SYSEX_END) {
-			currentEventState.eventState = MIDI_EVENT_WAITING;
-			currentEventState.index = 0;
-		} else if (currentEventState.index == 0) {
-
-			currentEventState.index = 1;
-			// Only do something for non commercial sysex
-			// We assume it's for us !
-			if (byte == 0x7d) {
-				// System exclusive
-				// Allow patch if real time allowed OR if currenly waiting for sysex
-				// Allow bank if currently waiting for sysex only
-				bool waitingForSysex = this->synthState->fullState.currentMenuItem->menuState == MENU_MIDI_SYSEX_GET;
-				bool realTimeSysexAllowed = this->synthState->fullState.midiConfigValue[MIDICONFIG_REALTIME_SYSEX] == 1;
-				int r = PresetUtil::readSysex(realTimeSysexAllowed || waitingForSysex, waitingForSysex);
-				if (r == 2) {
-					this->synthState->newBankReady();
-				}
+	} else {
+		if (currentEventState.eventState == MIDI_EVENT_WAITING && byte >= 0x80) {
+			newMessageType(byte);
+			this->runningStatus = byte;
+		} else if (currentEventState.eventState == MIDI_EVENT_WAITING && byte < 0x80) {
+			// midi source use running status...
+			if (this->runningStatus>0) {
+				newMessageType(this->runningStatus);
+				newMessageData(byte);
+			}
+		} else if (currentEventState.eventState == MIDI_EVENT_IN_PROGRESS) {
+			newMessageData(byte);
+		} else if (currentEventState.eventState == MIDI_EVENT_SYSEX) {
+			if (byte == MIDI_SYSEX_END) {
 				currentEventState.eventState = MIDI_EVENT_WAITING;
 				currentEventState.index = 0;
+			} else if (currentEventState.index == 0) {
+
+				currentEventState.index = 1;
+				// Only do something for non commercial sysex
+				// We assume it's for us !
+				if (byte == 0x7d) {
+					// System exclusive
+					// Allow patch if real time allowed OR if currenly waiting for sysex
+					// Allow bank if currently waiting for sysex only
+					bool waitingForSysex = this->synthState->fullState.currentMenuItem->menuState == MENU_MIDI_SYSEX_GET;
+					bool realTimeSysexAllowed = this->synthState->fullState.midiConfigValue[MIDICONFIG_REALTIME_SYSEX] == 1;
+					int r = PresetUtil::readSysex(realTimeSysexAllowed || waitingForSysex, waitingForSysex);
+					if (r == 2) {
+						this->synthState->newBankReady();
+					}
+					currentEventState.eventState = MIDI_EVENT_WAITING;
+					currentEventState.index = 0;
+				}
+			} else {
+				// We do nothing !
+				// consume sysex message till the end !
 			}
-		} else {
-			// We do nothing !
-			// consume sysex message till the end !
 		}
 	}
 }
 
+void MidiDecoder::newMessageData(uint8 byte) {
+	currentEvent.value[currentEventState.index++] = byte;
+	if (currentEventState.index == currentEventState.numberOfBytes) {
+		midiEventReceived(currentEvent);
+		currentEventState.eventState = MIDI_EVENT_WAITING;
+		currentEventState.index = 0;
+	}
+}
+
+
+void MidiDecoder::newMessageType(uint8 byte) {
+	currentEvent.eventType = (EventType)(byte & 0xf0);
+	currentEvent.channel = byte & 0x0f;
+
+	switch (currentEvent.eventType) {
+	case MIDI_NOTE_OFF:
+	case MIDI_NOTE_ON:
+	case MIDI_CONTROL_CHANGE:
+	case MIDI_PITCH_BEND:
+	case MIDI_POLY_AFTER_TOUCH:
+		currentEventState.numberOfBytes = 2;
+		currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
+		break;
+	case MIDI_AFTER_TOUCH:
+	case MIDI_PROGRAM_CHANGE:
+		currentEventState.numberOfBytes = 1;
+		currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
+		break;
+	case MIDI_REAL_TIME_EVENT:
+		// We must be sure it's 0xF0 and not 0xF1, 0xF8....
+		this->runningStatus = 0;
+		switch (byte)  {
+		case MIDI_SYSEX:
+			currentEventState.eventState = MIDI_EVENT_SYSEX;
+			break;
+		case MIDI_SONG_POSITION:
+			currentEvent.eventType = MIDI_SONG_POSITION;
+			// Channel hack to make it accepted
+			currentEvent.channel = 	this->synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL] -1;
+			currentEventState.numberOfBytes = 2;
+			currentEventState.eventState = MIDI_EVENT_IN_PROGRESS;
+			break;
+		}
+		break;
+	default :
+#ifdef LCDDEBUG
+		debug("W", currentEvent.eventType, 0);
+#endif
+		// Nothing to do...
+		break;
+	}
+}
 
 void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 	int acceptedChannel = this->synthState->fullState.midiConfigValue[MIDICONFIG_CHANNEL] -1;
@@ -163,13 +219,22 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 
 	switch (midiEvent.eventType) {
 	case MIDI_NOTE_OFF:
+#ifdef LCDDEBUG
+		debug("F", midiEvent.value[0], midiEvent.value[1]);
+#endif
 		this->synth->noteOff(midiEvent.value[0]);
 		break;
 	case MIDI_NOTE_ON:
 		if (midiEvent.value[1] == 0) {
 			// Some keyboards send note-off this way
+#ifdef LCDDEBUG
+			debug("F", midiEvent.value[0], midiEvent.value[1]);
+#endif
 			this->synth->noteOff(midiEvent.value[0]);
 		} else {
+#ifdef LCDDEBUG
+			debug("O", midiEvent.value[0], midiEvent.value[1]);
+#endif
 			this->synth->noteOn(midiEvent.value[0], midiEvent.value[1]);
 			this->synth->getMatrix()->setSource(MATRIX_SOURCE_KEY, 127-midiEvent.value[0]);
 			this->synth->getMatrix()->setSource(MATRIX_SOURCE_VELOCITY, midiEvent.value[1]);
@@ -177,6 +242,10 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 		break;
 	case MIDI_CONTROL_CHANGE:
 		controlChange(midiEvent);
+		break;
+	case MIDI_POLY_AFTER_TOUCH:
+		// We don't do anything
+		// this->synth->getMatrix()->setSource(MATRIX_SOURCE_AFTERTOUCH, midiEvent.value[1]);
 		break;
 	case MIDI_AFTER_TOUCH:
 		this->synth->getMatrix()->setSource(MATRIX_SOURCE_AFTERTOUCH, midiEvent.value[0]);
@@ -202,7 +271,7 @@ void MidiDecoder::midiEventReceived(MidiEvent midiEvent) {
 void MidiDecoder::controlChange(MidiEvent& midiEvent) {
 	int receives = this->synthState->fullState.midiConfigValue[MIDICONFIG_RECEIVES] ;
 
-	// the following one should always been recevied...
+	// the following one should always been received...
 	switch (midiEvent.value[0]) {
 		case CC_BANK_SELECT:
 			if (midiEvent.value[1] >= 1 and midiEvent.value[1] <= 3) {
@@ -497,7 +566,7 @@ void MidiDecoder::decodeNrpn() {
 			this->synthState->setNewValue(row, encoder, param.minValue + value);
 		} else if (index >= 228 && index<240) {
 			this->synthState->params.presetName[index - 228] = (char) value;
-			this->synthState->propagateNewPresetName();
+			this->synthState->propagateNewPresetName((value == 0));
 		}
 	} else if (this->currentNrpn.paramMSB < 4)  {
 		unsigned int whichStepSeq = this->currentNrpn.paramMSB -2;

@@ -103,6 +103,8 @@ public:
     MidiDecoder();
     ~MidiDecoder();
     void newByte(unsigned char byte);
+    void newMessageType(uint8 byte);
+    void newMessageData(uint8 byte);
     void midiEventReceived(MidiEvent midiEvent);
     void controlChange(MidiEvent& midiEvent);
     void decodeNrpn();
@@ -131,6 +133,7 @@ private:
     Matrix* matrix;
     RingBuffer<MidiEvent, 16> midiToSend;
     struct Nrpn currentNrpn;
+    uint8 runningStatus;
 
     // Midi Clock
     boolean isSequencerPlaying;

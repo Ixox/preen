@@ -30,6 +30,8 @@ void LfoOsc::init(int number, Matrix *matrix, SourceEnum source, DestinationEnum
     this->ramp = lfo->keybRamp << 4;
     this->destination = dest;
 
+	ticks = 1536;
+	midiClock(0, true);
 }
 
 

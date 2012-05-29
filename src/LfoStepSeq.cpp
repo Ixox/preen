@@ -37,7 +37,8 @@ void LfoStepSeq::init(int number, Matrix *matrix, SourceEnum source,
 		break;
 	}
 	gated = false;
-	ticks = 0;
+	ticks = 1536;
+	midiClock(0, true);
 }
 
 void LfoStepSeq::midiClock(int songPosition, boolean computeStep) {
