@@ -733,7 +733,8 @@ void PresetUtil::sendCurrentPatchAsNrpns() {
 
 			struct ParameterDisplay param = allParameterRows.row[currentrow]->params[encoder];
 		    int newValue;
-			if (param.displayType == DISPLAY_TYPE_SIGNED_CHAR) {
+			if (param.displayType == DISPLAY_TYPE_SIGNED_CHAR ||
+					(param.displayType == DISPLAY_TYPE_OSC_FREQUENCY && param.minValue < 0)) {
 				newValue = ((char*)&PresetUtil::synthState->params)[currentrow*NUMBER_OF_ENCODERS+encoder];
 			} else {
 				newValue = ((unsigned char*)&PresetUtil::synthState->params)[currentrow*NUMBER_OF_ENCODERS+encoder];
