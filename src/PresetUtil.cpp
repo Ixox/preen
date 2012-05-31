@@ -26,6 +26,10 @@ extern const struct MidiConfig midiConfig[];
 char PresetUtil::readName[13];
 SynthState * PresetUtil::synthState;
 
+int PresetUtil::midiBufferWriteIndex;
+int PresetUtil::midiBufferReadIndex;
+uint8 PresetUtil::midiBuffer[1024];
+
 AllSynthParams synthParamsEmpty  =  {
         		// patch name : 'Preen'
         		// Engine
@@ -74,6 +78,8 @@ AllSynthParams synthParamsEmpty  =  {
 
 
 PresetUtil::PresetUtil() {
+	midiBufferWriteIndex = 0;
+	midiBufferReadIndex = 0;
 }
 
 PresetUtil::~PresetUtil() {
@@ -102,17 +108,17 @@ uint8 PresetUtil::getDeviceId2(int bankNumber) {
 }
 
 
-// Part 2 is 128 bytes long
+// Part 1 is 128 bytes long
 int PresetUtil::getAddress1(int bankNumber, int preset) {
 	if (bankNumber <4) {
 		return bankNumber * BANKSIZE + preset * PART1_SIZE ;
 	} else if (bankNumber == 4) {
-		// Bank number 4 where is stored default patch...
+		// Bank number 4 (tmp bank) place 3 of EEPROM2
+		return 3 * BANKSIZE + preset * PART1_SIZE ;
+	} else if (bankNumber == 5) {
+		// Bank number 5 where is stored default patch...
 		// EEPROM 2 - bank 2 - bloack 1
 		return 2 * BANKSIZE  + BLOCKSIZE * 1 + preset * PART1_SIZE ;
-	} else if (bankNumber == 5) {
-		// Bank number 5 (tmp bank) place 3 of EEPROM2
-		return 3 * BANKSIZE + preset * PART1_SIZE ;
 	}
 }
 
@@ -122,11 +128,11 @@ int PresetUtil::getAddress2(int bankNumber, int preset) {
 		// EEPROM 2 - Bank 0 - column bankNumber
 		return bankNumber * BLOCKSIZE *2 + preset * PART2_SIZE ;
 	} else if (bankNumber == 4) {
-		// Bank number 4 where is stored default patch...
-		return 2 * BANKSIZE  + BLOCKSIZE * 1 + BLOCKSIZE / 2 + preset * PART2_SIZE;
-	} else if (bankNumber == 5) {
 		// EEPROM 2 - bank 2 - column 3
 		return 2 * BANKSIZE + BLOCKSIZE * 2 + preset * PART2_SIZE ;
+	} else if (bankNumber == 5) {
+		// Bank number 5 where is stored default patch...
+		return 2 * BANKSIZE  + BLOCKSIZE * 1 + BLOCKSIZE / 2 + preset * PART2_SIZE;
 	}
 }
 
@@ -326,7 +332,7 @@ void PresetUtil::readCharsFromEEPROM(int bankNumber, int preset, uint8* chars) {
 	msgsRead[1].data = chars;
 
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
-	delay(1);
+	delay(5);
 
 	// Part 1 second block
 	address = address + blockSize;
@@ -343,8 +349,7 @@ void PresetUtil::readCharsFromEEPROM(int bankNumber, int preset, uint8* chars) {
 	msgsRead[1].length = blockSize;
 	msgsRead[1].data = chars+ 64;
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
-
-	delay(1);
+	delay(5);
 
 	// Now let's read part 2
 	deviceaddress = PresetUtil::getDeviceId2(bankNumber);
@@ -363,8 +368,7 @@ void PresetUtil::readCharsFromEEPROM(int bankNumber, int preset, uint8* chars) {
 	msgsRead[1].length = blockSize;
 	msgsRead[1].data = chars+ blockSize *2;
 	i2c_master_xfer(I2C1, msgsRead, 2, 500);
-
-	delay(1);
+	delay(5);
 
 }
 
@@ -402,7 +406,7 @@ void PresetUtil::savePatchToEEPROM(AllSynthParams* synthParams, int bankNumber, 
 }
 
 
-void PresetUtil::saveCharParamsToEEPROM(uint8* chars, int bankNumber, int preset) {
+void PresetUtil::saveCharParamsToEEPROM(uint8* chars, int bankNumber, int preset, bool fillMidiBuffer) {
 	const int blockSize = 64;
 	uint8 deviceaddress = PresetUtil::getDeviceId1(bankNumber);
 	int address = PresetUtil::getAddress1(bankNumber, preset);
@@ -423,8 +427,15 @@ void PresetUtil::saveCharParamsToEEPROM(uint8* chars, int bankNumber, int preset
 	msgWrite1.length = blockSize + 2;
 	msgWrite1.data = bufWrite;
 	i2c_master_xfer(I2C1, &msgWrite1, 1, 500);
+
+	if (fillMidiBuffer) {
+		fillBufferWithNextMidiByte();
+	}
 	delay(5);
 
+	if (fillMidiBuffer) {
+		fillBufferWithNextMidiByte();
+	}
 	address = address + blockSize;
 	bufWrite[0] = (uint8) ((int) address >> 8);
 	bufWrite[1] = (uint8) ((int) address & 0xff);
@@ -436,7 +447,13 @@ void PresetUtil::saveCharParamsToEEPROM(uint8* chars, int bankNumber, int preset
 	msgWrite2.length = blockSize + 2;
 	msgWrite2.data = bufWrite;
 	i2c_master_xfer(I2C1, &msgWrite2, 1, 500);
+	if (fillMidiBuffer) {
+		fillBufferWithNextMidiByte();
+	}
 	delay(5);
+	if (fillMidiBuffer) {
+		fillBufferWithNextMidiByte();
+	}
 
 	// Let's save part 2 !!!
 	deviceaddress = PresetUtil::getDeviceId2(bankNumber);
@@ -452,7 +469,13 @@ void PresetUtil::saveCharParamsToEEPROM(uint8* chars, int bankNumber, int preset
 	msgWrite2.length = blockSize + 2;
 	msgWrite2.data = bufWrite;
 	i2c_master_xfer(I2C1, &msgWrite2, 1, 500);
+	if (fillMidiBuffer) {
+		fillBufferWithNextMidiByte();
+	}
 	delay(5);
+	if (fillMidiBuffer) {
+		fillBufferWithNextMidiByte();
+	}
 
 }
 
@@ -804,19 +827,23 @@ int PresetUtil::readSysexPatch(uint8* params) {
 
 		int byte = PresetUtil::getNextMidiByte();
 		if (byte < 0) {
-			return -index - 100;
+			return -index - 1000;
 		}
 		value += byte;
 
+
 		if (byte < 127) {
-			params[index]	= value;
+			params[index] = value;
 			index++;
 			checkSum += value;
 			value = 0;
 		}
 	}
 
+
 	int sentChecksum = PresetUtil::getNextMidiByte();
+
+
 	if (sentChecksum <0) {
 		return -198;
 	} else {
@@ -829,10 +856,26 @@ int PresetUtil::readSysexPatch(uint8* params) {
 	return sentChecksum;
 }
 
+
+int PresetUtil::fillBufferWithNextMidiByte() {
+	if (midiBufferWriteIndex == 1024) {
+		midiBufferWriteIndex = 0;
+	}
+	while (Serial3.available()) {
+		midiBuffer[midiBufferWriteIndex++] = Serial3.read();
+	}
+}
+
 int PresetUtil::getNextMidiByte() {
 	int timeout = 0;
+	if (midiBufferReadIndex != midiBufferWriteIndex) {
+		if (midiBufferReadIndex == 1024) {
+			midiBufferReadIndex = 0;
+		}
+		return midiBuffer[midiBufferReadIndex++];
+	}
 	while (!Serial3.available()) {
-		if (timeout++ >= 100000) {
+		if (timeout++ >= 1000000) {
 			return -1;
 		}
 	}
@@ -932,17 +975,26 @@ int PresetUtil::readSysexBank() {
 
 	lcd.setCursor(1,3);
 	lcd.print("Bank:");
+	midiBufferWriteIndex = 0;
+	midiBufferReadIndex = 0;
 
 	for (int preset = 0; preset<128 && errorCode>=0; preset++) {
+		lcd.setCursor(7,3);
+		lcd.print(preset);
+
 		if ((errorCode = PresetUtil::readSysexPatch(paramChars)) <0) {
+			lcd.setCursor(11,3);
+			lcd.print("##");
+			lcd.print(errorCode);
 			errorCode = -500 - preset;
 			break;
 		}
 
-		lcd.setCursor(7,3);
-		lcd.print(preset);
-
-		PresetUtil::saveCharParamsToEEPROM(paramChars, 4, preset);
+		if (midiBufferWriteIndex == midiBufferReadIndex) {
+			midiBufferWriteIndex = 0;
+			midiBufferReadIndex = 0;
+		}
+		PresetUtil::saveCharParamsToEEPROM(paramChars, 4, preset, true);
 	}
 
 	return errorCode;
@@ -954,11 +1006,13 @@ void PresetUtil::copyBank(int source, int dest) {
 	uint8 paramChars[PATCH_SIZE];
 	lcd.setCursor(1,3);
 	lcd.print("Save:");
-	for (int preset=0; preset<127; preset++) {
+	for (int preset=0; preset<128; preset++) {
 		PresetUtil::readCharsFromEEPROM(source, preset, paramChars);
 		lcd.setCursor(7,3);
 		lcd.print(preset);
+		delay(5);
 		PresetUtil::saveCharParamsToEEPROM(paramChars, dest, preset);
+		delay(5);
 	}
 }
 
@@ -968,7 +1022,7 @@ void PresetUtil::loadDefaultPatchIfAny() {
 
 	PresetUtil::readCharsFromEEPROM(5, 0, paramChars);
 
-	if (((char*)&paramChars)[0] == EEPROM_CONFIG_CHECK) {
+	if (((char*)&paramChars)[0] == EEPROM_DEFPATCH_CHECK) {
         PresetUtil::readSynthParamFromEEPROM(5, 1, &PresetUtil::synthState->params);
 	}
 }
@@ -977,7 +1031,7 @@ void PresetUtil::loadDefaultPatchIfAny() {
 void PresetUtil::saveCurrentPatchAsDefault() {
 	uint8 paramChars[PATCH_SIZE];
 	for (unsigned int k=0; k<PATCH_SIZE; k++) {
-		paramChars[k] = EEPROM_CONFIG_CHECK;
+		paramChars[k] = EEPROM_DEFPATCH_CHECK;
 	}
 	PresetUtil::saveCharParamsToEEPROM(paramChars, 5, 0);
 	PresetUtil::saveCurrentPatchToEEPROM(5,1);

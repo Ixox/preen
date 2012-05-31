@@ -19,6 +19,7 @@
 #define PRESETUTIL_H_
 
 #define EEPROM_CONFIG_CHECK 40
+#define EEPROM_DEFPATCH_CHECK 114
 
 #include "libmaple_types.h"
 #include "wirish.h"
@@ -59,7 +60,7 @@ public:
     static void readCharsFromEEPROM(int bankNumber, int preset, uint8* chars);
     static char* readPresetNameFromEEPROM(int bankNumber, int preset);
     static void savePatchToEEPROM(AllSynthParams* synthParams, int bankNumber, int preset);
-    static void saveCharParamsToEEPROM(uint8* paramChars, int bankNumber, int preset);
+    static void saveCharParamsToEEPROM(uint8* paramChars, int bankNumber, int preset, bool fillMidiBuffer = false);
     static void saveCurrentPatchToEEPROM(int bankNumber, int preset);
     static void formatEEPROM();
     static void upgradeEEPROMToV1_10();
@@ -78,6 +79,7 @@ public:
     static void copyBank(int source, int dest);
 
     static int  getNextMidiByte();
+    static int  fillBufferWithNextMidiByte();
     static void copySynthParams(char* source, char* dest);
 
     static void loadDefaultPatchIfAny();
@@ -97,6 +99,9 @@ private:
     static uint8 getDeviceId2(int bankNumber);
     static int getAddress2(int bankNumber, int preset);
 
+    static uint8 midiBuffer[1024];
+    static int midiBufferWriteIndex;
+    static int midiBufferReadIndex;
 };
 
 #endif /* PRESETUTIL_H_ */
