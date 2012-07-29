@@ -143,11 +143,11 @@ void MidiDecoder::newByte(unsigned char byte) {
 					bool waitingForSysex = this->synthState->fullState.currentMenuItem->menuState == MENU_MIDI_SYSEX_GET;
 					bool realTimeSysexAllowed = this->synthState->fullState.midiConfigValue[MIDICONFIG_REALTIME_SYSEX] == 1;
 					int r = PresetUtil::readSysex(realTimeSysexAllowed || waitingForSysex, waitingForSysex);
+					currentEventState.eventState = MIDI_EVENT_WAITING;
+					currentEventState.index = 0;
 					if (r == 2) {
 						this->synthState->newBankReady();
 					}
-					currentEventState.eventState = MIDI_EVENT_WAITING;
-					currentEventState.index = 0;
 				}
 			} else {
 				// We do nothing !

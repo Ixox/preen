@@ -280,8 +280,22 @@ void Synth::afterNewParamsLoad() {
 
 
 void Synth::newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
-	if (type == SYNTH_PARAM_TYPE_ENGINE && encoder == ENCODER_ENGINE_ALGO) {
-		checkMaxVoice(true);
+	if (type == SYNTH_PARAM_TYPE_ENGINE) {
+		if (encoder == ENCODER_ENGINE_ALGO) {
+			checkMaxVoice(true);
+		} else if (encoder == ENCODER_ENGINE_VOICE) {
+			switch (newValue) {
+			case 1:
+				voices[1].killNow();
+				// No break;
+			case 2:
+				voices[2].killNow();
+				// No break;
+			case 3:
+				voices[3].killNow();
+				// No break;
+			}
+		}
 	} else if (type == SYNTH_PARAM_TYPE_ENV) {
         switch (currentRow) {
         case ROW_ENV1:

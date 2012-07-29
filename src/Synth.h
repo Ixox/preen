@@ -74,6 +74,9 @@ public:
     void beforeNewParamsLoad() {
         // Stop all voices
         allSoundOff();
+
+        this->matrix.resetSources();
+        this->matrix.resetAllDestination();
     };
 
     void afterNewParamsLoad();

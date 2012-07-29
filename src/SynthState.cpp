@@ -747,6 +747,7 @@ void SynthState::setNewStepValue(int whichStepSeq, int step, int newValue) {
 void SynthState::setNewValue(int row, int number, int newValue) {
     int index = row * NUMBER_OF_ENCODERS + number;
     struct ParameterDisplay* param = &(allParameterRows.row[row]->params[number]);
+    int oldValue = ((char*)&params)[index];
     if (newValue > param->maxValue) {
     	newValue= param->maxValue;
     } else if (newValue < param->minValue) {
@@ -757,7 +758,6 @@ void SynthState::setNewValue(int row, int number, int newValue) {
     } else {
         ((unsigned char*)&params)[index] = newValue;
     }
-    int oldValue = ((char*)&params)[index];
     propagateNewParamValueFromExternal(row, number, param, oldValue, newValue);
 }
 
@@ -948,6 +948,10 @@ const MenuItem* SynthState::menuBack() {
         propagateAfterNewParamsLoad();
         break;
     case MENU_SAVE_BANK:
+    	// After back, bank should noe be receivable anymore
+        fullState.synthMode = SYNTH_MODE_EDIT;
+    	return MenuItemUtil::getMenuItem(MENU_LOAD);
+    	break;
     case MAIN_MENU:
         fullState.synthMode = SYNTH_MODE_EDIT;
         // put back old patch (has been overwritten if a new patch has been loaded)

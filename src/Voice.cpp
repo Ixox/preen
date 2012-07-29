@@ -163,6 +163,7 @@ void Voice::noteOff() {
 
 void Voice::killNow() {
     this->playing = false;
+    this->currentSample = 0;
 }
 
 

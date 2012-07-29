@@ -931,6 +931,7 @@ int PresetUtil::readSysex(bool patchAllowed, bool bankAllowed) {
 			if ((isPatch && !patchAllowed) || (!isPatch && !bankAllowed)) {
 				// Will wait untill F7 is received (end of sysex)
 				bSysexRead = true;
+				bError = true;
 			}
 		}
 
