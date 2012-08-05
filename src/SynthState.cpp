@@ -59,9 +59,19 @@ struct ParameterRowDisplay engine3ParameterRow = {
         }
 };
 
+struct ParameterRowDisplay performanceRow = {
+        "Performance" ,
+        { "CC1 ", "CC2 ", "CC3 ", "CC4 " },
+        {
+                {0, 127, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
+                {0, 127, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
+                {0, 127, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder },
+                {0, 127, DISPLAY_TYPE_UNSIGNED_CHAR, nullNames, nullNamesOrder, nullNamesOrder }
+        }
+};
 
 
-const char* oscShapeNames []=  {"sin ", "s^2 ", "1/2s", "spos", "rand", "squa", "saw ", "off " } ;
+const char* oscShapeNames []=  {"sin ", "s^2 ", "1/2s", "spos", "rand", "squa", "saw ", "off "} ;
 /*
 enum OscShape {
 	OSC_SHAPE_SIN = 0,
@@ -75,14 +85,16 @@ enum OscShape {
 };
 */
 unsigned char oscShameOrder[] = { OSC_SHAPE_SIN, OSC_SHAPE_SQUARE, OSC_SHAPE_SAW, OSC_SHAPE_RAND, OSC_SHAPE_SIN2, OSC_SHAPE_SIN3, OSC_SHAPE_SIN4, OSC_SHAPE_OFF };
+// index = enum value, value = position dans oscShameOrder
 unsigned char oscShameOrderReversed[] = { 0, 4, 5, 6, 3, 1, 2, 7};
+
 
 const char* oscTypeNames [] = { "keyb", "fixe"};
 struct ParameterRowDisplay oscParameterRow = {
         "Oscillator",
         { "Shap", "FTyp", "Freq", "FTun" },
         {
-                { OSC_SHAPE_SIN, OSC_SHAPE_OFF, DISPLAY_TYPE_STRINGS, oscShapeNames, oscShameOrder, oscShameOrderReversed },
+                { OSC_SHAPE_SIN, OSC_SHAPE_LAST -1, DISPLAY_TYPE_STRINGS, oscShapeNames, oscShameOrder, oscShameOrderReversed },
                 { OSC_FT_KEYBOARD, OSC_FT_FIXE, DISPLAY_TYPE_STRINGS, oscTypeNames, nullNamesOrder, nullNamesOrder},
                 { 0, 128, DISPLAY_TYPE_OSC_FREQUENCY , nullNames, nullNamesOrder, nullNamesOrder },
                 { (char)-127, 127, DISPLAY_TYPE_OSC_FREQUENCY, nullNames, nullNamesOrder, nullNamesOrder }
@@ -151,13 +163,17 @@ enum DestinationEnum {
 	MTX3_MUL = 21,	MTX4_MUL,	MTX5_MUL,
 	MTX6_MUL = 24,	MTX7_MUL,	MTX8_MUL,
 	MTX9_MUL = 27,	MTX10_MUL,	MTX11_MUL,
-	MTX12_MUL= 30,	ALL_OSC_FREQ,	LFO5_GATE,
-	LFO6_GATE,
+	MTX12_MUL= 30,	ALL_OSC_FREQ,	LFO5_GATE,	LFO6_GATE,
+	GATE = 34,
+	ENV1 = 35, ENV2, ENV3, ENV4, ENV5, ENV6 = 40,
+	ALL_ENV = 41
+	EXTERNAL_CC1 = 42,EXTERNAL_CC2,
 
 */
 
 const char* matrixDestNames [] = { "None", "o1Fq", "o2Fq", "o3Fq", "o4Fq", "o5Fq", "o6Fq", "IM1 ", "IM2 ", "IM3 ", "IM4 ", "Mix1", "Mix2", "Mix3", "Mix4",
-		"l1Fq", "l2Fq", "l3Fq", "l4Fq", "mx01", "mx02", "mx03", "mx04", "mx05", "mx06", "mx07", "mx08", "mx09", "mx10", "mx11", "mx12", "o*Fq", "l5gt", "l6gt", "gate" } ;
+		"l1Fq", "l2Fq", "l3Fq", "l4Fq", "mx01", "mx02", "mx03", "mx04", "mx05", "mx06", "mx07", "mx08", "mx09", "mx10", "mx11", "mx12", "o*Fq", "l5gt", "l6gt", "gate"
+		, "env1", "env2", "env3", "env4", "env5", "env6", "env*", "Ecc1", "Ecc2", "Ecc3", "Ecc4"  } ;
 unsigned char  matrixDestNamesOrder[] = { DESTINATION_NONE, OSC1_FREQ, 	OSC2_FREQ,
 /* 3 */		OSC3_FREQ  ,	OSC4_FREQ,	OSC5_FREQ, OSC6_FREQ ,
 /* 7 */     ALL_OSC_FREQ, INDEX_MODULATION1,	INDEX_MODULATION2,
@@ -168,9 +184,13 @@ unsigned char  matrixDestNamesOrder[] = { DESTINATION_NONE, OSC1_FREQ, 	OSC2_FRE
 /* 24 */	MTX3_MUL, MTX4_MUL,	MTX5_MUL,
 /* 27 */	MTX6_MUL, 	MTX7_MUL,	MTX8_MUL,
 /* 30 */	MTX9_MUL ,	MTX10_MUL,	MTX11_MUL,
-/* 33 */	MTX12_MUL, MAIN_GATE	  };
+/* 33 */	MTX12_MUL,
+/* 34 */    ENV1_ATTACK, ENV2_ATTACK, ENV3_ATTACK, ENV4_ATTACK, ENV5_ATTACK, ENV6_ATTACK, ALL_ENV_ATTACK,
+/* 41 */    EXTERNAL_CC1, EXTERNAL_CC2, EXTERNAL_CC3, EXTERNAL_CC4,
+/* 45 */    MAIN_GATE};
 
-unsigned char  matrixDestNamesOrderReversed[] = {0,1,2,3,4,5,6,8,9,10,11,12,13,14,15,16,17,18,19,22,23,24,25,26,27,28,29,30,31,32,33,7,20,21,34};
+// index = enum value, value = position dans matrixDestNamesOrder
+unsigned char  matrixDestNamesOrderReversed[] = {0,1,2,3,4,5,6,8,9,10,11,12,13,14,15,16,17,18,19,22,23,24,25,26,27,28,29,30,31,32,33,7,20,21,45,34,35,36,37,38,39,40,41,42,43,44};
 
 struct ParameterRowDisplay matrixParameterRow = {
         "Matrix",
@@ -221,6 +241,7 @@ const struct AllParameterRowsDisplay allParameterRows = {
                 &engine1ParameterRow,
                 &engine2ParameterRow,
                 &engine3ParameterRow,
+                &performanceRow,
                 &oscParameterRow,
                 &oscParameterRow,
                 &oscParameterRow,
@@ -289,8 +310,14 @@ SynthState::SynthState() {
     fullState.midiConfigValue[MIDICONFIG_RECEIVES] = 3;
     fullState.midiConfigValue[MIDICONFIG_SENDS] = 1;
     fullState.midiConfigValue[MIDICONFIG_REALTIME_SYSEX] = 0;
+    fullState.midiConfigValue[MIDICONFIG_BOOT_START] = 0;
     fullState.midiConfigValue[MIDICONFIG_TEST_NOTE] = 60;
     fullState.midiConfigValue[MIDICONFIG_TEST_VELOCITY] = 120;
+    fullState.midiConfigValue[MIDICONFIG_ECHANNEL] = 0;
+    fullState.midiConfigValue[MIDICONFIG_ECC1] = 115;
+    fullState.midiConfigValue[MIDICONFIG_ECC2] = 116;
+    fullState.midiConfigValue[MIDICONFIG_ECC3] = 117;
+    fullState.midiConfigValue[MIDICONFIG_ECC4] = 118;
     fullState.firstMenu = 0;
 
     for (int k=0; k<12; k++) {
@@ -365,7 +392,7 @@ void SynthState::encoderTurned(int encoder, int ticks) {
 
 		if (param->displayType == DISPLAY_TYPE_STRINGS) {
 			// Do not use encoder acceleration
-			ticks = ticks>0? 1 : -1;
+			ticks = ticks > 0 ? 1 : -1;
 		}
 
         if ((param->displayType == DISPLAY_TYPE_SIGNED_CHAR) || (param->displayType == DISPLAY_TYPE_OSC_FREQUENCY && param->minValue<0)) {
@@ -471,7 +498,7 @@ void SynthState::encoderTurned(int encoder, int ticks) {
                     fullState.name[fullState.menuSelect]= getLength(allChars)-1;
                 }
                 propagateNewMenuSelect();
-            } else if (fullState.currentMenuItem->menuState == MENU_CONFIG_MIDI) {
+            } else if (fullState.currentMenuItem->menuState == MENU_CONFIG_SETTINGS) {
             	fullState.midiConfigValue[fullState.menuSelect] = fullState.midiConfigValue[fullState.menuSelect] + (ticks>0? 1: -1);
             	if (fullState.midiConfigValue[fullState.menuSelect] >= midiConfig[fullState.menuSelect].maxValue) {
             		fullState.midiConfigValue[fullState.menuSelect] = midiConfig[fullState.menuSelect].maxValue - 1;
@@ -528,20 +555,20 @@ void SynthState::changeSynthModeRow(int button, int step) {
 
 	switch (button) {
 		case BUTTON_SYNTH:
-			if (showUp[params.engine1.algo].mix == 0) {
-				lastBecauseOfAlgo = ROW_MODULATION;
-			} else {
-				lastBecauseOfAlgo = ROW_ENGINE_LAST;
-			}
-			if (currentRow<ROW_ENGINE_FIRST || currentRow>lastBecauseOfAlgo) {
+			if (currentRow<ROW_ENGINE_FIRST || currentRow>ROW_ENGINE_LAST) {
 				currentRow = engineRow;
 			} else {
 				currentRow += step;
+				if (showUp[params.engine1.algo].mix == 0) {
+					if (currentRow == ROW_OSC_MIX ) {
+						currentRow += step;
+					}
+				}
 			}
-			if (currentRow>lastBecauseOfAlgo) {
+			if (currentRow>ROW_ENGINE_LAST) {
 				currentRow = ROW_ENGINE_FIRST;
 			} else if (currentRow<ROW_ENGINE_FIRST) {
-				currentRow = lastBecauseOfAlgo;
+				currentRow = ROW_ENGINE_LAST;
 			}
 			engineRow = currentRow;
 		break;
@@ -866,7 +893,7 @@ const MenuItem* SynthState::afterButtonPressed() {
     		return fullState.currentMenuItem;
     	}
         break;
-    case MENU_CONFIG_MIDI_SAVE:
+    case MENU_CONFIG_SETTINGS_SAVE:
         PresetUtil::saveConfigToEEPROM();
         break;
     case MENU_SAVE_DEFAULT:

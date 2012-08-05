@@ -18,6 +18,8 @@
 #ifndef VOICE_H_
 #define VOICE_H_
 
+#define BLOCK_SIZE 32
+
 #include "SynthState.h"
 #include "Matrix.h"
 #include "Osc.h"
@@ -34,12 +36,8 @@ public:
     Voice();
     ~Voice(void);
 
-    void init(Matrix* matrix, Lfo** lfo, Env<1>*env1, Env<2>*env2, Env<3>*env3, Env<4>*env4, Env<5>*env5, Env<6>*env6, Osc<1>*osc1, Osc<2>*osc2, Osc<3>*osc3, Osc<4>*osc4, Osc<5>*osc5, Osc<6>*osc6 );
+    void init(Matrix* matrix, Lfo** lfo, Env*env1, Env*env2, Env*env3, Env*env4, Env*env5, Env*env6, Osc*osc1, Osc*osc2, Osc*osc3, Osc*osc4, Osc*osc5, Osc*osc6 );
 
-
-    int getSample() {
-        return currentSample;
-    }
 
     void calculateFrequencyWithMatrix() {
     	osc1->calculateFrequencyWithMatrix(&oscState1);
@@ -53,34 +51,23 @@ public:
     }
 
 
-    void nextSample();
+    void nextBlock();
 
-    void updateModulationIndex1() {
+    void updateAllModulationIndexes() {
         IM1 = this->synthState->params.engine2.modulationIndex1 + (matrix->getDestination(INDEX_MODULATION1)>>4);
-    }
-    void updateModulationIndex2() {
         IM2 = this->synthState->params.engine2.modulationIndex2 + (matrix->getDestination(INDEX_MODULATION2)>>4);
-    }
-    void updateModulationIndex3() {
         IM3 = this->synthState->params.engine2.modulationIndex3 + (matrix->getDestination(INDEX_MODULATION3)>>4);
-    }
-    void updateModulationIndex4() {
         IM4 = this->synthState->params.engine2.modulationIndex4 + (matrix->getDestination(INDEX_MODULATION4)>>4);
     }
-    void updateMixOsc1() {
+
+    void updateAllMixOscs() {
         MIX1 = this->synthState->params.engine3.mixOsc1 + (matrix->getDestination(MIX_OSC1)>>4);
-    }
-    void updateMixOsc2() {
         MIX2 = this->synthState->params.engine3.mixOsc2 + (matrix->getDestination(MIX_OSC2)>>4);
-    }
-    void updateMixOsc3() {
         MIX3 = this->synthState->params.engine3.mixOsc3 + (matrix->getDestination(MIX_OSC3)>>4);
-    }
-    void updateMixOsc4() {
         MIX4 = this->synthState->params.engine3.mixOsc4 + (matrix->getDestination(MIX_OSC4)>>4);
     }
 
-    void endNoteOfBeginNextOne() {
+    void endNoteOrBeginNextOne() {
         if (newNotePending) {
             noteOn(nextNote, nextVelocity, index);
             this->newNotePending = false;
@@ -104,6 +91,9 @@ public:
     char getNote() { return this->note; }
     char getNextNote() { return this->nextNote; }
 
+    int* getSamples() { return currentSamples; }
+
+
 private:
     // voice status
     int frequency;
@@ -112,8 +102,7 @@ private:
     unsigned int index;
     char note;
     char velocity;
-    int currentSample;
-
+    int currentSamples[32];
     Matrix* matrix;
     // optimization
     static int IM1, IM2, IM3, IM4;
@@ -133,18 +122,18 @@ private:
     OscState oscState5;
     OscState oscState6;
 
-    Osc<1>* osc1;
-    Osc<2>* osc2;
-    Osc<3>* osc3;
-    Osc<4>* osc4;
-    Osc<5>* osc5;
-    Osc<6>* osc6;
-    Env<1>* env1;
-    Env<2>* env2;
-    Env<3>* env3;
-    Env<4>* env4;
-    Env<5>* env5;
-    Env<6>* env6;
+    Osc* osc1;
+    Osc* osc2;
+    Osc* osc3;
+    Osc* osc4;
+    Osc* osc5;
+    Osc* osc6;
+    Env* env1;
+    Env* env2;
+    Env* env3;
+    Env* env4;
+    Env* env5;
+    Env* env6;
 
     // Fixing the "plop" when all notes are buisy...
     bool newNotePending;
@@ -158,6 +147,14 @@ private:
 
     // lfos
     Lfo **lfo;
+
+    // env Value
+    unsigned int env1ValueMem;
+    unsigned int env2ValueMem;
+    unsigned int env3ValueMem;
+    unsigned int env4ValueMem;
+    unsigned int env5ValueMem;
+    unsigned int env6ValueMem;
 };
 
 #endif

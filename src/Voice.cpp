@@ -30,7 +30,7 @@ Voice::~Voice(void)
 {
 }
 
-void Voice::init(Matrix* matrix,  Lfo** lfo, Env<1>*env1, Env<2>*env2, Env<3>*env3, Env<4>*env4, Env<5>*env5, Env<6>*env6, Osc<1>*osc1, Osc<2>*osc2, Osc<3>*osc3, Osc<4>*osc4, Osc<5>*osc5, Osc<6>*osc6 ) {
+void Voice::init(Matrix* matrix,  Lfo** lfo, Env*env1, Env*env2, Env*env3, Env*env4, Env*env5, Env*env6, Osc*osc1, Osc*osc2, Osc*osc3, Osc*osc4, Osc*osc5, Osc*osc6 ) {
     this->env1 = env1;
     this->env2 = env2;
     this->env3 = env3;
@@ -67,7 +67,7 @@ void Voice::glideToNote(short newNote) {
 
 void Voice::noteOnWithoutPop(short newNote, char velocity, unsigned int index) {
 
-    // Update index : so that few chance to be choosen again during the quick dying
+    // Update index : so that few chance to be chosen again during the quick dying
     this->index = index;
     if (!this->released && this->synthState->params.engine1.numberOfVoice == 1 && this->synthState->params.engine1.glide>0) {
         glideToNote(newNote);
@@ -138,6 +138,8 @@ void Voice::noteOn(short newNote, char velocity, unsigned int index) {
     for (int k=0; k<NUMBER_OF_LFO; k++) {
         lfo[k]->noteOn();
     }
+
+    this->env1ValueMem = -1;
 }
 
 void Voice::glideNoteOff() {
@@ -163,13 +165,82 @@ void Voice::noteOff() {
 
 void Voice::killNow() {
     this->playing = false;
-    this->currentSample = 0;
+    for (int k=0; k<BLOCK_SIZE; k++) {
+    	this->currentSamples[k] = 0;
+    }
 }
 
 
-void Voice::nextSample() {
+void Voice::nextBlock() {
+	int env1Value;
+	int env2Value;
+	int env3Value;
+	int env4Value;
+	int env5Value;
+	int env6Value;
+	int envNextValue;
+
+	int env1Inc;
+	int env2Inc;
+	int env3Inc;
+	int env4Inc;
+	int env5Inc;
+	int env6Inc;
+
     if (playing) {
-        switch (this->synthState->params.engine1.algo) {
+
+    	calculateFrequencyWithMatrix();
+
+    	int oscNumber = showUp[this->synthState->params.engine1.algo].osc;
+    	if (this->env1ValueMem == -1) {
+    		// first call for current note
+        	this->env1ValueMem = env1->getNextAmp(&envState1);
+        	this->env2ValueMem = env2->getNextAmp(&envState2);
+        	this->env3ValueMem = env3->getNextAmp(&envState3);
+        	if (oscNumber >= 4) {
+            	this->env4ValueMem = env4->getNextAmp(&envState4);
+            	if (oscNumber == 6) {
+                	this->env5ValueMem = env5->getNextAmp(&envState5);
+                	this->env6ValueMem = env6->getNextAmp(&envState6);
+            	}
+        	}
+    	}
+
+    	env1Value = this->env1ValueMem;
+    	envNextValue = env1->getNextAmp(&envState1);
+    	env1Inc = (envNextValue - env1Value) >> 5;
+    	this->env1ValueMem = envNextValue;
+
+    	env2Value = this->env2ValueMem;
+    	envNextValue = env2->getNextAmp(&envState2);
+    	env2Inc = (envNextValue - env2Value) >> 5;
+    	this->env2ValueMem = envNextValue;
+
+    	env3Value = this->env3ValueMem;
+    	envNextValue = env3->getNextAmp(&envState3);
+    	env3Inc = (envNextValue - env3Value) >> 5;
+    	this->env3ValueMem = envNextValue;
+
+    	if (oscNumber >= 4 ) {
+        	env4Value = this->env4ValueMem;
+        	envNextValue = env4->getNextAmp(&envState4);
+        	env4Inc = (envNextValue - env4Value) >> 5;
+        	this->env4ValueMem = envNextValue;
+        	if (oscNumber == 6 ) {
+            	env5Value = this->env5ValueMem;
+            	envNextValue = env5->getNextAmp(&envState5);
+            	env5Inc = (envNextValue - env5Value) >> 5;
+            	this->env5ValueMem = envNextValue;
+            	env6Value = this->env6ValueMem;
+            	envNextValue = env6->getNextAmp(&envState6);
+            	env6Inc = (envNextValue - env6Value) >> 5;
+            	this->env6ValueMem = envNextValue;
+
+        	}
+    	}
+
+
+    	switch (this->synthState->params.engine1.algo) {
         case ALGO1:
             /*
                       IM3
@@ -184,29 +255,39 @@ void Voice::nextSample() {
 
              */
         {
-        	// Bitshifting to do :
-        	// 31 (32 - 1)  + 3 (IM)= 35....
-        	oscState3.frequency =  oscState3.mainFrequencyPlusMatrix;
-        	int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-            freq3 >>= 18;
-            freq3 *=  oscState3.frequency;
-            freq3 >>= 13;
+			oscState3.frequency =  oscState3.mainFrequencyPlusMatrix;
+        	int* osc3Values = osc3->getNextBlock(&oscState3);
 
-            oscState2.frequency =  ((freq3 * IM3) >> 3) + oscState2.mainFrequencyPlusMatrix;
-            int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
-            freq2 >>= 18;
-            freq2 *= oscState2.frequency;
-            freq2 >>= 13;
+        	for (int k =0; k< BLOCK_SIZE; k++) {
+				// Bitshifting to do :
+				// 31 (32 - 1)  + 3 (IM)= 35....
 
-            oscState1.frequency =  ((IM1 * freq2) >> 3) + ((IM2 * freq3) >> 3) + oscState1.mainFrequencyPlusMatrix;
-            currentSample =  osc1->getNextSample(&oscState1) * env1->getNextAmp(&envState1);
-            currentSample  >>= 15;
-            currentSample *= velocity;
-            currentSample >>=7;
+				int freq3 = osc3Values[k] * env3Value;
+				freq3 >>= 18;
+				freq3 *=  oscState3.frequency;
+				freq3 >>= 13;
 
-            if (env1->isDead(envState1)) {
-                endNoteOfBeginNextOne();
+				oscState2.frequency =  ((freq3 * IM3) >> 3) + oscState2.mainFrequencyPlusMatrix;
+				int freq2 = osc2->getNextSample(&oscState2) * env2Value;
+				freq2 >>= 18;
+				freq2 *= oscState2.frequency;
+				freq2 >>= 13;
+
+				oscState1.frequency =  ((IM1 * freq2) >> 3) + ((IM2 * freq3) >> 3) + oscState1.mainFrequencyPlusMatrix;
+				currentSamples[k] = osc1->getNextSample(&oscState1) * env1Value;
+				currentSamples[k] >>= 15;
+				currentSamples[k] *= velocity;
+				currentSamples[k] >>=7;
+
+				env1Value += env1Inc;
+				env2Value += env2Inc;
+				env3Value += env3Inc;
+        	}
+
+        	if (env1->isDead(envState1)) {
+                endNoteOrBeginNextOne();
             }
+
             break;
         }
         case ALGO2:
@@ -224,30 +305,43 @@ void Voice::nextSample() {
                    |Mix1  |Mix2
              */
         {
-        	oscState3.frequency = oscState3.mainFrequencyPlusMatrix;
-            int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-            freq3 >>= 18;
-            freq3 *=  oscState3.frequency;
-            freq3 >>= 13;
+			oscState3.frequency =  oscState3.mainFrequencyPlusMatrix;
+        	int* osc3Values = osc3->getNextBlock(&oscState3);
 
-            oscState2.frequency =  ((freq3*IM2)>>3) + oscState2.mainFrequencyPlusMatrix;
-            oscState1.frequency =  ((freq3*IM1)>>3) + oscState1.mainFrequencyPlusMatrix;
+        	for (int k =0; k< BLOCK_SIZE; k++) {
+				// Bitshifting to do :
+				// 31 (32 - 1)  + 3 (IM)= 35....
 
-            int currentSample2 = osc2->getNextSample(&oscState2)*env2->getNextAmp(&envState2);
-            currentSample2  >>= 7; //  7 for mixOsc2
-            currentSample2 *= MIX2;
-            currentSample2  >>= 15;
+				int freq3 = osc3Values[k] * env3Value;
+				freq3 >>= 18;
+				freq3 *=  oscState3.frequency;
+				freq3 >>= 13;
 
-            currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
-            currentSample  >>= 7; // 7 for mixOsc1
-            currentSample *= MIX1;
-            currentSample  >>= 15;
-            currentSample += currentSample2;
+				oscState2.frequency =  ((freq3*IM2)>>3) + oscState2.mainFrequencyPlusMatrix;
 
-            currentSample *= velocity;
-            currentSample >>=8; // >>7 >> 1(we added 2 samples)
+				int currentSample2 = osc2->getNextSample(&oscState2)* env2Value;
+				currentSample2  >>= 7; //  7 for mixOsc2
+				currentSample2 *= MIX2;
+				currentSample2  >>= 15;
+
+				oscState1.frequency =  ((freq3*IM1)>>3) + oscState1.mainFrequencyPlusMatrix;
+
+				currentSamples[k] = osc1->getNextSample(&oscState1)*env1Value;
+				currentSamples[k]  >>= 7; // 7 for mixOsc1
+				currentSamples[k] *= MIX1;
+				currentSamples[k]  >>= 15;
+				currentSamples[k] += currentSample2;
+
+				currentSamples[k] *= velocity;
+				currentSamples[k] >>=8; // >>7 >> 1(we added 2 samples)
+
+				env1Value += env1Inc;
+				env2Value += env2Inc;
+				env3Value += env3Inc;
+        	}
+
             if (env1->isDead(envState1) && env2->isDead(envState2)) {
-                endNoteOfBeginNextOne();
+                endNoteOrBeginNextOne();
             }
         }
         break;
@@ -265,34 +359,45 @@ void Voice::nextSample() {
                      '---'
              */
         {
-
-
         	oscState2.frequency = oscState2.mainFrequencyPlusMatrix;
-            int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
-            freq2 >>= 18;
-            freq2 *=  oscState2.frequency;
-            freq2 >>= 13;
+        	int* osc2Values = osc2->getNextBlock(&oscState2);
 
         	oscState3.frequency = oscState3.mainFrequencyPlusMatrix;
-            int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-            freq3 >>= 18;
-            freq3 *=  oscState3.frequency;
-            freq3 >>= 13;
+        	int* osc3Values = osc3->getNextBlock(&oscState3);
 
-            oscState4.frequency =  ((freq3 * IM4) >> 3) + oscState4.mainFrequencyPlusMatrix;
-            int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-            freq4 >>= 18;
-            freq4 *=  oscState4.frequency;
-            freq4 >>= 13;
 
-            oscState1.frequency =  ((freq2 * IM1) >> 3) + ((freq3 * IM2)>> 3) + ((freq4 * IM3) >> 3) + oscState1.mainFrequencyPlusMatrix;
-            currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
-            currentSample  >>= 15;
-            currentSample *= velocity;
-            currentSample >>=7;
+        	for (int k =0; k< BLOCK_SIZE; k++) {
+				int freq2 = osc2Values[k] * env2Value;
+				freq2 >>= 18;
+				freq2 *=  oscState2.frequency;
+				freq2 >>= 13;
+
+				int freq3 = osc3Values[k] * env3Value;
+				freq3 >>= 18;
+				freq3 *=  oscState3.frequency;
+				freq3 >>= 13;
+
+				oscState4.frequency =  ((freq3 * IM4) >> 3) + oscState4.mainFrequencyPlusMatrix;
+				int freq4 = osc4->getNextSample(&oscState4) * env4Value;
+				freq4 >>= 18;
+				freq4 *=  oscState4.frequency;
+				freq4 >>= 13;
+
+				oscState1.frequency =  ((freq2 * IM1) >> 3) + ((freq3 * IM2)>> 3) + ((freq4 * IM3) >> 3) + oscState1.mainFrequencyPlusMatrix;
+				currentSamples[k] = osc1->getNextSample(&oscState1) * env1Value;
+				currentSamples[k]  >>= 15;
+				currentSamples[k] *= velocity;
+				currentSamples[k] >>=7;
+
+				env1Value += env1Inc;
+				env2Value += env2Inc;
+				env3Value += env3Inc;
+				env4Value += env4Inc;
+
+        	}
 
             if (env1->isDead(envState1)) {
-                endNoteOfBeginNextOne();
+                endNoteOrBeginNextOne();
             }
 
 
@@ -311,40 +416,48 @@ void Voice::nextSample() {
 
              */
         {
+        	oscState4.frequency = oscState4.mainFrequencyPlusMatrix;
+        	int* osc4Values = osc4->getNextBlock(&oscState4);
 
-            oscState4.frequency =  oscState4.mainFrequencyPlusMatrix;
-            int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-            freq4 >>= 18;
-            freq4 *=  oscState4.frequency;
-            freq4 >>= 13;
+        	for (int k =0; k< BLOCK_SIZE; k++) {
+				int freq4 = osc4Values[k] * env4Value;
+				freq4 >>= 18;
+				freq4 *=  oscState4.frequency;
+				freq4 >>= 13;
 
-            oscState3.frequency =  ((freq4 * IM4) >> 3) + oscState3.mainFrequencyPlusMatrix;
-            int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-            freq3 >>= 18;
-            freq3 *=  oscState3.frequency;
-            freq3 >>= 13;
+				oscState3.frequency =  ((freq4 * IM4) >> 3) + oscState3.mainFrequencyPlusMatrix;
+				int freq3 = osc3->getNextSample(&oscState3) * env3Value;
+				freq3 >>= 18;
+				freq3 *=  oscState3.frequency;
+				freq3 >>= 13;
 
-            oscState1.frequency =  ((freq3*IM1)>>3) + oscState1.mainFrequencyPlusMatrix;
-            oscState2.frequency =  ((freq4*IM2)>>3) +  ((freq3*IM3)>>3) + oscState2.mainFrequencyPlusMatrix;
+				oscState2.frequency =  ((freq4*IM2)>>3) +  ((freq3*IM3)>>3) + oscState2.mainFrequencyPlusMatrix;
 
-            int currentSample2 = osc2->getNextSample(&oscState2)*env2->getNextAmp(&envState2);
-            currentSample2  >>= 7; // 7 for mixOsc2
-            currentSample2 *= MIX2;
-            currentSample2  >>= 15;
+				int currentSample2 = osc2->getNextSample(&oscState2) *  env2Value;
+				currentSample2  >>= 7; // 7 for mixOsc2
+				currentSample2 *= MIX2;
+				currentSample2  >>= 15;
 
-            currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
-            currentSample  >>= 7; // 7 for mixOsc2
-            currentSample *= MIX1;
-            currentSample  >>= 15;
-            currentSample += currentSample2;
+				oscState1.frequency =  ((freq3*IM1)>>3) + oscState1.mainFrequencyPlusMatrix;
 
-            currentSample *= velocity;
-            currentSample >>=8; // >>7 >> 1(we added 2 samples)
+				currentSamples[k] = osc1->getNextSample(&oscState1) * env1Value;
+				currentSamples[k]  >>= 7; // 7 for mixOsc2
+				currentSamples[k] *= MIX1;
+				currentSamples[k]  >>= 15;
+				currentSamples[k] += currentSample2;
+
+				currentSamples[k] *= velocity;
+				currentSamples[k] >>=8; // >>7 >> 1(we added 2 samples)
+
+				env1Value += env1Inc;
+				env2Value += env2Inc;
+				env3Value += env3Inc;
+				env4Value += env4Inc;
+        	}
+
             if (env1->isDead(envState1) && env2->isDead(envState2)) {
-                endNoteOfBeginNextOne();
+                endNoteOrBeginNextOne();
             }
-
-
         }
         break;
         case ALGO5:
@@ -367,31 +480,42 @@ void Voice::nextSample() {
 
              */
         {
-            oscState4.frequency =  oscState4.mainFrequencyPlusMatrix;
-            int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-            freq4 >>= 18;
-            freq4 *=  oscState4.frequency;
-            freq4 >>= 13;
+        	oscState4.frequency = oscState4.mainFrequencyPlusMatrix;
+        	int* osc4Values = osc4->getNextBlock(&oscState4);
 
-            oscState3.frequency =  ((freq4 * IM3)>>3)  + oscState3.mainFrequencyPlusMatrix;
-            int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-            freq3 >>= 18;
-            freq3 *=  oscState3.frequency;
-            freq3 >>= 13;
 
-            oscState2.frequency =  ((freq3 * IM2)>>3) + ((freq4*IM4)>>3) + oscState2.mainFrequencyPlusMatrix;
-            int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
-            freq2 >>= 18;
-            freq2 *=  oscState2.frequency;
-            freq2 >>= 13;
+        	for (int k =0; k< BLOCK_SIZE; k++) {
 
-            oscState1.frequency =  ((freq2 * IM1)>>3) + oscState1.mainFrequencyPlusMatrix;
-            currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
-            currentSample  >>= 15;
-            currentSample *= velocity;
-            currentSample >>=7;
+				int freq4 = osc4Values[k] * env4Value;
+				freq4 >>= 18;
+				freq4 *=  oscState4.frequency;
+				freq4 >>= 13;
+
+				oscState3.frequency =  ((freq4 * IM3)>>3)  + oscState3.mainFrequencyPlusMatrix;
+				int freq3 = osc3->getNextSample(&oscState3) * env3Value;
+				freq3 >>= 18;
+				freq3 *=  oscState3.frequency;
+				freq3 >>= 13;
+
+				oscState2.frequency =  ((freq3 * IM2)>>3) + ((freq4*IM4)>>3) + oscState2.mainFrequencyPlusMatrix;
+				int freq2 = osc2->getNextSample(&oscState2) * env2Value;
+				freq2 >>= 18;
+				freq2 *=  oscState2.frequency;
+				freq2 >>= 13;
+
+				oscState1.frequency =  ((freq2 * IM1)>>3) + oscState1.mainFrequencyPlusMatrix;
+				currentSamples[k] = osc1->getNextSample(&oscState1)*env1Value;
+				currentSamples[k]  >>= 15;
+				currentSamples[k] *= velocity;
+				currentSamples[k] >>=7;
+
+				env1Value += env1Inc;
+				env2Value += env2Inc;
+				env3Value += env3Inc;
+				env4Value += env4Inc;
+        	}
             if (env1->isDead(envState1)) {
-                endNoteOfBeginNextOne();
+                endNoteOrBeginNextOne();
             }
         }
         break;
@@ -408,38 +532,48 @@ void Voice::nextSample() {
 
              */
         {
-            oscState4.frequency =  oscState4.mainFrequencyPlusMatrix;
-            int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-            freq4 >>= 18;
-            freq4 *=  oscState4.frequency;
-            freq4 >>= 13;
+        	oscState4.frequency = oscState4.mainFrequencyPlusMatrix;
+        	int* osc4Values = osc4->getNextBlock(&oscState4);
 
-            oscState3.frequency =  ((freq4*IM3)>>3) + oscState3.mainFrequencyPlusMatrix;
+        	for (int k =0; k< BLOCK_SIZE; k++) {
 
-            int currentSample3 = osc3->getNextSample(&oscState3)*env3->getNextAmp(&envState3);
-            currentSample3  >>= 15;
-            currentSample3 *= MIX3;
+				int freq4 = osc4Values[k] * env4Value;
+				freq4 >>= 18;
+				freq4 *=  oscState4.frequency;
+				freq4 >>= 13;
 
-            oscState2.frequency =  ((freq4*IM2)>>3) + oscState2.mainFrequencyPlusMatrix;
+				oscState3.frequency =  ((freq4*IM3)>>3) + oscState3.mainFrequencyPlusMatrix;
 
-            int currentSample2 = osc2->getNextSample(&oscState2)*env2->getNextAmp(&envState2);
-            currentSample2  >>= 15;
-            currentSample2 *= MIX2;
+				int currentSample3 = osc3->getNextSample(&oscState3) * env3Value;
+				currentSample3  >>= 15;
+				currentSample3 *= MIX3;
 
-            oscState1.frequency =  ((freq4*IM1)>>3) + oscState1.mainFrequencyPlusMatrix;
+				oscState2.frequency =  ((freq4*IM2)>>3) + oscState2.mainFrequencyPlusMatrix;
 
-            currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
-            currentSample  >>= 15;
-            currentSample *= MIX1;
+				int currentSample2 = osc2->getNextSample(&oscState2) * env2Value;
+				currentSample2  >>= 15;
+				currentSample2 *= MIX2;
 
-            currentSample += currentSample2 + currentSample3;
+				oscState1.frequency =  ((freq4*IM1)>>3) + oscState1.mainFrequencyPlusMatrix;
 
-            currentSample *= velocity;
-            currentSample >>=14; // >>7 + 7 (MIX)
-            currentSample /=3; // 3 samples !!
+				currentSamples[k] = osc1->getNextSample(&oscState1) * env1Value;
+				currentSamples[k]  >>= 15;
+				currentSamples[k] *= MIX1;
+
+				currentSamples[k] += currentSample2 + currentSample3;
+
+				currentSamples[k] *= velocity;
+				currentSamples[k] >>=14; // >>7 + 7 (MIX)
+				currentSamples[k] /=3; // 3 samples !!
+
+				env1Value += env1Inc;
+				env2Value += env2Inc;
+				env3Value += env3Inc;
+				env4Value += env4Inc;
+        	}
 
             if (env1->isDead(envState1) && env2->isDead(envState2)&& env3->isDead(envState3)) {
-                endNoteOfBeginNextOne();
+                endNoteOrBeginNextOne();
             }
 
 
@@ -460,52 +594,64 @@ void Voice::nextSample() {
 
              */
         {
-        	oscState2.frequency =  oscState2.mainFrequencyPlusMatrix;
-            int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
-            freq2 >>= 18;
-            freq2 *=  oscState2.frequency;
-            freq2 >>= 13;
+        	oscState2.frequency = oscState2.mainFrequencyPlusMatrix;
+        	int* osc2Values = osc2->getNextBlock(&oscState2);
 
-            oscState4.frequency =  oscState4.mainFrequencyPlusMatrix;
+        	oscState4.frequency = oscState4.mainFrequencyPlusMatrix;
+        	int* osc4Values = osc4->getNextBlock(&oscState4);
 
-            int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-            freq4 >>= 18;
-            freq4 *=  oscState4.frequency;
-            freq4 >>= 13;
+        	for (int k =0; k< BLOCK_SIZE; k++) {
 
-            // Use freq4 to modulate op6 by IM4.
-            oscState6.frequency =  ((freq4 * IM4)>>3) + oscState6.mainFrequencyPlusMatrix;
+				int freq2 = osc2Values[k] * env2Value;
+				freq2 >>= 18;
+				freq2 *=  oscState2.frequency;
+				freq2 >>= 13;
 
-            int freq6 = osc6->getNextSample(&oscState6) * env6->getNextAmp(&envState6);
-            freq6 >>= 18;
-            freq6 *=  oscState6.frequency;
-            freq6 >>= 13;
+				int freq4 = osc4Values[k] * env4Value;
+				freq4 >>= 18;
+				freq4 *=  oscState4.frequency;
+				freq4 >>= 13;
 
-            oscState5.frequency =  ((freq6 * IM3)>>3)+ oscState5.mainFrequencyPlusMatrix;
-            int currentSample3 = osc5->getNextSample(&oscState5)*env5->getNextAmp(&envState5);
-            currentSample3  >>= 7; // 7 for mixOsc3
-            currentSample3 *= MIX3;
-            currentSample3  >>= 15;
+				// Use freq4 to modulate op6 by IM4.
+				oscState6.frequency =  ((freq4 * IM4)>>3) + oscState6.mainFrequencyPlusMatrix;
+				int freq6 = osc6->getNextSample(&oscState6) * env6Value;
+				freq6 >>= 18;
+				freq6 *=  oscState6.frequency;
+				freq6 >>= 13;
 
-            oscState3.frequency =  ((freq4 * IM2)>>3) + oscState3.mainFrequencyPlusMatrix;
-            int currentSample2 = osc3->getNextSample(&oscState3)*env3->getNextAmp(&envState3);
-            currentSample2  >>= 7; // 7 for mixOsc2
-            currentSample2 *= MIX2;
-            currentSample2  >>= 15;
+				oscState5.frequency =  ((freq6 * IM3)>>3)+ oscState5.mainFrequencyPlusMatrix;
+				int currentSample3 = osc5->getNextSample(&oscState5) * env5Value;
+				currentSample3  >>= 7; // 7 for mixOsc3
+				currentSample3 *= MIX3;
+				currentSample3  >>= 15;
 
-            oscState1.frequency =  ((freq2 *IM1)>>3) + oscState1.mainFrequencyPlusMatrix;
+				oscState3.frequency =  ((freq4 * IM2)>>3) + oscState3.mainFrequencyPlusMatrix;
+				int currentSample2 = osc3->getNextSample(&oscState3) * env3Value;
+				currentSample2  >>= 7; // 7 for mixOsc2
+				currentSample2 *= MIX2;
+				currentSample2  >>= 15;
 
-            currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
-            currentSample  >>= 7; // 7 for mixOsc2
-            currentSample *= MIX1;
-            currentSample  >>= 15;
-            currentSample += currentSample2 + currentSample3;
+				oscState1.frequency =  ((freq2 *IM1)>>3) + oscState1.mainFrequencyPlusMatrix;
 
-            currentSample *= velocity;
-            currentSample >>=7; // >>7
-            currentSample /=3; // 3 samples !!
-            if (env1->isDead(envState1) && env3->isDead(envState3)&& env5->isDead(envState5)) {
-                endNoteOfBeginNextOne();
+				currentSamples[k] = osc1->getNextSample(&oscState1) * env1Value;
+				currentSamples[k]  >>= 7; // 7 for mixOsc2
+				currentSamples[k] *= MIX1;
+				currentSamples[k]  >>= 15;
+				currentSamples[k] += currentSample2 + currentSample3;
+
+				currentSamples[k] *= velocity;
+				currentSamples[k] >>=7; // >>7
+				currentSamples[k] /=3; // 3 samples !!
+
+				env1Value += env1Inc;
+				env2Value += env2Inc;
+				env3Value += env3Inc;
+				env4Value += env4Inc;
+				env5Value += env5Inc;
+				env6Value += env6Inc;
+        	}
+            if (env1->isDead(envState1) && env3->isDead(envState3) && env5->isDead(envState5)) {
+                endNoteOrBeginNextOne();
             }
         }
         break;
@@ -522,50 +668,67 @@ void Voice::nextSample() {
 
              */
         {
-        	oscState6.frequency =  oscState6.mainFrequencyPlusMatrix;
-        	int freq6 = osc6->getNextSample(&oscState6) * env6->getNextAmp(&envState6);
-            freq6 >>= 18;
-            freq6 *=  oscState6.frequency;
-            freq6 >>= 13;
+        	oscState2.frequency = oscState2.mainFrequencyPlusMatrix;
+        	int* osc2Values = osc2->getNextBlock(&oscState2);
 
-            oscState4.frequency =  oscState4.mainFrequencyPlusMatrix;
-            int freq4 = osc4->getNextSample(&oscState4) * env4->getNextAmp(&envState4);
-            freq4 >>= 18;
-            freq4 *=  oscState4.frequency;
-            freq4 >>= 13;
+        	oscState3.frequency = oscState3.mainFrequencyPlusMatrix;
+        	int* osc3Values = osc3->getNextBlock(&oscState3);
 
-            oscState3.frequency =  oscState3.mainFrequencyPlusMatrix;
-            int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-            freq3 >>= 18;
-            freq3 *=  oscState3.frequency;
-            freq3 >>= 13;
+        	oscState4.frequency = oscState4.mainFrequencyPlusMatrix;
+        	int* osc4Values = osc4->getNextBlock(&oscState4);
 
-            oscState2.frequency =  oscState2.mainFrequencyPlusMatrix;
-            int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
-            freq2 >>= 18;
-            freq2 *=  oscState2.frequency;
-            freq2 >>= 13;
+        	oscState6.frequency = oscState6.mainFrequencyPlusMatrix;
+        	int* osc6Values = osc6->getNextBlock(&oscState6);
 
-            oscState5.frequency =  ((freq6 * IM4)>>3) + oscState5.mainFrequencyPlusMatrix;
-            int currentSample2 = osc5->getNextSample(&oscState5)*env5->getNextAmp(&envState5);
-            currentSample2  >>= 7; // 7 for mixOsc3
-            currentSample2 *= MIX2;
-            currentSample2  >>= 15;
+        	for (int k =0; k< BLOCK_SIZE; k++) {
 
-            oscState1.frequency =  ((freq2 *IM1)>>3) + ((freq3 *IM2)>>3) + ((freq4 *IM3)>>3) + oscState1.mainFrequencyPlusMatrix;
-            currentSample = osc1->getNextSample(&oscState1)*env1->getNextAmp(&envState1);
-            currentSample  >>= 7; // 7 for mixOsc2
-            currentSample *= MIX1;
-            currentSample  >>= 15;
-            currentSample += currentSample2;
+				int freq6 = osc6Values[k] * env6Value;
+				freq6 >>= 18;
+				freq6 *=  oscState6.frequency;
+				freq6 >>= 13;
 
-            currentSample *= velocity;
-            currentSample >>=8; // >>7 + >> 1 (2 samples)
+				int freq4 = osc4Values[k] * env4Value;
+				freq4 >>= 18;
+				freq4 *=  oscState4.frequency;
+				freq4 >>= 13;
 
-            if (env1->isDead(envState1) && env5->isDead(envState5)) {
-                endNoteOfBeginNextOne();
+				int freq3 = osc3Values[k] * env3Value;
+				freq3 >>= 18;
+				freq3 *=  oscState3.frequency;
+				freq3 >>= 13;
+
+				int freq2 = osc2Values[k] * env2Value;
+				freq2 >>= 18;
+				freq2 *=  oscState2.frequency;
+				freq2 >>= 13;
+
+				oscState5.frequency =  ((freq6 * IM4)>>3) + oscState5.mainFrequencyPlusMatrix;
+				int currentSample2 = osc5->getNextSample(&oscState5) * env5Value;
+				currentSample2  >>= 7; // 7 for mixOsc3
+				currentSample2 *= MIX2;
+				currentSample2  >>= 15;
+
+				oscState1.frequency =  ((freq2 *IM1)>>3) + ((freq3 *IM2)>>3) + ((freq4 *IM3)>>3) + oscState1.mainFrequencyPlusMatrix;
+				currentSamples[k] = osc1->getNextSample(&oscState1) * env1Value;
+				currentSamples[k]  >>= 7; // 7 for mixOsc2
+				currentSamples[k] *= MIX1;
+				currentSamples[k]  >>= 15;
+				currentSamples[k] += currentSample2;
+
+				currentSamples[k] *= velocity;
+				currentSamples[k] >>=8; // >>7 + >> 1 (2 samples)
+
+				env1Value += env1Inc;
+				env2Value += env2Inc;
+				env3Value += env3Inc;
+				env4Value += env4Inc;
+				env5Value += env5Inc;
+				env6Value += env6Inc;
+        	}
+
+        	if (env1->isDead(envState1) && env5->isDead(envState5)) {
+                endNoteOrBeginNextOne();
             }
-
 
             break;
         }
@@ -586,51 +749,66 @@ void Voice::nextSample() {
 
              */
         {
-        	oscState2.frequency =  oscState2.mainFrequencyPlusMatrix;
-            int freq2 = osc2->getNextSample(&oscState2) * env2->getNextAmp(&envState2);
-            freq2 >>= 18;
-            freq2 *=  oscState2.frequency;
-            freq2 >>= 13;
+        	oscState2.frequency = oscState2.mainFrequencyPlusMatrix;
+        	int* osc2Values = osc2->getNextBlock(&oscState2);
 
-            oscState3.frequency =  oscState3.mainFrequencyPlusMatrix;
-            int freq3 = osc3->getNextSample(&oscState3) * env3->getNextAmp(&envState3);
-            freq3 >>= 18;
-            freq3 *=  oscState3.frequency;
-            freq3 >>= 13;
+        	oscState3.frequency = oscState3.mainFrequencyPlusMatrix;
+        	int* osc3Values = osc3->getNextBlock(&oscState3);
 
-            oscState1.frequency =  ((freq2*IM1)>>3) + ((freq3*IM2)>>3) + oscState1.mainFrequencyPlusMatrix;
-            int currentSample2 =  osc1->getNextSample(&oscState1) * env1->getNextAmp(&envState1);
-            currentSample2  >>= 7; // 7 for MIX1
-            currentSample2 *= MIX1;
-            currentSample2  >>= 15;
+        	oscState6.frequency = oscState6.mainFrequencyPlusMatrix;
+        	int* osc6Values = osc6->getNextBlock(&oscState6);
 
-            oscState6.frequency =  oscState6.mainFrequencyPlusMatrix;
-            int freq6 = osc6->getNextSample(&oscState6) * env6->getNextAmp(&envState6);
-            freq6 >>= 18;
-            freq6 *=  oscState6.frequency;
-            freq6 >>= 13;
+        	for (int k =0; k< BLOCK_SIZE; k++) {
 
-            oscState5.frequency =  ((freq6 * IM4)>>3) + oscState5.mainFrequencyPlusMatrix;
-            int freq5 = osc5->getNextSample(&oscState5) * env5->getNextAmp(&envState5);
-            freq5 >>= 18;
-            freq5 *=  oscState5.frequency;
-            freq5 >>= 13;
+        		int freq6 = osc6Values[k] * env6Value;
+				freq6 >>= 18;
+				freq6 *=  oscState6.frequency;
+				freq6 >>= 13;
 
-            oscState4.frequency =  ((freq5 * IM3)>>3) +  oscState4.mainFrequencyPlusMatrix;
+				int freq3 = osc3Values[k] * env3Value;
+				freq3 >>= 18;
+				freq3 *=  oscState3.frequency;
+				freq3 >>= 13;
 
-            currentSample = osc4->getNextSample(&oscState4)*env4->getNextAmp(&envState4);
-            currentSample  >>= 7; // 7 for mixOsc2
-            currentSample *= MIX2;
-            currentSample  >>= 15;
-            currentSample += currentSample2;
+				int freq2 = osc2Values[k] * env2Value;
+				freq2 >>= 18;
+				freq2 *=  oscState2.frequency;
+				freq2 >>= 13;
 
-            currentSample *= velocity;
-            currentSample >>=8; // >>7 + >> 1 (2 samples)
+				oscState1.frequency =  ((freq2*IM1)>>3) + ((freq3*IM2)>>3) + oscState1.mainFrequencyPlusMatrix;
+				int currentSample2 =  osc1->getNextSample(&oscState1) * env1Value;
+				currentSample2  >>= 7; // 7 for MIX1
+				currentSample2 *= MIX1;
+				currentSample2  >>= 15;
+
+				oscState5.frequency =  ((freq6 * IM4)>>3) + oscState5.mainFrequencyPlusMatrix;
+				int freq5 = osc5->getNextSample(&oscState5) * env5Value;
+				freq5 >>= 18;
+				freq5 *=  oscState5.frequency;
+				freq5 >>= 13;
+
+				oscState4.frequency =  ((freq5 * IM3)>>3) +  oscState4.mainFrequencyPlusMatrix;
+
+				currentSamples[k] = osc4->getNextSample(&oscState4) * env4Value;
+				currentSamples[k]  >>= 7; // 7 for mixOsc2
+				currentSamples[k] *= MIX2;
+				currentSamples[k]  >>= 15;
+				currentSamples[k] += currentSample2;
+
+				currentSamples[k] *= velocity;
+				currentSamples[k] >>=8; // >>7 + >> 1 (2 samples)
+
+				env1Value += env1Inc;
+				env2Value += env2Inc;
+				env3Value += env3Inc;
+				env4Value += env4Inc;
+				env5Value += env5Inc;
+				env6Value += env6Inc;
+        	}
 
             if (env1->isDead(envState1) && env4->isDead(envState4)) {
-                endNoteOfBeginNextOne();
+                endNoteOrBeginNextOne();
             }
-
 
             break;
         }

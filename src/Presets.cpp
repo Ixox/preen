@@ -21,48 +21,49 @@
 
 const struct AllSynthParams presets[]  = {
         {
-        		// patch name : 'Preen'
+        		// patch name : 'Preen 2.0'
         		// Engine
-        		{ ALGO1, 14, 4, 6} ,
-        		{ 16, 21, 0, 0} ,
+        		{ ALGO9, 7, 4, 6} ,
+        		{ 40, 48, 32, 16} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN,  OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN4, OSC_FT_KEYBOARD , 8, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 24, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
-        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
+        		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 48, 0} ,
+        		{ OSC_SHAPE_RAND, OSC_FT_KEYBOARD , 18, 0} ,
         		// Enveloppe
-        		{ 0, 150, 160, 60} ,
-        		{ 100, 65, 150, 100} ,
-        		{ 50, 100, 255, 100} ,
-        		{ 3, 100, 100, 100} ,
-        		{ 0, 150, 160, 60} ,
-        		{ 0, 150, 160, 60} ,
+        		{ 10, 72, 225 ,100} ,
+        		{ 10, 44, 202, 100} ,
+        		{ 0, 32, 201, 115} ,
+        		{ 11, 56, 222, 100} ,
+        		{ 0, 255, 255, 226} ,
+        		{ 0, 30, 0, 30} ,
         		// Modulation matrix
-        		{ MATRIX_SOURCE_MODWHEEL, 16, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 10, INDEX_MODULATION1, 0} ,
         		{ MATRIX_SOURCE_PITCHBEND, 16, ALL_OSC_FREQ, 0} ,
-        		{ MATRIX_SOURCE_LFO5, 0, INDEX_MODULATION1, 0} ,
-        		{ MATRIX_SOURCE_LFO6, 0, INDEX_MODULATION2, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
-        		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
+        		{ MATRIX_SOURCE_VELOCITY, 4, INDEX_MODULATION2, 0} ,
+        		{ MATRIX_SOURCE_LFO4, 35, LFO1_FREQ, 0} ,
+        		{ MATRIX_SOURCE_LFO1, 2, INDEX_MODULATION2, 0} ,
+        		{ MATRIX_SOURCE_VELOCITY, 4, INDEX_MODULATION4, 0} ,
+        		{ MATRIX_SOURCE_MODWHEEL, 4, MTX5_MUL, 0} ,
+        		{ MATRIX_SOURCE_MODWHEEL, 6, INDEX_MODULATION1, 0} ,
+        		{ MATRIX_SOURCE_MODWHEEL, 4, INDEX_MODULATION2, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		{ MATRIX_SOURCE_NONE, 0, DESTINATION_NONE, 0} ,
         		// LFOs
-        		{ LFO_SAW, 36, 0, 0} ,
-        		{ LFO_SAW, 20, 0, 0} ,
-        		{ LFO_SAW, 3, 0, 0} ,
-        		{ 100, 100, 100, 100} ,
+        		{ LFO_SIN, 24, 127, 174} ,
+        		{ LFO_SIN, 16, 0, 0} ,
+        		{ LFO_SIN, 16, 0, 0} ,
+        		{ 255, 0, 255, 255} ,
         		{ 70, 12,  0, 0}  ,
         		{ 140, 18, 0, 0},
         		{{ 15, 4, 2, 0, 15, 2, 0, 8, 15, 0, 12, 0, 8, 0, 15 ,0}} ,
         		{{ 15, 4, 2, 0, 15, 2, 0, 8, 15, 0, 12, 0, 8, 0, 15, 0}} ,
-        		"Preen"
+        		"Preen 2.0"
         } ,
         {
         		// patch name : 'Preen Seq'
@@ -70,6 +71,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 10, 4, 6} ,
         		{ 16, 21, 0, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
@@ -114,6 +116,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 0, 4, 0} ,
         		{ 20, 28, 0, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
@@ -159,6 +162,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 0, 4, 0} ,
         		{ 15, 3, 0, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
@@ -203,6 +207,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO8, 14, 2, 0} ,
         		{ 32, 44, 156, 56} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 48, 0} ,
@@ -247,6 +252,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO4, 0, 3, 7} ,
         		{ 16, 16, 0, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SAW, OSC_FT_KEYBOARD , 8, 0} ,
@@ -291,6 +297,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 0, 4, 7} ,
         		{ 0, 3, 0, 0} ,
         		{ 114, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SAW, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SAW, OSC_FT_KEYBOARD , 4, 0} ,
@@ -335,6 +342,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO6, 0, 3, 0} ,
         		{ 8, 13, 19, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
@@ -379,6 +387,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO4, 8, 3, 0} ,
         		{ 44, 89, 31, 7} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
@@ -423,6 +432,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 10, 1, 6} ,
         		{ 16, 36, 0, 81} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
@@ -467,6 +477,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 14, 4, 0} ,
         		{ 27, 28, 0, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 12, 0} ,
@@ -511,6 +522,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO6, 14, 3, 0} ,
         		{ 19, 42, 84, 0} ,
         		{ 96, 128, 87, 30} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN2, OSC_FT_KEYBOARD , 64, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
@@ -555,6 +567,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO7, 14, 2, 0} ,
         		{ 53, 64, 41, 0} ,
         		{ 88, 128, 113, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 24, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
@@ -599,6 +612,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 14, 4, 0} ,
         		{ 0, 36, 0, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN3, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_RAND, OSC_FT_KEYBOARD , 8, 0} ,
@@ -643,6 +657,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 8, 4, 6} ,
         		{ 7, 21, 19, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN4, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 4, -127} ,
@@ -687,6 +702,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO7, 14, 2, 6} ,
         		{ 22, 52, 57, 0} ,
         		{ 128, 88, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN4, OSC_FT_KEYBOARD , 8, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 23, 0} ,
@@ -731,6 +747,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 14, 4, 6} ,
         		{ 16, 0, 47, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
@@ -776,6 +793,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO3, 14, 2, 6} ,
         		{ 82, 0, 116, 197} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_FIXE, 1, -28} ,
         		{ OSC_SHAPE_SQUARE, OSC_FT_KEYBOARD , 16, 0} ,
@@ -820,6 +838,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 14, 2, 7} ,
         		{ 61, 39, 0, 6} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 64, 27} ,
         		{ OSC_SHAPE_RAND, OSC_FT_FIXE, 3, 0} ,
@@ -864,6 +883,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 14, 4, 6} ,
         		{ 0, 16, 0, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
@@ -909,6 +929,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 14, 4, 6} ,
         		{ 0, 25, 24, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 24, 0} ,
@@ -953,6 +974,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO7, 10, 2, 6} ,
         		{ 10, 0, 16, 0} ,
         		{ 128, 92, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 20, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
@@ -997,6 +1019,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 14, 4, 6} ,
         		{ 8, 18, 0, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SQUARE, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
@@ -1041,6 +1064,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 10, 4, 6} ,
         		{ 15, 11, 0, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 40, 0} ,
@@ -1085,6 +1109,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO7, 10, 2, 6} ,
         		{ 24, 24, 30, 0} ,
         		{ 82, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
@@ -1129,6 +1154,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO2, 10, 4, 6} ,
         		{ 32, 40, 0, 0} ,
         		{ 128, 1, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SQUARE, OSC_FT_KEYBOARD , 8, 0} ,
         		{ OSC_SHAPE_SIN2, OSC_FT_KEYBOARD , 128, 0} ,
@@ -1173,6 +1199,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO1, 14, 4, 6} ,
         		{ 24, 0, 16, 0} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SQUARE, OSC_FT_KEYBOARD , 32, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
@@ -1217,6 +1244,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO3, 14, 3, 6} ,
         		{ 57, 99, 26, 4} ,
         		{ 128, 128, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 32, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
@@ -1261,6 +1289,7 @@ const struct AllSynthParams presets[]  = {
         		{ ALGO3, 16, 3, 6} ,
         		{ 16, 32, 64, 133} ,
         		{ 128, 0, 128, 0} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 23, 0} ,
@@ -1300,6 +1329,7 @@ const struct AllSynthParams presets[]  = {
         		"Broken game"
         },
         {
+                { 0,0,0,0} ,
                 { 0,0,0,0} ,
                 { 0,0,0,0} ,
                 { 0,0,0,0} ,

@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include "wirish.h"
 #include "libmaple.h"
 
@@ -23,6 +24,7 @@
 #include "RingBuffer.h"
 #include "MidiDecoder.h"
 #include "Encoders.h"
+#include "Menu.h"
 
 
 // Main timer define
@@ -42,7 +44,7 @@ SynthState		   synthState;
 Synth              synth;
 MidiDecoder        midiDecoder;
 Encoders		   encoders;
-RingBuffer<uint16, 50> rb;
+RingBuffer<int, 96> rb;
 FMDisplay          fmDisplay;
 
 #ifdef PCB_R1
@@ -57,38 +59,32 @@ LiquidCrystal      lcd(2, 3, 4, 5, 6, 7, 31, 30, 29, 28);
 LiquidCrystal      lcd(31, 30, 29, 28, 2, 3, 4, 5, 6, 7);
 #endif
 
+
+
 HardwareTimer mainTimer(TIME_NUMBER);
 
 int mainCpt = 0;
 
 void IRQSendSample() {
     if (rb.getCount()>0) {
-        pwmWrite(AUDIO_PIN , rb.remove());
+        pwmWrite(AUDIO_PIN , (rb.remove() >>5)+1024);
     }
 }
-
 
 inline void fillSoundBuffer() {
-    for (int cpt=0; cpt<12 && !rb.isFull(); cpt++) {
-        synth.nextSample();
-        rb.insert((uint16)(synth.getSample()>>5)+1024);
-    }
-}
-
-inline void fillSoundBufferFull() {
-    for (int cpt=0; cpt<1000 && !rb.isFull(); cpt++) {
-        synth.nextSample();
-        rb.insert((uint16)(synth.getSample()>>5)+1024);
+    if (rb.getCount() < 64) {
+        synth.nextSampleBlock();
+        rb.appendBlock(synth.getSampleBlock(), 32);
     }
 }
 
 
 void setup()
 {
-#ifndef DEBUG
+ #ifndef DEBUG
 	SerialUSB.end();
 	nvic_irq_disable(NVIC_USB_LP_CAN_RX0);
-#endif
+ #endif
 
     byte midiIn[8] = {
             B01100,
@@ -253,22 +249,25 @@ void setup()
 
 
     fillSoundBuffer();
-    for (int k=0; k<13; k++) {
-        synth.noteOn(60+k, 60);
+    synth.noteOn(48, 60);
+    fillSoundBuffer();
+    int notes[] = { 60, 64, 60, 67, 60, 72};
+    for (int k=0; k<6; k++) {
+        synth.noteOn(notes[k], 60);
         for (int cpt=0; cpt<1500; cpt++) {
             fillSoundBuffer();
-            delayMicroseconds(30);
+            delayMicroseconds(30 - k*2);
         }
-        synth.noteOff(60+k);
+        synth.noteOff(notes[k]);
         for (int cpt=0; cpt<100; cpt++) {
             fillSoundBuffer();
-            delayMicroseconds(30);
+            delayMicroseconds(30 - k*2);
         }
     }
-
+    synth.noteOff(48);
     for (int cpt=0; cpt<10000; cpt++) {
-        fillSoundBuffer();
         delayMicroseconds(30);
+        fillSoundBuffer();
     }
 
     // Load default patch
@@ -276,9 +275,35 @@ void setup()
     PresetUtil::loadDefaultPatchIfAny();
     synthState.propagateAfterNewParamsLoad();
 
-    fillSoundBuffer();
     fmDisplay.init(&lcd);
 
+
+
+    int bootOption = synthState.fullState.midiConfigValue[MIDICONFIG_BOOT_START];
+
+    if (bootOption == 0) {
+    	fmDisplay.displayPreset();
+    	fmDisplay.setRefreshStatus(12);
+    } else {
+    	// Menu
+    	synthState.buttonPressed(BUTTON_MENUSELECT);
+    	// Load
+    	synthState.buttonPressed(BUTTON_MENUSELECT);
+    	if (bootOption == 5) {
+        	// Internal bank
+    		synthState.encoderTurned(0, 1);
+       		synthState.buttonPressed(BUTTON_MENUSELECT);
+    	} else {
+    		// User
+       		synthState.buttonPressed(BUTTON_MENUSELECT);
+       		// Bank
+       		for (int k = 0; k < bootOption - 1; k++) {
+       			synthState.encoderTurned(0, 1);
+       		}
+       		synthState.buttonPressed(BUTTON_MENUSELECT);
+    	}
+    }
+	srand(micros());
 }
 
 unsigned short midiReceive = 0;
@@ -287,16 +312,19 @@ uint32 encoderMicros = 0;
 uint32 midiInMicros = 0;
 uint32 midiOutMicros = 0;
 uint32 synthStateMicros = 0;
+uint32 externGearMidiMicros = 0;
+int ECCnumber = 0;
+
 
 
 void loop() {
     uint32 newMicros = micros();
 
     mainCpt++;
-    fillSoundBufferFull();
+
+    fillSoundBuffer();
 
 	while (Serial3.available()) {
-		fillSoundBuffer();
 		midiDecoder.newByte(Serial3.read());
 		if (midiReceive == 0) {
 			fillSoundBuffer();
@@ -324,8 +352,10 @@ void loop() {
     if ((newMicros - midiOutMicros) > 240) {
         if (midiDecoder.hasMidiToSend()) {
 
-            fillSoundBufferFull();
-            midiDecoder.sendMidiOut();
+            while (midiDecoder.hasMidiToSend()) {
+            	fillSoundBuffer();
+            	midiDecoder.sendMidiOut();
+            }
 
             if (midiSent == 0) {
                 fillSoundBuffer();
@@ -349,13 +379,21 @@ void loop() {
         midiOutMicros = newMicros;
     }
 
-    if (fmDisplay.needRefresh() && ((mainCpt & 0x7) == 0)) {
-        fillSoundBufferFull();
+    if ((newMicros - externGearMidiMicros) > 2500) {
+    	fillSoundBuffer();
+        midiDecoder.sendToExternalGear(ECCnumber);
+        externGearMidiMicros = newMicros;
+        ECCnumber++;
+        ECCnumber &= 0x3;
+    }
+
+   	if (fmDisplay.needRefresh() && ((mainCpt & 0x7) == 0)) {
+        fillSoundBuffer();
         fmDisplay.refreshAllScreenByStep();
     }
 
-    if ((newMicros - encoderMicros) > 2500) {
-    	fillSoundBufferFull();
+    if ((newMicros - encoderMicros) > 1500) {
+    	fillSoundBuffer();
         encoders.checkStatus();
         encoderMicros = newMicros;
     }
@@ -375,7 +413,7 @@ __attribute__(( constructor )) void premain() {
 
 int main(void)
 {
-    setup();
+	setup();
 
     while (1) {
         loop();

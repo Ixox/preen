@@ -63,6 +63,13 @@ enum {
 };
 
 enum {
+    ENCODER_PERFORMANCE_CC1 = 0,
+    ENCODER_PERFORMANCE_CC2,
+    ENCODER_PERFORMANCE_CC3,
+    ENCODER_PERFORMANCE_CC4
+};
+
+enum {
     ENCODER_OSC_SHAP = 0,
     ENCODER_OSC_FTYPE,
     ENCODER_OSC_FREQ,
@@ -125,7 +132,8 @@ enum OscShape {
     OSC_SHAPE_RAND,
     OSC_SHAPE_SQUARE,
     OSC_SHAPE_SAW,
-	OSC_SHAPE_OFF
+	OSC_SHAPE_OFF,
+	OSC_SHAPE_LAST
 };
 
 enum LfoType {
@@ -194,6 +202,17 @@ enum DestinationEnum {
 	LFO5_GATE,
 	LFO6_GATE,
 	MAIN_GATE,
+	ENV1_ATTACK,
+	ENV2_ATTACK,
+	ENV3_ATTACK,
+	ENV4_ATTACK,
+	ENV5_ATTACK,
+	ENV6_ATTACK,
+	ALL_ENV_ATTACK,
+	EXTERNAL_CC1,
+	EXTERNAL_CC2,
+	EXTERNAL_CC3,
+	EXTERNAL_CC4,
 	DESTINATION_MAX
 };
 
@@ -221,6 +240,13 @@ struct Engine3Params {
     uchar mixOsc2;
     uchar mixOsc3;
     uchar mixOsc4;
+};
+
+struct PerformanceParams {
+    uchar cc1;
+    uchar cc2;
+    uchar cc3;
+    uchar cc4;
 };
 
 struct OscillatorParams {
@@ -267,7 +293,8 @@ enum {
     ROW_ENGINE = ROW_ENGINE_FIRST,
     ROW_MODULATION ,
     ROW_OSC_MIX,
-    ROW_ENGINE_LAST = ROW_OSC_MIX
+    ROW_PERFORMANCE,
+    ROW_ENGINE_LAST = ROW_PERFORMANCE
 };
 
 enum {
@@ -328,6 +355,7 @@ struct AllSynthParams {
 	struct Engine1Params engine1;
     struct Engine2Params engine2;
     struct Engine3Params engine3;
+    struct PerformanceParams engine4;
 	struct OscillatorParams osc1;
 	struct OscillatorParams osc2;
 	struct OscillatorParams osc3;

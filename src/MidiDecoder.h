@@ -23,6 +23,9 @@
 #include "RingBuffer.h"
 #include "VisualInfo.h"
 
+// number of external control change
+#define NUMBER_OF_ECC 4
+
 enum AllControlChange {
     CC_BANK_SELECT = 0,
     CC_MODWHEEL = 1,
@@ -117,6 +120,7 @@ public:
     void beforeNewParamsLoad() {};
     void afterNewParamsLoad() {};
     void sendMidiOut();
+    void sendToExternalGear(int enumber);
     void readSysex();
     void playNote(char note, char velocity) {};
     void stopNote(char note) {};
@@ -139,6 +143,9 @@ private:
     boolean isSequencerPlaying;
     int midiClockCpt;
     int songPosition;
+
+    // Old ECC values
+    uint8 previousECC[NUMBER_OF_ECC];
 
 };
 

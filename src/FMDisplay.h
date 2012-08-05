@@ -108,6 +108,10 @@ public:
     	lcd->print(' ');
     }
 
+    void setRefreshStatus(int refreshStatus) {
+    	this->refreshStatus = refreshStatus;
+    }
+
 
 private:
 	LiquidCrystal* lcd;

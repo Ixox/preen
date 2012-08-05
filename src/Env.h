@@ -18,6 +18,7 @@
 #pragma once
 
 #include "SynthStateAware.h"
+#include "Matrix.h"
 
 
 enum EnvState {
@@ -25,7 +26,7 @@ enum EnvState {
     ENV_STATE_ON_D,
     ENV_STATE_ON_S,
     ENV_STATE_ON_R,
-    ENV_STATE_QUICK_OFF,
+    ENV_STATE_QUICK_OFF_USELESSNOW__,
     ENV_STATE_DEAD
 };
 
@@ -41,85 +42,71 @@ struct EnvData {
 };
 
 
-template <int number>
 class Env : public SynthStateAware
 {
 public:
     Env() {
     }
-    ~Env(void) {
+
+    virtual ~Env(void) {
     }
 
-	void setSynthState(SynthState* sState) {
-		SynthStateAware::setSynthState(sState);
-	    EnvelopeParams * e = (EnvelopeParams *)&(this->synthState->params.env1);
-	    envParams = &e[number-1];
-	    reloadADSR();
-	}
-
+	void setSynthState(SynthState* sState);
+	void init(int number, Matrix* matrix);
 
     void reloadADSR() {
 
-        adsr[0] = envParams->attack * envParams->attack + 1;
-        adsr[1] = envParams->decay * envParams->decay + 1;
+        adsr[0] = ((envParams->attack * envParams->attack) >> 5);
+        adsr[1] = ((envParams->decay * envParams->decay) >> 5 );
         adsr[2] = envParams->sustain << 7;
-        adsr[3] = envParams->release * envParams->release + 1;
+        adsr[3] = ((envParams->release * envParams->release) >> 5);
 
-        incA = (32767<<15) / adsr[0];
-        incD = ((32767 - adsr[2]) << 15) / adsr[1];
+        if (adsr[1] != 0) {
+            incD = ((32767 - adsr[2]) << 15) / adsr[1];
+        } else {
+        	incD = ((32767 - adsr[2]) << 15);
+        }
+
     }
 
 
-
     void noteOn(struct EnvData& env) {
-        env.currentAmp= 0;
+    	int attack = adsr[0] + ((this->matrix->getDestination(destAttack) + this->matrix->getDestination(ALL_ENV_ATTACK)) >> 5);
+
+    	if (attack > 2033) {
+    		attack = 2033;
+    	} else if (attack< 0) {
+    		attack = 0;
+    	}
+
+        if (attack != 0) {
+        	incA = (32767 << 15) / attack;
+            env.currentAmp= 0;
+        } else {
+        	incA = (32767 << 15);
+            env.currentAmp= incA;
+        }
+
         env.currentAmpSpeed = incA;
-        // index is decremented
-        env.index = adsr[0] + 1;
+        // index is decremented in the first call...
+        env.index = attack + 1;
         env.envState = ENV_STATE_ON_A;
     }
 
     void noteOffQuick(struct EnvData* env) {
-        // assembly to update all env value at the same time...
-        asm volatile(
-                // r5 : index, r6 : currentAmp, r7 : envState, r8 : currentAmpSpeed
-                "    ldm %[env], {r5-r8}\n\t"
-                // env->index = 65;
-                "    mov r5, #65\n\t"
-                // env->envState = ENV_STATE_QUICK_OFF;
-                "    mov r7, #4\n\t"
-                // env->currentAmpSpeed = env->currentAmp >> 6;
-                "    mov r8, r6, lsr #6\n\t"
-                // Store all values
-                "    stm %[env], {r5-r8}\n\t"
-                : [env]"+rV" (env)
-                  :
-                  : "r5", "r6", "r7", "r8", "cc");
+    	env->index = 1;
+    	env->envState = ENV_STATE_ON_R;
+    	env->currentAmpSpeed = env->currentAmp;
     }
 
-
     void noteOff(struct EnvData* env) {
-        // assembly to update all env value at the same time...
-        // Because it happens outside of main synth thread
-        asm volatile(
-                // r5 : index, r6 : currentAmp, r7 : envState, r8 : currentAmpSpeed
-                "    ldm %[env], {r5-r8}\n\t"
-                // env->index = adsr[3] +1;
-                "    add r5, %[release], #1\n\t"
-                // env->envState = ENV_STATE_ON_R;
-                "    mov r7, #3\n\t"
-                // env->currentAmpSpeed = (env->currentAmp) / adsr[3];
-                "    udiv r8, r6, %[release]\n\t"
-                // Store all values
-                "    stm %[env], {r5-r8}\n\t"
-                : [env]"+rV" (env)
-                : [release]"r"(adsr[3])
-                : "r5", "r6", "r7", "r8", "cc");
+        env->index = adsr[3] +1;
+        env->envState = ENV_STATE_ON_R;
+        env->currentAmpSpeed = (env->currentAmp) / adsr[3];
 
     }
 
     inline int getNextAmp(struct EnvData* env)  __attribute__((always_inline))  {
-
     	asm volatile(
                 // r5 : index, r6 : currentAmp, r7 : envState, r8 : currentAmpSpeed
                 "    ldm %[env], {r5-r8}\n\t"
@@ -145,10 +132,15 @@ public:
                 "    b 6f\n\t"
 
                 "11: ldr r5, [%[adsr], #4]\n\t"
+    			// mv 32767 << 15 in r6 (currentAmp).
+    			"    mvn r6, #0\n\t"
+    			"    lsr r6, r6, #2\n\t"
+    			// change state to DECAY
                 "    mov r7, #1\n\t"
                 "    mov r8, %[incD]\n\t"
-                // store index, currentAmp
-                "    stm %[env], {r5-r8}\n\t"
+                // store envState, currentAmpSpeed
+                "    str r7, [%[env], #8]\n\t"
+                "    str r8, [%[env], #12]\n\t"
 
                 // decay
                 "2:  cbz r5, 21f\n\t"
@@ -185,7 +177,7 @@ public:
                 : [adsr]"rV" (adsr), [incD]"r"(incD)
                 : "r5", "r6", "r7", "r8", "cc");
 
-        return env->currentAmp>>15;
+		return env->currentAmp>>15;
     }
 
     bool isDead(struct EnvData& env)  __attribute__((always_inline))  {
@@ -198,5 +190,7 @@ private:
     // Ramp speed Of attack and Decay
     unsigned int incA, incD;
     EnvelopeParams* envParams;
+    Matrix* matrix;
+    DestinationEnum destAttack;
 };
 

@@ -170,7 +170,7 @@ void LfoOsc::nextValueInMatrix() {
 		index += stepPlusMatrix;
 		if (index > 0xfffff) {
 			 index &= 0xfffff;
-			 currentRandomValue = (RANDOM >> 8);
+			 currentRandomValue = (noise[0] >> 7) - 128;
 		}
 		lfoValue = currentRandomValue;
 		break;

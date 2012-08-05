@@ -24,6 +24,7 @@ const char* midiChannels [] = { "All", "1", "2", "3", "4", "5", "6", "7", "8", "
 const char* yesNo [] = { "No", "Yes" };
 const char* midiReceives[] = { "None", "CC", "NRPN", "CC & NRPN" };
 const char* midiSends [] = { "None", "CC", "NRPN" };
+const char* bootOptions [] = { "Default", "Bank1", "Bank2", "Bank3", "Bank4", "Internal" };
 
 const struct MidiConfig midiConfig[]  = {
 		{
@@ -60,8 +61,37 @@ const struct MidiConfig midiConfig[]  = {
 			"Test Velocity: ",
 			127,
 			0
+		},
+		{
+			"Boot: ",
+			6,
+			bootOptions
+		},
+		{
+			"ECC channel: ",
+			16,
+			midiChannels + 1
+		},
+		{
+			"ECC 1: ",
+			127,
+			0
+		},
+		{
+			"ECC 2: ",
+			127,
+			0
+		},
+		{
+			"ECC 3: ",
+			127,
+			0
+		},
+		{
+			"ECC 4: ",
+			127,
+			0
 		}
-
 };
 
 const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
@@ -197,20 +227,20 @@ const struct MenuItem allMenus[] __attribute__ ((section (".USER_FLASH"))) = {
         "Conf",
         true,
         2,
-        {MENU_CONFIG_MIDI, MENU_FORMAT_BANK}
+        {MENU_CONFIG_SETTINGS, MENU_FORMAT_BANK}
     },
     {
-        MENU_CONFIG_MIDI,
-        "Midi",
+        MENU_CONFIG_SETTINGS,
+        "Settings",
         false,
         MIDICONFIG_SIZE,
-        {MENU_CONFIG_MIDI_SAVE}
+        {MENU_CONFIG_SETTINGS_SAVE}
     },
     {
-    	MENU_CONFIG_MIDI_SAVE,
+    	MENU_CONFIG_SETTINGS_SAVE,
         "",
         false,
-        MENU_CONFIG_MIDI,
+        MENU_CONFIG_SETTINGS,
         {MENU_DONE}
     },
 	{

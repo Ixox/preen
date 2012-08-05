@@ -36,6 +36,7 @@ AllSynthParams synthParamsEmpty  =  {
         		{ ALGO1, 6, 4, 6} ,
         		{ 16, 24, 0, 0 } ,
         		{ 128, 128, 128, 128} ,
+        		{ 0, 0, 0, 0} ,
         		// Oscillator
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 16, 0} ,
         		{ OSC_SHAPE_SIN, OSC_FT_KEYBOARD , 8, 0} ,
@@ -1046,14 +1047,18 @@ void PresetUtil::convertSynthStateToCharArray(AllSynthParams* params, uint8* cha
 		chars[k] = 0;
 	}
 
-	// 1.00 compatibility
-	// => matrix 8
-	int firstPartSize = 23*4;
-	for (unsigned int k=0; k<firstPartSize; k++) {
+	// 2.00 compatibility performance mode which is not saved
+	unsigned int firstPartASize = 3*4;
+	for (unsigned int k=0; k<firstPartASize; k++) {
 		chars[k] = ((char*) params)[k];
 	}
+	unsigned  int firstPartBSize = 20*4;
+	for (unsigned int k=0; k<firstPartBSize; k++) {
+		chars[firstPartASize + k] = ((char*) &params->osc1)[k];
+	}
+	int firstPartSize = firstPartASize + firstPartBSize;
 	// LFO 1->4
-	int secondPartSize = 4*4;
+	unsigned int secondPartSize = 4*4;
 	for (unsigned int k=0; k<secondPartSize; k++) {
 		chars[firstPartSize + k] = ((char*) &params->lfo1)[k];
 	}
@@ -1086,14 +1091,26 @@ void PresetUtil::convertSynthStateToCharArray(AllSynthParams* params, uint8* cha
 }
 
 void PresetUtil::convertCharArrayToSynthState(uint8* chars, AllSynthParams* params) {
+	// In 2.0...
+	// performance mode added... CC1..4 must not be saved
 
-	// Copy first part
-	int firstPartSize = 23*4;
-	for (unsigned int k=0; k<firstPartSize; k++) {
+	// Copy first part A
+	unsigned int firstPartASize = 3*4;
+	for (unsigned int k=0; k<firstPartASize; k++) {
 		((char*) params)[k] = chars[k];
 	}
+	// performance
+	for (unsigned int k=0; k<4; k++) {
+		((char*) &params->engine4)[k] = 0;
+	}
+	// Copy first part B
+	unsigned  int firstPartBSize = 20*4;
+	for (unsigned int k=0; k<firstPartBSize; k++) {
+		((char*) &params->osc1)[k] = chars[firstPartASize + k];
+	}
+	int firstPartSize = firstPartASize + firstPartBSize;
 	// LFO 1->4
-	int secondPartSize = 4*4;
+	unsigned int secondPartSize = 4*4;
 	for (unsigned int k=0; k<secondPartSize; k++) {
 		((char*) &params->lfo1)[k] = chars[firstPartSize + k];
 	}

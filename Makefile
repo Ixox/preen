@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := r3
 
-PREENFM_VERSION_NUMBER=1.72
+PREENFM_VERSION_NUMBER=2.00.B1
 PREENFM_VERSION=\"$(PREENFM_VERSION_NUMBER)\"
 
 LIB_MAPLE_HOME=/home/xhosxe/libmaple
@@ -170,61 +170,61 @@ jtag:
 
 
 build/Env.o: src/Env.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/Osc.o: src/Osc.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/FM.o: src/FM.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/Synth.o: src/Synth.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/Voice.o: src/Voice.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/Lfo.o: src/Lfo.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/LfoOsc.o: src/LfoOsc.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/LfoEnv.o: src/LfoEnv.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/LfoStepSeq.o: src/LfoStepSeq.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/Matrix.o: src/Matrix.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/MidiDecoder.o: src/MidiDecoder.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/RingBuffer.o: src/RingBuffer.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/Encoders.o: src/Encoders.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/FMDisplay.o: src/FMDisplay.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/SynthState.o: src/SynthState.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/Menu.o: src/Menu.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/PresetUtil.o: src/PresetUtil.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/Presets.o: src/Presets.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 build/LiquidCrystal.o: src/LiquidCrystal.cpp
-	$(CXX) -I/home/xhosxe/src $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 
 $(PROJECT_BUILD_PATH)/$(BOARD).elf: $(OBJECTS) $(BUILDDIRS) 

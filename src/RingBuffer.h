@@ -52,6 +52,11 @@ public:
 	    return count;
 	}
 
+	void appendBlock(T* block, int number) {
+		for (int k=0; k<number ; k++) {
+			insert(block[k]);
+		}
+	}
 
 private:
     volatile int head;

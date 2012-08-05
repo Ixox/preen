@@ -17,4 +17,17 @@
 
 #include "Env.h"
 
+void Env::setSynthState(SynthState* sState) {
+	SynthStateAware::setSynthState(sState);
+}
+
+void Env::init(int number, Matrix* matrix) {
+    this->destAttack = (DestinationEnum)(ENV1_ATTACK + number - 1);
+    this->matrix = matrix;
+
+    EnvelopeParams * e = (EnvelopeParams *)&(this->synthState->params.env1);
+	envParams = &e[number-1];
+	reloadADSR();
+}
+
 

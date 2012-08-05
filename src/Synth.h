@@ -27,7 +27,7 @@
 #include "SynthParamListener.h"
 #include "wirish.h"
 
-#define MAX_NUMBER_OF_VOICES 4
+#define MAX_NUMBER_OF_VOICES 8
 
 #define UINT_MAX  4294967295
 
@@ -48,8 +48,8 @@ public:
     void allSoundOff();
     bool isPlaying();
     Matrix* getMatrix() { return &matrix; }
-    int getSample();
-    void nextSample();
+    int* getSampleBlock();
+    void nextSampleBlock();
 
 
     // Overide SynthParamListener
@@ -119,7 +119,6 @@ private:
     Matrix matrix;
     Voice voices[MAX_NUMBER_OF_VOICES];
     unsigned int voiceIndex;
-    int cpt;
 
     LfoOsc lfoOsc[NUMBER_OF_LFO_OSC];
     LfoEnv lfoEnv[NUMBER_OF_LFO_ENV];
@@ -131,21 +130,25 @@ private:
     boolean recomputeNext;
 
     int currentGate;
+    int samples[32];
 
     // 6 oscillators Max
-    Osc<1> osc1;
-    Osc<2> osc2;
-    Osc<3> osc3;
-    Osc<4> osc4;
-    Osc<5> osc5;
-    Osc<6> osc6;
+    Osc osc1;
+    Osc osc2;
+    Osc osc3;
+    Osc osc4;
+    Osc osc5;
+    Osc osc6;
     // And their 6 envelopes
-    Env<1> env1;
-    Env<2> env2;
-    Env<3> env3;
-    Env<4> env4;
-    Env<5> env5;
-    Env<6> env6;
+    Env env1;
+    Env env2;
+    Env env3;
+    Env env4;
+    Env env5;
+    Env env6;
+
+    // random generator
+    int randomizerInt;
 };
 
 

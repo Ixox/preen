@@ -18,7 +18,7 @@
 #ifndef PRESETUTIL_H_
 #define PRESETUTIL_H_
 
-#define EEPROM_CONFIG_CHECK 40
+#define EEPROM_CONFIG_CHECK 86
 #define EEPROM_DEFPATCH_CHECK 114
 
 #include "libmaple_types.h"

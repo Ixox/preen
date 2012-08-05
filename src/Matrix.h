@@ -63,9 +63,13 @@ public:
         }
     }
 
-    inline void computeFutureDestintation(int k) {
-    	int mul = rows[k].mul + (currentDestinations[MTX1_MUL + k] >> 7) ;
-        futurDestinations[(int)rows[k].destination] += sources[(int)rows[k].source] * mul;
+    void computeAllFutureDestintationAndSwitch() {
+    	resetUsedFuturDestination();
+        for (int k=0; k< MATRIX_SIZE; k++) {
+			int mul = rows[k].mul + (currentDestinations[MTX1_MUL + k] >> 7) ;
+			futurDestinations[(int)rows[k].destination] += sources[(int)rows[k].source] * mul;
+        }
+        useNewValues();
     }
 
     void setSource(SourceEnum source, int value) __attribute__((always_inline)) {

@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include "Synth.h"
 
 Synth::Synth(void) {
@@ -41,18 +42,26 @@ void Synth::init() {
 	env5.setSynthState(this->synthState);
 	env6.setSynthState(this->synthState);
 
+	env1.init(1, &matrix);
+	env2.init(2, &matrix);
+	env3.init(3, &matrix);
+	env4.init(4, &matrix);
+	env5.init(5, &matrix);
+	env6.init(6, &matrix);
+
 	osc1.setSynthState(this->synthState);
 	osc2.setSynthState(this->synthState);
 	osc3.setSynthState(this->synthState);
 	osc4.setSynthState(this->synthState);
 	osc5.setSynthState(this->synthState);
 	osc6.setSynthState(this->synthState);
-	osc1.init(&matrix);
-	osc2.init(&matrix);
-	osc3.init(&matrix);
-	osc4.init(&matrix);
-	osc5.init(&matrix);
-	osc6.init(&matrix);
+
+	osc1.init(1, &matrix);
+	osc2.init(2, &matrix);
+	osc3.init(3, &matrix);
+	osc4.init(4, &matrix);
+	osc5.init(5, &matrix);
+	osc6.init(6, &matrix);
 
 	// OSC + ENV
 	for (int k = 0; k < NUMBER_OF_LFO_OSC + NUMBER_OF_LFO_ENV; k++) {
@@ -75,9 +84,9 @@ void Synth::init() {
 				&this->osc5, &this->osc6);
 	}
 
-	this->cpt = 0;
 	this->recomputeNext = true;
 	this->currentGate = 0;
+	this->randomizerInt = 1253246184;
 }
 
 void Synth::noteOn(char note, char velocity) {
@@ -89,31 +98,39 @@ void Synth::noteOn(char note, char velocity) {
 	int zeroVelo = (16 - this->synthState->params.engine1.velocity) * 8;
 	velocity = zeroVelo + velocity * (128 - zeroVelo) / 128;
 
-	int freeNote = -1;
-
-	for (int k = 0; k < numberOfNote && freeNote == -1; k++) {
-		if (!voices[k].isPlaying()) {
-			freeNote = k;
-			voices[freeNote].noteOn(note, velocity, voiceIndex++);
-			return;
-		}
-	}
+	unsigned int indexMin = (unsigned int)2147483647;
+	int voiceToUse = -1;
 
 	for (int k = 0; k < numberOfNote; k++) {
-		if (voices[k].getNote() == note || voices[k].isReleased()) {
-			freeNote = k;
+		if (!voices[k].isPlaying()) {
+			voices[k].noteOn(note, velocity, voiceIndex++);
+			return;
 		}
-	}
-	if (freeNote == -1) {
-		unsigned int indexMin = (unsigned int)2147483647;
-		for (int k = 0; k < numberOfNote; k++) {
-			if (voices[k].getIndex() < indexMin) {
-				indexMin = voices[k].getIndex();
-				freeNote = k;
+		// same note.... ?
+		if (voices[k].getNote() == note) {
+			voices[k].noteOnWithoutPop(note, velocity, voiceIndex++);
+			return;
+		}
+
+		if (voices[k].isReleased()) {
+			int indexVoice = voices[k].getIndex();
+			if (indexVoice < indexMin) {
+				indexMin = indexVoice;
+				voiceToUse = k;
 			}
 		}
 	}
-	voices[freeNote].noteOnWithoutPop(note, velocity, voiceIndex++);
+
+	if (voiceToUse == -1) {
+		for (int k = 0; k < numberOfNote; k++) {
+			int indexVoice = voices[k].getIndex();
+			if (indexVoice < indexMin) {
+				indexMin = indexVoice;
+				voiceToUse = k;
+			}
+		}
+	}
+	voices[voiceToUse].noteOnWithoutPop(note, velocity, voiceIndex++);
 }
 
 void Synth::noteOff(char note) {
@@ -157,109 +174,104 @@ bool Synth::isPlaying() {
 	return false;
 }
 
-int Synth::getSample() {
+int* Synth::getSampleBlock() {
+	return samples;
+}
+
+
+void Synth::nextSampleBlock() {
+
+	this->lfo[0]->nextValueInMatrix();
+	this->lfo[1]->nextValueInMatrix();
+	this->lfo[2]->nextValueInMatrix();
+	this->lfo[3]->nextValueInMatrix();
+	this->lfo[4]->nextValueInMatrix();
+	this->lfo[5]->nextValueInMatrix();
+
+	this->matrix.computeAllFutureDestintationAndSwitch();
+
+	// Update static members, can be called a ony voice
+	this->voices[0].updateAllModulationIndexes();
+	this->voices[0].updateAllMixOscs();
+	// glide only appens on voice 0
+	this->voices[0].glide();
+
+	// update noise
+	// http://software.intel.com/en-us/articles/fast-random-number-generator-on-the-intel-pentiumr-4-processor/
+	int randomizer = rand();
+	for (int k=0; k<32;) {
+		randomizer = (214013 * randomizer + 2531011);
+		noise[k++] = (randomizer & 0xffff) - 32768;
+		randomizer = (214013 * randomizer + 2531011);
+		noise[k++] = (randomizer & 0xffff) - 32768;
+		randomizer = (214013 * randomizer + 2531011);
+		noise[k++] = (randomizer & 0xffff) - 32768;
+		randomizer = (214013 * randomizer + 2531011);
+		noise[k++] = (randomizer & 0xffff) - 32768;
+	}
+
+	this->voices[0].nextBlock();
+	this->voices[1].nextBlock();
+	this->voices[2].nextBlock();
+	this->voices[3].nextBlock();
+	this->voices[4].nextBlock();
+	this->voices[5].nextBlock();
+	this->voices[6].nextBlock();
+	this->voices[7].nextBlock();
+
 
 	// Gate algo !!
 	int gate = this->matrix.getDestination(MAIN_GATE) >> 4;
-	int sample = 0;
+	for (int k=0; k<32; k++) {
+		samples[k] = 0;
 
-	if (currentGate < 256 && currentGate < gate) {
-		currentGate ++;
-	}
-	if (currentGate > 0 && currentGate > gate) {
-		currentGate --;
-	}
+		if (currentGate < 256 && currentGate < gate) {
+			currentGate ++;
+		}
+		if (currentGate > 0 && currentGate > gate) {
+			currentGate --;
+		}
 
-	if (currentGate < 256) {
-		sample = voices[0].getSample();
-		sample += voices[1].getSample();
-		sample += voices[2].getSample();
-		sample += voices[3].getSample();
-		sample /= this->synthState->params.engine1.numberOfVoice;
+		if (currentGate < 256) {
+			samples[k] = voices[0].getSamples()[k];
+			samples[k] += voices[1].getSamples()[k];
+			samples[k] += voices[2].getSamples()[k];
+			samples[k] += voices[3].getSamples()[k];
+			samples[k] += voices[4].getSamples()[k];
+			samples[k] += voices[5].getSamples()[k];
+			samples[k] += voices[6].getSamples()[k];
+			samples[k] += voices[7].getSamples()[k];
+			samples[k] /= this->synthState->params.engine1.numberOfVoice;
 
-		if (currentGate > 0) {
-			// Shift all << 8 for better resolution in the calcul
-			sample =  ((sample << 8) - (sample * currentGate)) >> 8;
+			if (currentGate > 0) {
+				// Shift all << 8 for better resolution in the calcul
+				samples[k] =  ((samples[k] << 8) - (samples[k] * currentGate)) >> 8;
+			}
 		}
 	}
-	return sample;
-}
-
-void Synth::nextSample() {
-
-	osc1.updateRandomNumber();
-
-	// step 32 : update lfo1 , step 33 update lfo2 etc....
-	int step32 = cpt & 0x1f;
-	switch (step32) {
-	case 0 ... 5:
-		this->lfo[step32]->nextValueInMatrix();
-		break;
-
-	case 6:
-		// Value must be reset because the matrix only add value to destination.
-		this->matrix.resetUsedFuturDestination();
-		break;
-	case 7 ... 18:
-		this->matrix.computeFutureDestintation(step32 - 7);
-		break;
-	case 19:
-		this->matrix.useNewValues();
-		break;
-	case 20:
-		// Update static members, can be called a ony voice
-		this->voices[0].updateModulationIndex1();
-		this->voices[0].updateModulationIndex2();
-		break;
-	case 21:
-		this->voices[0].updateModulationIndex3();
-		this->voices[0].updateModulationIndex4();
-		break;
-	case 22:
-		this->voices[0].updateMixOsc1();
-		this->voices[0].updateMixOsc2();
-		break;
-	case 23:
-		this->voices[0].updateMixOsc3();
-		this->voices[0].updateMixOsc4();
-		break;
-	case 24 ... 27:
-		this->voices[step32 - 24].calculateFrequencyWithMatrix();
-		break;
-		//
-	case 28:
-		// glide can happens only on Voice 0
-		this->voices[0].glide();
-		break;
-	default:
-		break;
-
-	}
-
-	for (int k=0; k<4; k++) {
-		this->voices[k].nextSample();
-	}
-
-	cpt++;
 }
 
 void Synth::checkMaxVoice(boolean setEngineVoice) {
 	int voiceMax = MAX_NUMBER_OF_VOICES;
 	switch (showUp[this->synthState->params.engine1.algo].osc) {
 	case 4:
-		voices[3].killNow();
-		voiceMax = 3;
+		voices[6].killNow();
+		voices[7].killNow();
+		voiceMax = 6;
 		break;
 	case 6:
-		voices[2].killNow();
-		voices[3].killNow();
-		voiceMax = 2;
+		voices[4].killNow();
+		voices[5].killNow();
+		voices[6].killNow();
+		voices[7].killNow();
+		voiceMax = 4;
 		break;
 	}
 	allParameterRows.row[0]->params[ENCODER_ENGINE_VOICE].maxValue = voiceMax;
 
-	if (setEngineVoice && this->synthState->params.engine1.numberOfVoice > 1) {
-		this->synthState->setNewValue(ROW_ENGINE, ENCODER_ENGINE_VOICE, voiceMax);
+	if (setEngineVoice && this->synthState->params.engine1.numberOfVoice > 4) {
+		// If not voic set to 0 then we set it to 4 when changing algorithm...
+		this->synthState->setNewValue(ROW_ENGINE, ENCODER_ENGINE_VOICE, 4);
 	}
 }
 
@@ -280,21 +292,17 @@ void Synth::afterNewParamsLoad() {
 
 
 void Synth::newParamValue(SynthParamType type, int currentRow, int encoder, ParameterDisplay* param, int oldValue, int newValue) {
-	if (type == SYNTH_PARAM_TYPE_ENGINE) {
-		if (encoder == ENCODER_ENGINE_ALGO) {
-			checkMaxVoice(true);
-		} else if (encoder == ENCODER_ENGINE_VOICE) {
-			switch (newValue) {
-			case 1:
-				voices[1].killNow();
-				// No break;
-			case 2:
-				voices[2].killNow();
-				// No break;
-			case 3:
-				voices[3].killNow();
-				// No break;
+	if (type == SYNTH_PARAM_TYPE_ENGINE ) {
+		if (currentRow == ROW_ENGINE) {
+			if (encoder == ENCODER_ENGINE_ALGO) {
+				checkMaxVoice(true);
+			} else if (encoder == ENCODER_ENGINE_VOICE) {
+				for (int k = newValue; k<MAX_NUMBER_OF_VOICES; k++) {
+					voices[k].killNow();
+				}
 			}
+		} else if (currentRow == ROW_PERFORMANCE) {
+			matrix.setSource((enum SourceEnum)(MATRIX_SOURCE_CC1 + encoder), newValue);
 		}
 	} else if (type == SYNTH_PARAM_TYPE_ENV) {
         switch (currentRow) {

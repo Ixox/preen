@@ -24,17 +24,16 @@ extern const char* lfoOscMidiClock[];
 const char* stepChars  = "_123456789ABCDEF";
 
 FMDisplay::FMDisplay() {
-	refreshStatus = 10;
-	presetModifed = false;
 }
 
 FMDisplay::~FMDisplay() {
 }
 
 void FMDisplay::init(LiquidCrystal* lcd) {
+	presetModifed = false;
+	refreshStatus = 0;
 	this->lcd = lcd;
 	lcd->clear();
-	displayPreset();
 }
 
 void FMDisplay::printValueWithSpace(int value) {
@@ -417,6 +416,7 @@ void FMDisplay::newSynthMode(FullState* fullState)  {
 		displayPreset();
 		refreshStatus = 12;
 	} else {
+		refreshStatus = 0;
 		menuRow = 0;
 		newMenuState(fullState);
 	}
@@ -478,11 +478,11 @@ void FMDisplay::newMenuState(FullState* fullState) {
 			lcd->setCursor(1, menuRow-1);
 			lcd->print("Waiting SysEx...");
 			break;
-		case MENU_CONFIG_MIDI:
+		case MENU_CONFIG_SETTINGS:
 			lcd->setCursor(1, menuRow-1);
 			lcd->print(midiConfig[fullState->menuSelect].title);
 			break;
-		case MENU_CONFIG_MIDI_SAVE:
+		case MENU_CONFIG_SETTINGS_SAVE:
 			lcd->setCursor(1, menuRow-1);
 			lcd->print("Save to EEPROM ?");
 			break;
@@ -555,7 +555,7 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 		lcd->setCursor(14, menuRow-1);
 		lcd->print(allChars[fullState->menuSelect]);
 		break;
-	case MENU_CONFIG_MIDI:
+	case MENU_CONFIG_SETTINGS:
 		eraseRow(menuRow-1);
 		lcd->setCursor(1, menuRow-1);
 		lcd->print(midiConfig[fullState->menuSelect].title);

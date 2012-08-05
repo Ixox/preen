@@ -55,6 +55,9 @@ MidiDecoder::MidiDecoder() {
 	this->isSequencerPlaying = false;
 	this->midiClockCpt = 0;
 	this->runningStatus = 0;
+	for (int k=0; k<NUMBER_OF_ECC; k++) {
+		previousECC[k] = 0;
+	}
 }
 
 MidiDecoder::~MidiDecoder() {
@@ -492,15 +495,19 @@ void MidiDecoder::controlChange(MidiEvent& midiEvent) {
 			break;
 		case CC_MATRIX_SOURCE_CC1:
 			this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC1, midiEvent.value[1]);
+			this->synthState->setNewValue(ROW_PERFORMANCE, ENCODER_PERFORMANCE_CC1, midiEvent.value[1]);
 			break;
 		case CC_MATRIX_SOURCE_CC2:
 			this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC2, midiEvent.value[1]);
+			this->synthState->setNewValue(ROW_PERFORMANCE, ENCODER_PERFORMANCE_CC2, midiEvent.value[1]);
 			break;
 		case CC_MATRIX_SOURCE_CC3:
 			this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC3, midiEvent.value[1]);
+			this->synthState->setNewValue(ROW_PERFORMANCE, ENCODER_PERFORMANCE_CC3, midiEvent.value[1]);
 			break;
 		case CC_MATRIX_SOURCE_CC4:
 			this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC4, midiEvent.value[1]);
+			this->synthState->setNewValue(ROW_PERFORMANCE, ENCODER_PERFORMANCE_CC4, midiEvent.value[1]);
 			break;
 		}
 	}
@@ -729,7 +736,7 @@ void MidiDecoder::newParamValue(SynthParamType type, int currentrow,
 }
 
 void MidiDecoder::sendMidiOut() {
-	// 1.52 : from now only MIDI_CONTRIL_CHANGE should be sent...
+	// 1.52 : from now only MIDI_CONTROL_CHANGE should be sent...
 	// Other events are directly copied when recevied...
 	// Check before calling that there is something to send...
 
@@ -752,3 +759,25 @@ void MidiDecoder::sendMidiOut() {
 	}
 }
 
+
+void MidiDecoder::sendToExternalGear(int enumber) {
+	int currentValue = this->synth->getMatrix()->getDestination((DestinationEnum)(EXTERNAL_CC1 + enumber)) ;
+	currentValue >>= 4;
+
+	if (currentValue<0) {
+		currentValue =0;
+	}
+	if (currentValue>127) {
+		currentValue = 127;
+	}
+	if (currentValue != previousECC[enumber]) {
+		previousECC[enumber] = currentValue;
+
+		struct MidiEvent cc;
+		cc.eventType = MIDI_CONTROL_CHANGE;
+		cc.channel = this->synthState->fullState.midiConfigValue[MIDICONFIG_ECHANNEL];
+		cc.value[0] = this->synthState->fullState.midiConfigValue[MIDICONFIG_ECC1 + enumber] ;
+		cc.value[1] = currentValue;
+		midiToSend.insert(cc);
+	}
+}
