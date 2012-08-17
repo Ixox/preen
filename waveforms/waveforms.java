@@ -31,7 +31,7 @@ class waveforms {
     
     public static void main(String[] args) {
 	    int numberOfSteps = 2048;
-	    int order = 15;
+	    int order = 18;
 
 	    if (args.length>0) {
 		    try {
@@ -54,9 +54,15 @@ class waveforms {
     	}
     	
     	
-    	System.out.println("const short waveforms[] __FLASH__ = {");
+    	System.out.println("const short sinTable[] __FLASH__ = {");
     	System.out.println(getWaveFormData(WaveForm.SIN, numberOfSteps, order));
+	System.out.println("};");
+	System.out.println("");
+    	System.out.println("const short squareTable[] __FLASH__ = {");    	
     	System.out.println(getWaveFormData(WaveForm.SQUARE, numberOfSteps, order));
+	System.out.println("};");
+	System.out.println("");
+    	System.out.println("const short sawTable[] __FLASH__ = {");    	
     	System.out.println(getWaveFormData(WaveForm.SAWTOOTH, numberOfSteps, order));
     	System.out.println("};");
     	
@@ -82,7 +88,7 @@ class waveforms {
 	    }
         
         double m = max - min;
-	    double mul = 65535 / m ;
+	    double mul = 65534 / m ;
 	    int intMin = 0;
 	    int intMax = 0;
 	    int i = 0;
@@ -91,7 +97,7 @@ class waveforms {
         out.append(" //  max  =  "+ max ).append(nl);
         out.append(" //  min  =  "+ min ).append(nl);
 	    for (double value : values) {
-		    int intValue = (int) ((value - min) * mul) - 32768;
+		    int intValue = (int) ((value - min) * mul) - 32767;
 		    if (intValue < intMin) {
 			    intMin = intValue;
 		    }

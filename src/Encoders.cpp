@@ -31,6 +31,10 @@ Encoders::Encoders() {
 	char encoderPins[] = { 9, 8, 11, 10, 1,0, 3, 2};
 #endif
 
+#ifdef PCB_R4
+    char encoderPins[] = { 9, 8, 11, 10, 1,0, 3, 2};
+#endif
+
     char buttonPins[] = { 12, 13, 14, 15, 7, 5, 6};
 
 	/*

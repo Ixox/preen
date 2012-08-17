@@ -51,39 +51,39 @@ public:
     virtual ~Env(void) {
     }
 
-	void setSynthState(SynthState* sState);
-	void init(int number, Matrix* matrix);
+    void setSynthState(SynthState* sState);
+    void init(int number, Matrix* matrix);
 
     void reloadADSR() {
 
         adsr[0] = ((envParams->attack * envParams->attack) >> 5);
         adsr[1] = ((envParams->decay * envParams->decay) >> 5 );
         adsr[2] = envParams->sustain << 7;
-        adsr[3] = ((envParams->release * envParams->release) >> 5);
+        adsr[3] = ((envParams->release * envParams->release) >> 5) + 1;
 
         if (adsr[1] != 0) {
             incD = ((32767 - adsr[2]) << 15) / adsr[1];
         } else {
-        	incD = ((32767 - adsr[2]) << 15);
+            incD = ((32767 - adsr[2]) << 15);
         }
 
     }
 
 
     void noteOn(struct EnvData& env) {
-    	int attack = adsr[0] + ((this->matrix->getDestination(destAttack) + this->matrix->getDestination(ALL_ENV_ATTACK)) >> 5);
+        int attack = adsr[0] + ((this->matrix->getDestination(destAttack) + this->matrix->getDestination(ALL_ENV_ATTACK)) >> 5);
 
-    	if (attack > 2033) {
-    		attack = 2033;
-    	} else if (attack< 0) {
-    		attack = 0;
-    	}
+        if (attack > 2033) {
+            attack = 2033;
+        } else if (attack< 0) {
+            attack = 0;
+        }
 
         if (attack != 0) {
-        	incA = (32767 << 15) / attack;
+            incA = (32767 << 15) / attack;
             env.currentAmp= 0;
         } else {
-        	incA = (32767 << 15);
+            incA = (32767 << 15);
             env.currentAmp= incA;
         }
 
@@ -94,9 +94,9 @@ public:
     }
 
     void noteOffQuick(struct EnvData* env) {
-    	env->index = 1;
-    	env->envState = ENV_STATE_ON_R;
-    	env->currentAmpSpeed = env->currentAmp;
+        env->index = 1;
+        env->envState = ENV_STATE_ON_R;
+        env->currentAmpSpeed = env->currentAmp;
     }
 
     void noteOff(struct EnvData* env) {
@@ -107,13 +107,13 @@ public:
     }
 
     inline int getNextAmp(struct EnvData* env)  __attribute__((always_inline))  {
-    	asm volatile(
+        asm volatile(
                 // r5 : index, r6 : currentAmp, r7 : envState, r8 : currentAmpSpeed
                 "    ldm %[env], {r5-r8}\n\t"
                 // index --
                 "    sub r5, #1\n\t"
 
-        		// switch
+                // switch
                 "    tbb [pc, r7]\n\t"
                 "7:\n\t"
                 "    .byte   (1f-7b)/2\n\t"
@@ -132,10 +132,10 @@ public:
                 "    b 6f\n\t"
 
                 "11: ldr r5, [%[adsr], #4]\n\t"
-    			// mv 32767 << 15 in r6 (currentAmp).
-    			"    mvn r6, #0\n\t"
-    			"    lsr r6, r6, #2\n\t"
-    			// change state to DECAY
+                // mv 32767 << 15 in r6 (currentAmp).
+                "    mvn r6, #0\n\t"
+                "    lsr r6, r6, #2\n\t"
+                // change state to DECAY
                 "    mov r7, #1\n\t"
                 "    mov r8, %[incD]\n\t"
                 // store envState, currentAmpSpeed
@@ -174,10 +174,10 @@ public:
                 // env.envState = ENV_STATE_DEAD;
                 "6:\n\t"
                 : [env]"+rV" (env)
-                : [adsr]"rV" (adsr), [incD]"r"(incD)
-                : "r5", "r6", "r7", "r8", "cc");
+                  : [adsr]"rV" (adsr), [incD]"r"(incD)
+                    : "r5", "r6", "r7", "r8", "cc");
 
-		return env->currentAmp>>15;
+        return env->currentAmp>>15;
     }
 
     bool isDead(struct EnvData& env)  __attribute__((always_inline))  {

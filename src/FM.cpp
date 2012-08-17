@@ -29,16 +29,18 @@
 
 // Main timer define
 #define TIME_NUMBER       2
-#define CHANNEL_PWM       TIMER_CH1
-#define CHANNEL_INTERUPT  TIMER_CH2
-#define AUDIO_PIN    11
+#define CHANNEL_PWM_MSB   TIMER_CH1
+#define CHANNEL_PWM_LSB   TIMER_CH2
+#define CHANNEL_INTERUPT  TIMER_CH3
+#define AUDIO_PIN_MSB    11
+#define AUDIO_PIN_LSB    10
 
 /*
 #define TIME_NUMBER       1
 #define CHANNEL_PWM       TIMER_CH3
 #define CHANNEL_INTERUPT  TIMER_CH2
 #define AUDIO_PIN    25
-*/
+ */
 
 SynthState		   synthState;
 Synth              synth;
@@ -49,16 +51,31 @@ FMDisplay          fmDisplay;
 
 #ifdef PCB_R1
 LiquidCrystal      lcd(2, 3, 4, 5, 6, 7, 27, 26, 25, 22);
+#define TIMER_OVERFLOW 2197
+#define TIMER_IRQ_COMPARE 2048
+#define TIMER_PRESCALE 1
 #endif
 
- #ifdef PCB_R2
+#ifdef PCB_R2
 LiquidCrystal      lcd(2, 3, 4, 5, 6, 7, 31, 30, 29, 28);
+#define TIMER_OVERFLOW 2197
+#define TIMER_PRESCALE 1
+#define TIMER_IRQ_COMPARE 2048
 #endif
 
 #ifdef PCB_R3
 LiquidCrystal      lcd(31, 30, 29, 28, 2, 3, 4, 5, 6, 7);
+#define TIMER_OVERFLOW 2197
+#define TIMER_IRQ_COMPARE 2048
+#define TIMER_PRESCALE 1
 #endif
 
+#ifdef PCB_R4
+LiquidCrystal      lcd(31, 30, 29, 28, 2, 3, 4, 5, 6, 7);
+#define TIMER_OVERFLOW 274
+#define TIMER_IRQ_COMPARE 240
+#define TIMER_PRESCALE 8
+#endif
 
 
 HardwareTimer mainTimer(TIME_NUMBER);
@@ -67,7 +84,13 @@ int mainCpt = 0;
 
 void IRQSendSample() {
     if (rb.getCount()>0) {
-        pwmWrite(AUDIO_PIN , (rb.remove() >>5)+1024);
+#ifndef PCB_R4
+        pwmWrite(AUDIO_PIN_MSB , (rb.remove() >>5)+1024);
+#else
+        int sample = (rb.remove() + 32768);
+        pwmWrite(AUDIO_PIN_LSB, sample & 0xff);
+        pwmWrite(AUDIO_PIN_MSB, sample >> 8);
+#endif
     }
 }
 
@@ -81,10 +104,10 @@ inline void fillSoundBuffer() {
 
 void setup()
 {
- #ifndef DEBUG
-	SerialUSB.end();
-	nvic_irq_disable(NVIC_USB_LP_CAN_RX0);
- #endif
+#ifndef DEBUG
+    SerialUSB.end();
+    nvic_irq_disable(NVIC_USB_LP_CAN_RX0);
+#endif
 
     byte midiIn[8] = {
             B01100,
@@ -215,14 +238,37 @@ void setup()
 
     // Timer init
     mainTimer.pause();
-    mainTimer.setOverflow(2197);
-    mainTimer.setPrescaleFactor(1);
+    mainTimer.setOverflow(TIMER_OVERFLOW);
+    mainTimer.setPrescaleFactor(TIMER_PRESCALE);
 
     // PWM for the SOUND !
-    mainTimer.setMode(CHANNEL_PWM, TIMER_PWM);
-    pinMode(AUDIO_PIN, PWM);
+#ifdef PCB_R4
+    mainTimer.setMode(CHANNEL_PWM_LSB, TIMER_PWM);
+    pinMode(AUDIO_PIN_LSB, PWM);
+#endif
+
+    mainTimer.setMode(CHANNEL_PWM_MSB, TIMER_PWM);
+    pinMode(AUDIO_PIN_MSB, PWM);
 
     //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     mainTimer.refresh();
     mainTimer.resume();
 
@@ -240,11 +286,16 @@ void setup()
     PresetUtil::loadConfigFromEEPROM();
 
     // init the audio interupt
-    mainTimer.setCompare(CHANNEL_INTERUPT, 2048);
+    mainTimer.setCompare(CHANNEL_INTERUPT, TIMER_IRQ_COMPARE);
     mainTimer.setMode(CHANNEL_INTERUPT, TIMER_OUTPUTCOMPARE);
     mainTimer.attachInterrupt(CHANNEL_INTERUPT, IRQSendSample);
 
-    pwmWrite(AUDIO_PIN , 1024);
+#ifndef PCB_R4
+    pwmWrite(AUDIO_PIN_MSB , 1024);
+#else
+    pwmWrite(AUDIO_PIN_LSB , 0);
+    pwmWrite(AUDIO_PIN_MSB , 64);
+#endif
     delay(500);
 
 
@@ -256,16 +307,16 @@ void setup()
         synth.noteOn(notes[k], 60);
         for (int cpt=0; cpt<1500; cpt++) {
             fillSoundBuffer();
-            delayMicroseconds(30 - k*2);
+            delayMicroseconds(35 - k*2);
         }
         synth.noteOff(notes[k]);
         for (int cpt=0; cpt<100; cpt++) {
             fillSoundBuffer();
-            delayMicroseconds(30 - k*2);
+            delayMicroseconds(35 - k*2);
         }
     }
     synth.noteOff(48);
-    for (int cpt=0; cpt<10000; cpt++) {
+    for (int cpt=0; cpt<7000; cpt++) {
         delayMicroseconds(30);
         fillSoundBuffer();
     }
@@ -282,28 +333,28 @@ void setup()
     int bootOption = synthState.fullState.midiConfigValue[MIDICONFIG_BOOT_START];
 
     if (bootOption == 0) {
-    	fmDisplay.displayPreset();
-    	fmDisplay.setRefreshStatus(12);
+        fmDisplay.displayPreset();
+        fmDisplay.setRefreshStatus(12);
     } else {
-    	// Menu
-    	synthState.buttonPressed(BUTTON_MENUSELECT);
-    	// Load
-    	synthState.buttonPressed(BUTTON_MENUSELECT);
-    	if (bootOption == 5) {
-        	// Internal bank
-    		synthState.encoderTurned(0, 1);
-       		synthState.buttonPressed(BUTTON_MENUSELECT);
-    	} else {
-    		// User
-       		synthState.buttonPressed(BUTTON_MENUSELECT);
-       		// Bank
-       		for (int k = 0; k < bootOption - 1; k++) {
-       			synthState.encoderTurned(0, 1);
-       		}
-       		synthState.buttonPressed(BUTTON_MENUSELECT);
-    	}
+        // Menu
+        synthState.buttonPressed(BUTTON_MENUSELECT);
+        // Load
+        synthState.buttonPressed(BUTTON_MENUSELECT);
+        if (bootOption == 5) {
+            // Internal bank
+            synthState.encoderTurned(0, 1);
+            synthState.buttonPressed(BUTTON_MENUSELECT);
+        } else {
+            // User
+            synthState.buttonPressed(BUTTON_MENUSELECT);
+            // Bank
+            for (int k = 0; k < bootOption - 1; k++) {
+                synthState.encoderTurned(0, 1);
+            }
+            synthState.buttonPressed(BUTTON_MENUSELECT);
+        }
     }
-	srand(micros());
+    srand(micros());
 }
 
 unsigned short midiReceive = 0;
@@ -324,24 +375,24 @@ void loop() {
 
     fillSoundBuffer();
 
-	while (Serial3.available()) {
-		midiDecoder.newByte(Serial3.read());
-		if (midiReceive == 0) {
-			fillSoundBuffer();
-			fmDisplay.midiIn(true);
-		}
-		if (synthState.fullState.synthMode == SYNTH_MODE_MENU) {
-			midiReceive = 0;
-		} else {
-			midiReceive = 2500;
-		}
-	}
+    while (Serial3.available()) {
+        midiDecoder.newByte(Serial3.read());
+        if (midiReceive == 0) {
+            fillSoundBuffer();
+            fmDisplay.midiIn(true);
+        }
+        if (synthState.fullState.synthMode == SYNTH_MODE_MENU) {
+            midiReceive = 0;
+        } else {
+            midiReceive = 2500;
+        }
+    }
 
-	if ((newMicros - midiInMicros) > 200) {
+    if ((newMicros - midiInMicros) > 200) {
         if (midiReceive>0) {
             if (midiReceive == 1) {
                 fillSoundBuffer();
-    			fmDisplay.midiIn(false);
+                fmDisplay.midiIn(false);
             }
             midiReceive--;
         }
@@ -353,25 +404,25 @@ void loop() {
         if (midiDecoder.hasMidiToSend()) {
 
             while (midiDecoder.hasMidiToSend()) {
-            	fillSoundBuffer();
-            	midiDecoder.sendMidiOut();
+                fillSoundBuffer();
+                midiDecoder.sendMidiOut();
             }
 
             if (midiSent == 0) {
                 fillSoundBuffer();
-    			fmDisplay.midiOut(true);
+                fmDisplay.midiOut(true);
             }
             if (synthState.fullState.synthMode == SYNTH_MODE_MENU) {
-            	midiSent = 0;
+                midiSent = 0;
             } else {
-            	midiSent = 2500;
+                midiSent = 2500;
             }
         }
 
         if (midiSent>0) {
             if (midiSent == 1) {
                 fillSoundBuffer();
-    			fmDisplay.midiOut(false);
+                fmDisplay.midiOut(false);
             }
             midiSent--;
         }
@@ -380,27 +431,27 @@ void loop() {
     }
 
     if ((newMicros - externGearMidiMicros) > 2500) {
-    	fillSoundBuffer();
+        fillSoundBuffer();
         midiDecoder.sendToExternalGear(ECCnumber);
         externGearMidiMicros = newMicros;
         ECCnumber++;
         ECCnumber &= 0x3;
     }
 
-   	if (fmDisplay.needRefresh() && ((mainCpt & 0x7) == 0)) {
+    if (fmDisplay.needRefresh() && ((mainCpt & 0x7) == 0)) {
         fillSoundBuffer();
         fmDisplay.refreshAllScreenByStep();
     }
 
     if ((newMicros - encoderMicros) > 1500) {
-    	fillSoundBuffer();
+        fillSoundBuffer();
         encoders.checkStatus();
         encoderMicros = newMicros;
     }
 
     if ((newMicros - synthStateMicros) > 200000) {
-    	fillSoundBuffer();
-    	synthState.tempoClick();
+        fillSoundBuffer();
+        synthState.tempoClick();
         synthStateMicros = newMicros;
     }
 }
@@ -413,7 +464,7 @@ __attribute__(( constructor )) void premain() {
 
 int main(void)
 {
-	setup();
+    setup();
 
     while (1) {
         loop();

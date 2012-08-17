@@ -475,7 +475,7 @@ public:
 	void changeSynthModeRow(int button, int step);
 	void buttonPressed(int number);
 	void buttonLongPressed(int number);
-	void setNewValue(int row, int number, int newValue);
+	void setNewValue(int row, int number, int newValue, bool realPropagate = false);
 	void setNewStepValue(int whichStepSeq, int step, int newValue);
 
 	const MenuItem* afterButtonPressed();

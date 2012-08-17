@@ -462,8 +462,7 @@ void FMDisplay::newMenuState(FullState* fullState) {
 			lcd->setCursor(1, menuRow-1);
 			lcd->print("Confirm replace ?");
 			break;
-		case MENU_FORMAT_V1_10:
-		case MENU_FORMAT_ALL:
+		case MENU_FORMAT_BANK:
 			lcd->setCursor(1, menuRow-1);
 			lcd->print("Y to format:");
 			fullState->menuSelect = 14;
@@ -511,7 +510,6 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 	case MENU_MIDI_BANK_SELECT_DUMP:
 	case MENU_MIDI_SYSEX_DUMP:
 	case MENU_SAVE_BANK:
-	case MENU_FORMAT_BANK:
 		for (int k=0; k<fullState->currentMenuItem->maxValue; k++) {
 			lcd->setCursor(fullState->menuPosition[k], menuRow-1);
 			lcd->print(' ');
@@ -550,8 +548,7 @@ void FMDisplay::newMenuSelect(FullState* fullState) {
 		lcd->setCursor(6+fullState->menuSelect, menuRow-2);
 		lcd->cursor();
 		break;
-	case MENU_FORMAT_ALL:
-	case MENU_FORMAT_V1_10:
+	case MENU_FORMAT_BANK:
 		lcd->setCursor(14, menuRow-1);
 		lcd->print(allChars[fullState->menuSelect]);
 		break;

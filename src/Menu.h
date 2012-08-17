@@ -24,94 +24,92 @@
 
 
 enum {
-	MIDICONFIG_CHANNEL = 0,
-	MIDICONFIG_THROUGH,
-	MIDICONFIG_RECEIVES,
-	MIDICONFIG_SENDS,
-	MIDICONFIG_REALTIME_SYSEX,
-	MIDICONFIG_TEST_NOTE,
-	MIDICONFIG_TEST_VELOCITY,
-	MIDICONFIG_BOOT_START,
-	MIDICONFIG_ECHANNEL,
-	MIDICONFIG_ECC1,
-	MIDICONFIG_ECC2,
-	MIDICONFIG_ECC3,
-	MIDICONFIG_ECC4,
-	MIDICONFIG_SIZE
+    MIDICONFIG_CHANNEL = 0,
+    MIDICONFIG_THROUGH,
+    MIDICONFIG_RECEIVES,
+    MIDICONFIG_SENDS,
+    MIDICONFIG_REALTIME_SYSEX,
+    MIDICONFIG_TEST_NOTE,
+    MIDICONFIG_TEST_VELOCITY,
+    MIDICONFIG_BOOT_START,
+    MIDICONFIG_ECHANNEL,
+    MIDICONFIG_ECC1,
+    MIDICONFIG_ECC2,
+    MIDICONFIG_ECC3,
+    MIDICONFIG_ECC4,
+    MIDICONFIG_SIZE
 };
 
 enum SynthMode {
-	SYNTH_MODE_EDIT = 0,
-	SYNTH_MODE_MENU
+    SYNTH_MODE_EDIT = 0,
+    SYNTH_MODE_MENU
 };
 
 enum MenuState {
-	MAIN_MENU = 0,
-	MENU_LOAD,
+    MAIN_MENU = 0,
+    MENU_LOAD,
     MENU_SAVE_SELECT_USER_BANK,
-	MENU_SAVE_SELECT_PRESET,
-	MENU_LOAD_INTERNAL,
-	MENU_LOAD_USER_SELECT_BANK,
+    MENU_SAVE_SELECT_PRESET,
+    MENU_LOAD_INTERNAL,
+    MENU_LOAD_USER_SELECT_BANK,
     MENU_LOAD_USER_SELECT_PRESET,
     MENU_SAVE,
-	MENU_SAVE_ENTER_NAME,
-	MENU_MIDI_SYSEX_DUMP,
-	MENU_MIDI_SYS_EX,
-	MENU_MIDI_SYSEX_GET,
+    MENU_SAVE_ENTER_NAME,
+    MENU_MIDI_SYSEX_DUMP,
+    MENU_MIDI_SYS_EX,
+    MENU_MIDI_SYSEX_GET,
     MENU_CONFIG_SETTINGS,
     MENU_CONFIG_SETTINGS_SAVE,
-	MENU_MIDI_BANK,
-	MENU_MIDI_BANK_GET,
-	MENU_MIDI_BANK_DUMP,
-	MENU_MIDI_BANK_SELECT_DUMP,
-	MENU_MIDI_PATCH,
-	MENU_MIDI_PATCH_GET,
-	MENU_MIDI_PATCH_DUMP,
-	MENU_DONE,
-	MENU_IN_PROGRESS,
+    MENU_MIDI_BANK,
+    MENU_MIDI_BANK_GET,
+    MENU_MIDI_BANK_DUMP,
+    MENU_MIDI_BANK_SELECT_DUMP,
+    MENU_MIDI_PATCH,
+    MENU_MIDI_PATCH_GET,
+    MENU_MIDI_PATCH_DUMP,
+    MENU_DONE,
+    MENU_IN_PROGRESS,
     MENU_CONFIG,
-	MENU_FORMAT_BANK,
-	MENU_FORMAT_ALL,
-	MENU_FORMAT_V1_10,
-	MENU_SAVE_BANK,
-	MENU_SAVE_BANK_CONFIRM,
-	MENU_SAVE_DEFAULT,
-	LAST_MENU
+    MENU_FORMAT_BANK,
+    MENU_SAVE_BANK,
+    MENU_SAVE_BANK_CONFIRM,
+    MENU_SAVE_DEFAULT,
+    LAST_MENU
 };
 
 
 
 struct MenuItem {
-	MenuState menuState;
-	const char* name;
-	bool hasSubMenu;
-	short maxValue;
-	MenuState subMenu[4];
+    MenuState menuState;
+    const char* name;
+    bool hasSubMenu;
+    short maxValue;
+    MenuState subMenu[4];
 };
 
 
 
 struct FullState {
-	SynthMode synthMode;
-	int menuSelect;
-	unsigned char previousMenuSelect;
-	unsigned char bankNumber;
-	unsigned char presetNumber;
-	unsigned char internalPresetNumber;
-	const MenuItem* currentMenuItem;
-	char name[13];
-	bool presetModified;
-	unsigned char loadWhat;
-	unsigned char saveWhat;
-	unsigned char firstMenu;
-	unsigned char  menuPosition[4];
-	char  midiConfigValue[MIDICONFIG_SIZE];
+    SynthMode synthMode;
+    int menuSelect;
+    unsigned char previousMenuSelect;
+    unsigned char bankNumber;
+    unsigned char presetNumber;
+    unsigned char internalPresetNumber;
+    const MenuItem* currentMenuItem;
+    char name[13];
+    bool presetModified;
+    unsigned char loadWhat;
+    unsigned char saveWhat;
+    unsigned char firstMenu;
+    unsigned char  menuPosition[4];
+    char  midiConfigValue[MIDICONFIG_SIZE];
 };
 
 struct MidiConfig {
-	const char* title;
-	unsigned char maxValue;
-	const char** valueName;
+    const char* title;
+    unsigned char maxValue;
+    const char** valueName;
 };
 
 
@@ -120,24 +118,24 @@ extern const struct MidiConfig midiConfig[];
 
 class MenuItemUtil {
 public:
-	static const MenuItem* getMenuItem(MenuState ms) {
-		const MenuItem* item = &allMenus[0];
-		int cpt = 0;
-		while (item->menuState != LAST_MENU) {
-			if (item->menuState == ms) {
-				return item;
-			}
-			cpt ++;
-			item = &allMenus[cpt];
-		}
-		return 0;
-	}
+    static const MenuItem* getMenuItem(MenuState ms) {
+        const MenuItem* item = &allMenus[0];
+        int cpt = 0;
+        while (item->menuState != LAST_MENU) {
+            if (item->menuState == ms) {
+                return item;
+            }
+            cpt ++;
+            item = &allMenus[cpt];
+        }
+        return 0;
+    }
 
     static const MenuItem* getParentMenuItem(MenuState ms) {
-    	// MENU_DONE exception -> return itself to block back button
-    	if (ms == MENU_DONE) {
-    		return getMenuItem(ms);
-    	}
+        // MENU_DONE exception -> return itself to block back button
+        if (ms == MENU_DONE) {
+            return getMenuItem(ms);
+        }
         const MenuItem* item = &allMenus[0];
         int cpt = 0;
         while (item->menuState != LAST_MENU) {

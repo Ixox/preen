@@ -771,7 +771,9 @@ void SynthState::setNewStepValue(int whichStepSeq, int step, int newValue) {
 
 }
 
-void SynthState::setNewValue(int row, int number, int newValue) {
+
+
+void SynthState::setNewValue(int row, int number, int newValue, bool realPropagate) {
     int index = row * NUMBER_OF_ENCODERS + number;
     struct ParameterDisplay* param = &(allParameterRows.row[row]->params[number]);
     int oldValue = ((char*)&params)[index];
@@ -785,7 +787,11 @@ void SynthState::setNewValue(int row, int number, int newValue) {
     } else {
         ((unsigned char*)&params)[index] = newValue;
     }
-    propagateNewParamValueFromExternal(row, number, param, oldValue, newValue);
+    if (!realPropagate) {
+        propagateNewParamValueFromExternal(row, number, param, oldValue, newValue);
+    } else {
+        propagateNewParamValue(row, number, param, oldValue, newValue);
+    }
 }
 
 const MenuItem* SynthState::afterButtonPressed() {
@@ -863,7 +869,7 @@ const MenuItem* SynthState::afterButtonPressed() {
     case MENU_DONE:
         fullState.synthMode = SYNTH_MODE_EDIT;
         break;
-    case MENU_FORMAT_ALL:
+    case MENU_FORMAT_BANK:
     	if (fullState.menuSelect == 25) {
         	const MenuItem *cmi = fullState.currentMenuItem;
         	// Update display while formating
@@ -872,23 +878,8 @@ const MenuItem* SynthState::afterButtonPressed() {
             PresetUtil::formatEEPROM();
         	PresetUtil::resetConfigAndSaveToEEPROM();
             fullState.currentMenuItem = cmi;
-    	} else if (fullState.menuSelect == 2) {
-    		PresetUtil::sendCurrentPatchAsNrpns();
     	} else if (fullState.menuSelect == 1) {
 			PresetUtil::checkReadEEPROM();
-    	} else {
-    		return fullState.currentMenuItem;
-    	}
-        break;
-    case MENU_FORMAT_V1_10:
-    	if (fullState.menuSelect == 25) {
-        	const MenuItem *cmi = fullState.currentMenuItem;
-        	// Update display while formating
-        	fullState.currentMenuItem = MenuItemUtil::getMenuItem(MENU_IN_PROGRESS);
-        	propagateNewMenuState();
-            PresetUtil::upgradeEEPROMToV1_10();
-        	PresetUtil::resetConfigAndSaveToEEPROM();
-            fullState.currentMenuItem = cmi;
     	} else {
     		return fullState.currentMenuItem;
     	}
@@ -983,8 +974,6 @@ const MenuItem* SynthState::menuBack() {
         fullState.synthMode = SYNTH_MODE_EDIT;
         // put back old patch (has been overwritten if a new patch has been loaded)
         break;
-    case MENU_FORMAT_ALL:
-    case MENU_FORMAT_V1_10:
     case MENU_LOAD_USER_SELECT_BANK:
     case MENU_MIDI_PATCH:
     case MENU_SAVE_SELECT_USER_BANK:
