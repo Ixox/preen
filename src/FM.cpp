@@ -86,9 +86,9 @@ int mainCpt = 0;
 void IRQSendSample() {
     if (rb.getCount()>0) {
 #ifndef PCB_R4
-        timer_dev *dev = PIN_MAP[AUDIO_PIN].timer_device;
-        timer_set_compare(dev, PIN_MAP[AUDIO_PIN].timer_channel, (rb.remove() >>5)+1024);
-
+//        timer_dev *dev = PIN_MAP[AUDIO_PIN].timer_device;
+//        timer_set_compare(dev, PIN_MAP[AUDIO_PIN].timer_channel, (rb.remove() >>5)+1024);
+        pwmWrite(AUDIO_PIN , (rb.remove() >>5)+1024);
 #else
         digitalWrite(SPI_CS_PIN, LOW);
         int sample = rb.remove() + 32768;
