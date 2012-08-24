@@ -29,18 +29,7 @@
 
 // Main timer define
 #define TIME_NUMBER       2
-#define CHANNEL_PWM_MSB   TIMER_CH1
-#define CHANNEL_PWM_LSB   TIMER_CH2
-#define CHANNEL_INTERUPT  TIMER_CH3
-#define AUDIO_PIN_MSB    11
-#define AUDIO_PIN_LSB    10
 
-/*
-#define TIME_NUMBER       1
-#define CHANNEL_PWM       TIMER_CH3
-#define CHANNEL_INTERUPT  TIMER_CH2
-#define AUDIO_PIN    25
- */
 
 SynthState		   synthState;
 Synth              synth;
@@ -54,6 +43,9 @@ LiquidCrystal      lcd(2, 3, 4, 5, 6, 7, 27, 26, 25, 22);
 #define TIMER_OVERFLOW 2197
 #define TIMER_IRQ_COMPARE 2048
 #define TIMER_PRESCALE 1
+#define AUDIO_PIN    11
+#define CHANNEL_PWM   TIMER_CH1
+#define CHANNEL_INTERUPT  TIMER_CH3
 #endif
 
 #ifdef PCB_R2
@@ -61,6 +53,9 @@ LiquidCrystal      lcd(2, 3, 4, 5, 6, 7, 31, 30, 29, 28);
 #define TIMER_OVERFLOW 2197
 #define TIMER_PRESCALE 1
 #define TIMER_IRQ_COMPARE 2048
+#define AUDIO_PIN    11
+#define CHANNEL_PWM   TIMER_CH1
+#define CHANNEL_INTERUPT  TIMER_CH3
 #endif
 
 #ifdef PCB_R3
@@ -68,13 +63,19 @@ LiquidCrystal      lcd(31, 30, 29, 28, 2, 3, 4, 5, 6, 7);
 #define TIMER_OVERFLOW 2197
 #define TIMER_IRQ_COMPARE 2048
 #define TIMER_PRESCALE 1
+#define AUDIO_PIN    11
+#define CHANNEL_PWM   TIMER_CH1
+#define CHANNEL_INTERUPT  TIMER_CH3
 #endif
 
 #ifdef PCB_R4
-LiquidCrystal      lcd(31, 30, 29, 28, 2, 3, 4, 5, 6, 7);
+LiquidCrystal      lcd(8,9,10,11, 2, 3, 4, 5, 6, 7);
 #define TIMER_OVERFLOW 274
-#define TIMER_IRQ_COMPARE 240
+#define TIMER_IRQ_COMPARE 0
 #define TIMER_PRESCALE 8
+#define CHANNEL_INTERUPT  TIMER_CH1
+HardwareSPI spi(2);
+#define SPI_CS_PIN 20
 #endif
 
 
@@ -85,11 +86,32 @@ int mainCpt = 0;
 void IRQSendSample() {
     if (rb.getCount()>0) {
 #ifndef PCB_R4
-        pwmWrite(AUDIO_PIN_MSB , (rb.remove() >>5)+1024);
+        timer_dev *dev = PIN_MAP[AUDIO_PIN].timer_device;
+        timer_set_compare(dev, PIN_MAP[AUDIO_PIN].timer_channel, (rb.remove() >>5)+1024);
+
 #else
-        int sample = (rb.remove() + 32768);
-        pwmWrite(AUDIO_PIN_LSB, sample & 0xff);
-        pwmWrite(AUDIO_PIN_MSB, sample >> 8);
+        digitalWrite(SPI_CS_PIN, LOW);
+        int sample = rb.remove() + 32768;
+
+        unsigned short toSendMSB = 0xB << 12;
+        toSendMSB |= sample >> 4;
+
+        unsigned short toSendMSB2 = toSendMSB >> 8;
+        toSendMSB2 |= (toSendMSB &0xff) << 8;
+        spi.write((uint8 *)&toSendMSB2, 2);
+
+        digitalWrite(SPI_CS_PIN, HIGH);
+        digitalWrite(SPI_CS_PIN, LOW);
+
+        unsigned short toSendLSB = 0x3 << 12;
+        toSendLSB |= (sample & 0xf) << 4;
+
+        unsigned short toSendLSB2 = toSendLSB >> 8;
+        toSendLSB2 |= (toSendLSB & 0xff) << 8;
+        spi.write((uint8 *)&toSendLSB2, 2);
+
+        digitalWrite(SPI_CS_PIN, HIGH);
+
 #endif
     }
 }
@@ -100,7 +122,6 @@ inline void fillSoundBuffer() {
         rb.appendBlock(synth.getSampleBlock(), 32);
     }
 }
-
 
 void setup()
 {
@@ -242,32 +263,16 @@ void setup()
     mainTimer.setPrescaleFactor(TIMER_PRESCALE);
 
     // PWM for the SOUND !
-#ifdef PCB_R4
-    mainTimer.setMode(CHANNEL_PWM_LSB, TIMER_PWM);
-    pinMode(AUDIO_PIN_LSB, PWM);
+#ifndef PCB_R4
+    mainTimer.setMode(CHANNEL_PWM, TIMER_PWM);
+    pinMode(AUDIO_PIN, PWM);
+#else
+    spi.begin(SPI_18MHZ, MSBFIRST, 0);
+    pinMode(SPI_CS_PIN, OUTPUT);
 #endif
 
-    mainTimer.setMode(CHANNEL_PWM_MSB, TIMER_PWM);
-    pinMode(AUDIO_PIN_MSB, PWM);
 
     //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     mainTimer.refresh();
     mainTimer.resume();
@@ -291,10 +296,7 @@ void setup()
     mainTimer.attachInterrupt(CHANNEL_INTERUPT, IRQSendSample);
 
 #ifndef PCB_R4
-    pwmWrite(AUDIO_PIN_MSB , 1024);
-#else
-    pwmWrite(AUDIO_PIN_LSB , 0);
-    pwmWrite(AUDIO_PIN_MSB , 64);
+    pwmWrite(AUDIO_PIN , 1024);
 #endif
     delay(500);
 
@@ -327,8 +329,6 @@ void setup()
     synthState.propagateAfterNewParamsLoad();
 
     fmDisplay.init(&lcd);
-
-
 
     int bootOption = synthState.fullState.midiConfigValue[MIDICONFIG_BOOT_START];
 
@@ -443,7 +443,7 @@ void loop() {
         fmDisplay.refreshAllScreenByStep();
     }
 
-    if ((newMicros - encoderMicros) > 1500) {
+    if ((newMicros - encoderMicros) > 2000) {
         fillSoundBuffer();
         encoders.checkStatus();
         encoderMicros = newMicros;
