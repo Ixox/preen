@@ -86,9 +86,13 @@ int mainCpt = 0;
 void IRQSendSample() {
     if (rb.getCount()>0) {
 #ifndef PCB_R4
-//        timer_dev *dev = PIN_MAP[AUDIO_PIN].timer_device;
-//        timer_set_compare(dev, PIN_MAP[AUDIO_PIN].timer_channel, (rb.remove() >>5)+1024);
         pwmWrite(AUDIO_PIN , (rb.remove() >>5)+1024);
+        // Or inline :
+        /*
+        timer_dev *dev = PIN_MAP[AUDIO_PIN].timer_device;
+        __io uint32 *ccr = &(dev->regs).gen->CCR1 + (PIN_MAP[AUDIO_PIN].timer_channel - 1);
+        *ccr = (rb.remove() >>5)+1024;
+        */
 #else
         digitalWrite(SPI_CS_PIN, LOW);
         int sample = rb.remove() + 32768;
@@ -266,6 +270,7 @@ void setup()
 #ifndef PCB_R4
     mainTimer.setMode(CHANNEL_PWM, TIMER_PWM);
     pinMode(AUDIO_PIN, PWM);
+    pwmWrite(AUDIO_PIN , 1024);
 #else
     spi.begin(SPI_18MHZ, MSBFIRST, 0);
     pinMode(SPI_CS_PIN, OUTPUT);
@@ -295,11 +300,7 @@ void setup()
     mainTimer.setMode(CHANNEL_INTERUPT, TIMER_OUTPUTCOMPARE);
     mainTimer.attachInterrupt(CHANNEL_INTERUPT, IRQSendSample);
 
-#ifndef PCB_R4
-    pwmWrite(AUDIO_PIN , 1024);
-#endif
     delay(500);
-
 
     fillSoundBuffer();
     synth.noteOn(48, 60);

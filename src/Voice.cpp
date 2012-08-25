@@ -112,6 +112,13 @@ void Voice::glide() {
 }
 
 void Voice::noteOn(short newNote, char velocity, unsigned int index) {
+    this->released = false;
+    this->playing = true;
+    this->note = newNote;
+    this->nextNote = 0;
+    this->index = index;
+    this->velocity = velocity;
+
     osc1->newNote(oscState1, newNote);
     osc2->newNote(oscState2, newNote);
     osc3->newNote(oscState3, newNote);
@@ -122,25 +129,24 @@ void Voice::noteOn(short newNote, char velocity, unsigned int index) {
     env3->noteOn(envState3);
     env4->noteOn(envState4);
 
+    for (int k=0; k<NUMBER_OF_LFO; k++) {
+        lfo[k]->noteOn();
+    }
+
+    this->env1ValueMem = 0;
+    this->env2ValueMem = 0;
+    this->env3ValueMem = 0;
+    this->env4ValueMem = 0;
+
+
     if (showUp[this->synthState->params.engine1.algo].osc>4) {
         osc5->newNote(oscState5, newNote);
         osc6->newNote(oscState6, newNote);
         env5->noteOn(envState5);
         env6->noteOn(envState6);
+        this->env5ValueMem = 0;
+        this->env6ValueMem = 0;
     }
-
-    this->released = false;
-    this->playing = true;
-    this->note = newNote;
-    this->nextNote = 0;
-    this->index = index;
-    this->velocity = velocity;
-
-    for (int k=0; k<NUMBER_OF_LFO; k++) {
-        lfo[k]->noteOn();
-    }
-
-    this->env1ValueMem = -1;
 }
 
 void Voice::glideNoteOff() {
@@ -198,19 +204,6 @@ void Voice::nextBlock() {
         calculateFrequencyWithMatrix();
 
         int oscNumber = showUp[this->synthState->params.engine1.algo].osc;
-        if (this->env1ValueMem == -1) {
-            // first call for current note
-            this->env1ValueMem = env1->getNextAmp(&envState1);
-            this->env2ValueMem = env2->getNextAmp(&envState2);
-            this->env3ValueMem = env3->getNextAmp(&envState3);
-            if (oscNumber >= 4) {
-                this->env4ValueMem = env4->getNextAmp(&envState4);
-                if (oscNumber == 6) {
-                    this->env5ValueMem = env5->getNextAmp(&envState5);
-                    this->env6ValueMem = env6->getNextAmp(&envState6);
-                }
-            }
-        }
 
         env1Value = this->env1ValueMem;
         envNextValue = env1->getNextAmp(&envState1);

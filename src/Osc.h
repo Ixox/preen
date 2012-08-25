@@ -38,11 +38,11 @@ struct OscState {
 };
 
 struct WaveTable {
-	const short* table;
-	int max;
-	int rightShift;
-	int useFreq;
-	int intToAdd;
+    const short* table;
+    int max;
+    int rightShift;
+    int useFreq;
+    int intToAdd;
 };
 
 extern struct WaveTable waveTables[];
@@ -61,32 +61,33 @@ public:
     void glideStep(struct OscState& oscState, int step);
 
     void calculateFrequencyWithMatrix(struct OscState *oscState) {
-		oscState->mainFrequencyPlusMatrix = oscState->mainFrequency + ((oscState->mainFrequency   * (this->matrix->getDestination(destFreq) + this->matrix->getDestination(ALL_OSC_FREQ))) >> 14);
+        oscState->mainFrequencyPlusMatrix = oscState->mainFrequency + ((oscState->mainFrequency   * (this->matrix->getDestination(destFreq) + this->matrix->getDestination(ALL_OSC_FREQ))) >> 14);
     }
 
 
-   	int getNextSample(struct OscState *oscState)  {
-   		const struct WaveTable* waveTable = &waveTables[oscillator->shape];
+    int getNextSample(struct OscState *oscState)  {
+        const struct WaveTable* waveTable = &waveTables[oscillator->shape];
 
-   		oscState->index +=  oscState->frequency * waveTable->useFreq + waveTable->intToAdd;
-    	oscState->index &= waveTable->max;
-		return waveTable->table[oscState->index >> waveTable->rightShift];
-   	}
+        oscState->index +=  oscState->frequency * waveTable->useFreq + waveTable->intToAdd;
+        oscState->index &= waveTable->max;
+        return waveTable->table[oscState->index >> waveTable->rightShift];
 
-   	int* getNextBlock(struct OscState *oscState)  {
-   		int max = waveTables[oscillator->shape].max;
-   		int rs = waveTables[oscillator->shape].rightShift;
-   		int index = oscState->index;
-   		int freq = oscState->frequency * waveTables[oscillator->shape].useFreq + waveTables[oscillator->shape].intToAdd;
-   		const short *wave = waveTables[oscillator->shape].table;
+    }
 
-   		for (int k=0; k<32; k++) {
+    int* getNextBlock(struct OscState *oscState)  {
+        int max = waveTables[oscillator->shape].max;
+        int rs = waveTables[oscillator->shape].rightShift;
+        int index = oscState->index;
+        int freq = oscState->frequency * waveTables[oscillator->shape].useFreq + waveTables[oscillator->shape].intToAdd;
+        const short *wave = waveTables[oscillator->shape].table;
+
+        for (int k=0; k<32; k++) {
             index +=  freq;
             index &= max;
-    		oscValues[k] = wave[index >> rs];
-   		}
-    	oscState->index = index;
-    	return oscValues;
+            oscValues[k] = wave[index >> rs];
+        }
+        oscState->index = index;
+        return oscValues;
     };
 
 

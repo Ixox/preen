@@ -171,8 +171,8 @@ const struct AllSynthParams presets[]  = {
                 { OSC_SHAPE_OFF, OSC_FT_KEYBOARD , 0, 0} ,
                 { OSC_SHAPE_OFF, OSC_FT_KEYBOARD , 0, 0} ,
                 // Enveloppe
-                { 100, 150, 111, 11} ,
-                { 0, 122, 125, 253} ,
+                { 100, 150, 160, 17} ,
+                { 0, 122, 165, 253} ,
                 { 50, 100, 255, 100} ,
                 { 3, 100, 100, 100} ,
                 { 0, 0, 0, 0} ,
@@ -249,7 +249,7 @@ const struct AllSynthParams presets[]  = {
         {
                 // patch name : 'March Seq'
                 // Engine
-                { ALGO4, 0, 3, 7} ,
+                { ALGO4, 0, 4, 7} ,
                 { 16, 16, 0, 0} ,
                 { 128, 128, 128, 0} ,
                 { 0, 0, 0, 0} ,
@@ -339,8 +339,8 @@ const struct AllSynthParams presets[]  = {
         {
                 // patch name : 'Organ'
                 // Engine
-                { ALGO6, 0, 3, 0} ,
-                { 8, 13, 19, 0} ,
+                { ALGO6, 0, 4, 0} ,
+                { 8, 13, 58, 0} ,
                 { 128, 128, 128, 0} ,
                 { 0, 0, 0, 0} ,
                 // Oscillator
@@ -351,9 +351,9 @@ const struct AllSynthParams presets[]  = {
                 { OSC_SHAPE_OFF, OSC_FT_KEYBOARD , 0, 0} ,
                 { OSC_SHAPE_OFF, OSC_FT_KEYBOARD , 0, 0} ,
                 // Enveloppe
-                { 70, 89, 145, 60} ,
-                { 84, 66, 194, 60} ,
-                { 90, 87, 150, 60} ,
+                { 70, 89, 215, 60} ,
+                { 84, 66, 204, 60} ,
+                { 90, 87, 245, 60} ,
                 { 0, 0, 255, 255} ,
                 { 0, 0, 0, 0} ,
                 { 0, 0, 0, 0} ,
@@ -384,7 +384,7 @@ const struct AllSynthParams presets[]  = {
         {
                 // patch name : 'Klong'
                 // Engine
-                { ALGO4, 8, 3, 0} ,
+                { ALGO4, 8, 4, 0} ,
                 { 44, 89, 31, 7} ,
                 { 128, 128, 128, 0} ,
                 { 0, 0, 0, 0} ,
@@ -519,7 +519,7 @@ const struct AllSynthParams presets[]  = {
         {
                 // patch name : 'Crystal Blow'
                 // Engine
-                { ALGO6, 14, 3, 0} ,
+                { ALGO6, 14, 4, 0} ,
                 { 19, 42, 84, 0} ,
                 { 96, 128, 87, 30} ,
                 { 0, 0, 0, 0} ,
@@ -564,7 +564,7 @@ const struct AllSynthParams presets[]  = {
         {
                 // patch name : '6 osc first'
                 // Engine
-                { ALGO7, 14, 2, 0} ,
+                { ALGO7, 14, 3, 0} ,
                 { 53, 64, 41, 0} ,
                 { 88, 128, 113, 0} ,
                 { 0, 0, 0, 0} ,
@@ -699,7 +699,7 @@ const struct AllSynthParams presets[]  = {
         {
                 // patch name : 'Space Wave'
                 // Engine
-                { ALGO7, 14, 2, 6} ,
+                { ALGO7, 14, 4, 6} ,
                 { 22, 52, 57, 0} ,
                 { 128, 88, 128, 0} ,
                 { 0, 0, 0, 0} ,
@@ -1106,7 +1106,7 @@ const struct AllSynthParams presets[]  = {
         {
                 // patch name : 'Danger Now'
                 // Engine
-                { ALGO7, 10, 2, 6} ,
+                { ALGO7, 10, 3, 6} ,
                 { 24, 24, 30, 0} ,
                 { 82, 128, 128, 0} ,
                 { 0, 0, 0, 0} ,
@@ -1241,7 +1241,7 @@ const struct AllSynthParams presets[]  = {
         {
                 // patch name : 'Up Bass'
                 // Engine
-                { ALGO3, 14, 3, 6} ,
+                { ALGO3, 14, 1, 6} ,
                 { 57, 99, 26, 4} ,
                 { 128, 128, 128, 0} ,
                 { 0, 0, 0, 0} ,
@@ -1286,7 +1286,7 @@ const struct AllSynthParams presets[]  = {
         {
                 // patch name : 'Broken game'
                 // Engine
-                { ALGO3, 16, 3, 6} ,
+                { ALGO3, 16, 4, 6} ,
                 { 16, 32, 64, 133} ,
                 { 128, 0, 128, 0} ,
                 { 0, 0, 0, 0} ,

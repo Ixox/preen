@@ -94,13 +94,13 @@ public:
     }
 
     void noteOffQuick(struct EnvData* env) {
-        env->index = 2;
+        env->index = 5;
         env->envState = ENV_STATE_ON_R;
-        env->currentAmpSpeed = env->currentAmp >> 1;
+        env->currentAmpSpeed = env->currentAmp  >> 2;
     }
 
     void noteOff(struct EnvData* env) {
-        env->index = adsr[3] +1;
+        env->index = adsr[3] + 1;
         env->envState = ENV_STATE_ON_R;
         env->currentAmpSpeed = (env->currentAmp) / adsr[3];
 
