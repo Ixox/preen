@@ -509,6 +509,9 @@ void MidiDecoder::controlChange(MidiEvent& midiEvent) {
             this->synth->getMatrix()->setSource(MATRIX_SOURCE_CC4, midiEvent.value[1]);
             this->synthState->setNewValue(ROW_PERFORMANCE, ENCODER_PERFORMANCE_CC4, midiEvent.value[1]);
             break;
+        case CC_HOLD_PEDAL:
+        	this->synth->setHoldPedal(midiEvent.value[1]);
+        	break;
         }
     }
 

@@ -46,6 +46,7 @@ public:
     void noteOff(char note);
     void allNoteOff();
     void allSoundOff();
+	void setHoldPedal(int value);
     bool isPlaying();
     Matrix* getMatrix() { return &matrix; }
     int* getSampleBlock();
@@ -128,7 +129,7 @@ private:
 
     // Must recompute LFO steps ?
     boolean recomputeNext;
-
+    boolean holdPedal;
     int currentGate;
     int samples[32];
 

@@ -65,6 +65,7 @@ enum AllControlChange {
     CC_OSC4_FREQ,
     CC_OSC5_FREQ,
     CC_OSC6_FREQ,
+    CC_HOLD_PEDAL = 64,
     CC_OSC1_DETUNE = 102,
     CC_OSC2_DETUNE,
     CC_OSC3_DETUNE,

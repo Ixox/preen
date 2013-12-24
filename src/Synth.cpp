@@ -87,6 +87,7 @@ void Synth::init() {
     this->recomputeNext = true;
     this->currentGate = 0;
     this->randomizerInt = 1253246184;
+    this->holdPedal = false;
 }
 
 void Synth::noteOn(char note, char velocity) {
@@ -134,6 +135,10 @@ void Synth::noteOn(char note, char velocity) {
 }
 
 void Synth::noteOff(char note) {
+	if (holdPedal) {
+		return;
+	}
+
     int numberOfNote = this->synthState->params.engine1.numberOfVoice;
 
     for (int k = 0; k < numberOfNote; k++) {
@@ -165,6 +170,15 @@ void Synth::allSoundOff() {
     for (int k = 0; k < MAX_NUMBER_OF_VOICES; k++) {
         voices[k].killNow();
     }
+}
+
+void Synth::setHoldPedal(int value) {
+	if (value < 64) {
+		holdPedal = false;
+		allNoteOff();
+	} else {
+		holdPedal = true;
+	}
 }
 
 bool Synth::isPlaying() {
@@ -304,6 +318,15 @@ void Synth::newParamValue(SynthParamType type, int currentRow, int encoder, Para
                     voices[k].killNow();
                 }
             }
+            /* DEBUG test hold pedal
+            else if (encoder == ENCODER_ENGINE_VELOCITY) {
+            	if (newValue == 3) {
+            		setHoldPedal(0);
+            	} else if (newValue == 4) {
+            		setHoldPedal(127);
+            	}
+            }
+            */
         } else if (currentRow == ROW_PERFORMANCE) {
             matrix.setSource((enum SourceEnum)(MATRIX_SOURCE_CC1 + encoder), newValue);
         }

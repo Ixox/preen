@@ -1,9 +1,9 @@
-.DEFAULT_GOAL := r4
+.DEFAULT_GOAL := r3
 
-PREENFM_VERSION_NUMBER=2.00
+PREENFM_VERSION_NUMBER=2.01
 PREENFM_VERSION=\"$(PREENFM_VERSION_NUMBER)\"
 
-LIB_MAPLE_HOME=/home/xhosxe/libmaple
+LIB_MAPLE_HOME=/home/xhosxe/STM32F4/libmaple
 
 OBJECTS= build/Env.o build/FM.o build/Osc.o build/Synth.o build/Voice.o build/Lfo.o build/Matrix.o build/RingBuffer.o build/MidiDecoder.o build/Encoders.o build/FMDisplay.o build/SynthState.o build/Menu.o build/PresetUtil.o build/Presets.o build/LfoOsc.o build/LfoEnv.o build/LfoStepSeq.o build/LiquidCrystal.o
 
@@ -44,7 +44,7 @@ PROJECT_BUILD_PATH=build/
 # Useful variables
 GLOBAL_CFLAGS   := -O2 -g -mcpu=cortex-m3 -mthumb -march=armv7-m -nostdlib \
                    -ffunction-sections -fdata-sections -Wl,--gc-sections   \
-                   -DBOARD_$(BOARD) -DMCU_$(MCU) -fsigned-char -DSTM32_MEDIUM_DENSITY -I/home/xhosxe/libmaple/libraries/LiquidCrystal -I/home/xhosxe/libmaple/libraries/Wire
+                   -DBOARD_$(BOARD) -DMCU_$(MCU) -fsigned-char -DSTM32_MEDIUM_DENSITY -I$(LIB_MAPLE_HOME)/libraries/LiquidCrystal -I$(LIB_MAPLE_HOME)/libraries/Wire -I$(LIB_MAPLE_HOME)/libmaple/include/libmaple -I$(LIB_MAPLE_HOME)/wirish/include/wirish -I$(LIB_MAPLE_HOME)/libmaple/stm32f1/include
 
 GLOBAL_CXXFLAGS := -fno-rtti -fno-exceptions -Wall -DBOARD_$(BOARD) -DMCU_$(MCU) -DPCB_$(PCB_VERSION) -DPREENFM_VERSION=$(PREENFM_VERSION)
 GLOBAL_ASFLAGS  := -mcpu=cortex-m3 -march=armv7-m -mthumb -DBOARD_$(BOARD) \
@@ -170,10 +170,10 @@ jtag:
 
 
 # main project target
-
+ADDITIONAL_INCLUDES=
 
 build/Env.o: src/Env.cpp
-	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
+	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES)  -o $@ -c $< 
 
 build/Osc.o: src/Osc.cpp
 	$(CXX)  $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
